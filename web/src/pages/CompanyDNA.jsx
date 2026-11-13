@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { ArrowRight, Building2, CheckCircle2, Globe, Lightbulb, Lock, MapPin, Pencil, ShieldCheck, Users } from "lucide-react";
+import { AlertTriangle, ArrowRight, ArrowUpRight, BadgeCheck, Building2, CheckCircle2, CircleDashed, GitCompareArrows, Globe,
+         Lightbulb, Lock, MapPin, Pencil, ShieldCheck, Users } from "lucide-react";
 import { api } from "../api";
 import { useSession } from "../store";
 import { Badge, Card, Chip, CompanyPicker, Disclosure, Empty, HypothesisNotice, Notice, PageHeader, QueryState, Ring, ScoreBars,
@@ -25,6 +26,96 @@ function ClaimCard({ claim: cl }) {
         ? <blockquote className="quote">“{ev.text.slice(0, 420)}”</blockquote>
         : <p className="mt-1 text-[13px] leading-relaxed text-ink2">{ev.text.split(" Domain key:")[0]}</p>)}
       {ev && <p className="text-xs"><SourceLink url={ev.url} /></p>}
+    </div>
+  );
+}
+
+/* ---- directory verification ---------------------------------------------------------------------- */
+const STATUS = {
+  verified: { label: "Verified against the official profile", tone: "border-fact/35 bg-fact/10 text-fact", icon: BadgeCheck },
+  check_failed: { label: "Last check failed", tone: "border-pink/40 bg-pink/10 text-pink", icon: AlertTriangle },
+  not_listed: { label: "No longer in the directory listing", tone: "border-hyp/40 bg-hyp/10 text-hyp", icon: AlertTriangle },
+  outside_listing: { label: "Profile found outside the directory listing", tone: "border-inf/40 bg-inf/10 text-inf", icon: CircleDashed },
+  not_verified: { label: "Not yet verified by a directory sync", tone: "border-line bg-surface2 text-ink2", icon: CircleDashed },
+};
+
+export function VerificationBadge({ v }) {
+  const s = STATUS[v.status] ?? STATUS.not_verified;
+  const Icon = s.icon;
+  return (
+    <span className={clsx("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11.5px] font-medium", s.tone)}
+          title={v.last_verified_at ? `Profile page read ${stamp(v.last_verified_at)} UTC` : undefined}>
+      <Icon size={13} />{s.label}{v.status === "verified" && v.last_verified_at && <span className="opacity-80">· {stamp(v.last_verified_at).slice(0, 10)}</span>}
+    </span>
+  );
+}
+
+/** A small link to the exact page a displayed fact was copied from. */
+function FactSource({ f }) {
+  if (!f?.url) return null;
+  return (
+    <a href={f.url} target="_blank" rel="noopener noreferrer" className="ml-1 inline-flex align-middle text-muted hover:text-brand"
+       title={`Source: ${f.source}, read ${stamp(f.retrieved_at)} UTC`} aria-label={`Source for ${f.label}`}>
+      <ArrowUpRight size={12} />
+    </a>
+  );
+}
+
+function DirectoryRecord({ v }) {
+  const differs = v.fields.filter((f) => f.seed && !f.seed.agrees);
+  const seeded = v.fields.some((f) => f.seed);
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center gap-3">
+        <VerificationBadge v={v} />
+        <span className="meta">
+          Fetch status: {v.fetch_status ?? "never fetched"}{v.snapshot_id && ` · snapshot ${v.snapshot_id}`}
+        </span>
+      </div>
+      <p className="meta max-w-3xl leading-relaxed">
+        Every fact below was copied from the company's official Blue Science Park profile page; the link next to each
+        value opens that exact page. Facts the page does not publish are left empty, never filled in from elsewhere.
+        {seeded && " The imported audited seed is shown as a second source and never replaces the official text."}
+      </p>
+      <div className="table-wrap">
+        <table className="table">
+          <thead><tr><th>Field</th><th>Value on the official profile</th><th>Source</th>{seeded && <th>Audited seed (2026-11-13)</th>}</tr></thead>
+          <tbody>
+            {v.fields.map((f) => (
+              <tr key={f.field}>
+                <td className="whitespace-nowrap font-medium text-ink">{f.label}</td>
+                <td className="min-w-[220px]">
+                  {f.value ? <span className={f.field === "description" ? "block max-w-xl leading-relaxed" : ""}>{f.field === "website"
+                    ? <a className="link" href={f.value} target="_blank" rel="noopener noreferrer">{f.value}</a> : f.value}</span>
+                    : <span className="italic text-muted">not published on the profile</span>}
+                </td>
+                <td className="whitespace-nowrap">
+                  {f.url ? <SourceLink url={f.url}>BSP profile</SourceLink> : <span className="text-muted">-</span>}
+                  {f.retrieved_at && <div className="meta">{stamp(f.retrieved_at)} UTC</div>}
+                </td>
+                {seeded && (
+                  <td className="min-w-[180px]">
+                    {!f.seed ? <span className="text-muted">-</span> : f.seed.agrees
+                      ? <span className="inline-flex items-center gap-1 text-fact"><CheckCircle2 size={13} />agrees</span>
+                      : <span className="block text-[12.5px] leading-relaxed"><span className="inline-flex items-center gap-1 font-medium text-inf"><GitCompareArrows size={13} />differs:</span> {f.seed.value ?? <i className="text-muted">empty</i>}</span>}
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {differs.length > 0 && (
+        <Notice tone="sim" icon={GitCompareArrows}>
+          The audited seed differs from the live official page on {differs.map((f) => f.label.toLowerCase().split(" (")[0]).join(", ")}.
+          NEXUS shows the official page's wording; the seed values are kept for review only.
+        </Notice>
+      )}
+      <dl className="grid gap-x-6 gap-y-2 text-[13px] sm:grid-cols-2">
+        <div><dt className="meta">Member or partner</dt><dd className="text-ink2">Not disclosed per organisation by Blue Science Park, so not stated here.</dd></div>
+        <div><dt className="meta">Directory listing</dt><dd className="text-ink2">{{ listed: "Listed in the public member directory", related_link_only: "Found through a related-member link only", seed_only: "Found only through the audited seed", not_in_latest_listing: "Not in the latest listing (kept until an admin confirms removal)" }[v.listing_status] ?? "Unknown"}</dd></div>
+        {v.aliases.length > 0 && <div className="sm:col-span-2"><dt className="meta">Also known as</dt><dd className="break-all text-ink2">{v.aliases.join(" · ")}</dd></div>}
+      </dl>
     </div>
   );
 }
@@ -265,6 +356,7 @@ export default function CompanyDNA() {
           const inferred = active.filter((x) => x.classification === "INFERENCE");
           const user = active.filter((x) => x.classification === "USER");
           const capCount = new Set(facts.filter((x) => x.category === "capability" && x.capability).map((x) => x.capability.key)).size;
+          const vf = Object.fromEntries(data.verification.fields.map((f) => [f.field, f]));
           return (
             <>
               <div className="mb-6 grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
@@ -277,13 +369,15 @@ export default function CompanyDNA() {
                       </span>
                       <div className="min-w-0">
                         <h2 className="text-2xl font-semibold leading-tight">{c.name}</h2>
-                        <div className="mt-1 flex flex-wrap items-center gap-2">
-                          <Badge kind="FACT" /><span className="meta">from the Blue Science Park member directory ·</span>
-                          <SourceLink url={c.directory_url} className="text-xs">directory entry</SourceLink>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                          <button onClick={() => setTab("directory")} className="rounded-full transition hover:brightness-110"><VerificationBadge v={data.verification} /></button>
+                          <SourceLink url={c.directory_url} className="text-xs">official profile</SourceLink>
                         </div>
                       </div>
                     </div>
-                    <p className="mt-4 text-[14.5px] leading-relaxed text-ink2">{c.description || "No public description found."}</p>
+                    <p className="mt-4 text-[14.5px] leading-relaxed text-ink2">
+                      <Badge kind="FACT" className="mr-2 align-middle" />{c.description || "No public description found."}<FactSource f={vf.description} />
+                    </p>
                     {c.user_description && (
                       <div className="mt-4 rounded-xl border border-user/30 bg-user/[0.06] p-3.5">
                         <div className="flex flex-wrap items-center gap-2"><Badge kind="USER" /><span className="meta">company refinement (not independently verified)</span></div>
@@ -291,11 +385,12 @@ export default function CompanyDNA() {
                       </div>
                     )}
                     <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5 text-[13px] sm:grid-cols-4">
-                      {[[Building2, "Industry", c.industry], [MapPin, "Location", c.location], [Users, "Employees", c.employees], [Pencil, "Founded", c.founded]].map(([Icon, k, v]) => (
-                        <div key={k}><dt className="meta flex items-center gap-1"><Icon size={12} />{k}</dt><dd className="mt-0.5 text-ink">{v || "-"}</dd></div>
+                      {[[Building2, "Industry", "industry"], [MapPin, "Location", "location"], [Users, "Employees", "employees"], [Pencil, "Founded", "founded"]].map(([Icon, k, f]) => (
+                        <div key={k}><dt className="meta flex items-center gap-1"><Icon size={12} />{k}{c[f] && <FactSource f={vf[f]} />}</dt>
+                          <dd className="mt-0.5 text-ink">{c[f] || <span className="text-muted" title="Not published on the official profile">not published</span>}</dd></div>
                       ))}
                     </dl>
-                    {c.website && <p className="mt-3 flex items-center gap-1.5 text-[13px]"><Globe size={13} className="text-muted" /><SourceLink url={c.website}>{c.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</SourceLink></p>}
+                    {c.website && <p className="mt-3 flex items-center gap-1.5 text-[13px]"><Globe size={13} className="text-muted" /><SourceLink url={c.website}>{c.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</SourceLink><span className="meta">as linked on the official profile</span></p>}
                   </div>
                 </Card>
                 <div className="space-y-3">
@@ -322,6 +417,7 @@ export default function CompanyDNA() {
                 { id: "inferred", label: "Inferred interests", count: inferred.length },
                 { id: "refine", label: "Review and refine", count: user.length },
                 { id: "recs", label: "Recommendations", count: data.recommendations.length },
+                { id: "directory", label: "Directory record" },
                 { id: "history", label: "History and private data" },
               ]} />
               <div className={clsx("animate-rise")} key={tab}>
@@ -336,6 +432,7 @@ export default function CompanyDNA() {
                 )}
                 {tab === "refine" && <Refine data={data} />}
                 {tab === "recs" && <Recommendations recs={data.recommendations} />}
+                {tab === "directory" && <DirectoryRecord v={data.verification} />}
                 {tab === "history" && <History data={data} />}
               </div>
             </>

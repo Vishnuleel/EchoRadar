@@ -1,19 +1,62 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { SearchX } from "lucide-react";
+import { ArrowRight, Bookmark, Fingerprint, MessageSquare, Radar as RadarIcon, SlidersHorizontal } from "lucide-react";
 import { api } from "../api";
 import { useSession } from "../store";
 import ItemCard, { KIND } from "../components/ItemCard";
-import { Chip, CompanyPicker, Disclosure, Empty, Notice, PageHeader, QueryState, Segmented, SourceLink, day } from "../components/ui";
+import { Chip, CompanyPicker, Disclosure, Notice, PageHeader, QueryState, Segmented, SourceLink, day } from "../components/ui";
 
 const VIEWS = [{ value: "all", label: "All items" }, { value: "saved", label: "Saved by us" }, { value: "open", label: "Funding: open only" }];
+const DEFAULT_MIN = 25;
+
+/** The company has no radar at all: explain why, and offer the ways forward. */
+function NoRadar({ name, owner }) {
+  return (
+    <div className="card relative overflow-hidden p-6 sm:p-8">
+      <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full border border-cyan/15" />
+      <div className="pointer-events-none absolute -right-6 -top-6 h-36 w-36 rounded-full border border-cyan/15" />
+      <div className="relative max-w-2xl">
+        <span className="grid h-11 w-11 place-items-center rounded-xl bg-cyan/10 text-cyan"><RadarIcon size={20} /></span>
+        <h2 className="mt-4 text-xl font-semibold">No radar yet for {name}</h2>
+        <p className="mt-2 text-[14px] leading-relaxed text-ink2">
+          The radar ranks funding, test environments, events and research against a company's confirmed capabilities.
+          The public profile of {name} does not name a technology or expertise that NEXUS can confirm, so nothing is
+          ranked rather than guessed.
+        </p>
+        <ol className="mt-5 space-y-2.5 text-[13.5px] text-ink2">
+          <li className="flex gap-3"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand/15 text-xs font-semibold text-brand">1</span>
+            {owner ? "Add one capability or interest to your profile; the radar is calculated straight away."
+                   : `Sign in as ${name} under “Acting as” and add one capability or interest; the radar is calculated straight away.`}</li>
+          <li className="flex gap-3"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand/15 text-xs font-semibold text-brand">2</span>
+            Or ask the assistant directly, for example “funding for digital services”.</li>
+        </ol>
+        <div className="mt-6 flex flex-wrap gap-2">
+          <Link to="/dna" className="btn btn-primary !px-4 !py-2"><Fingerprint size={15} />{owner ? "Refine the profile" : "Open the profile"}<ArrowRight size={14} /></Link>
+          <Link to="/" className="btn !px-4 !py-2"><MessageSquare size={15} />Ask the assistant</Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmptyFilter({ icon: Icon, title, text, action, onAction }) {
+  return (
+    <div className="card flex flex-col items-center px-6 py-10 text-center">
+      <span className="grid h-11 w-11 place-items-center rounded-xl bg-surface2 text-ink2"><Icon size={19} /></span>
+      <h2 className="mt-3 text-base font-semibold">{title}</h2>
+      <p className="mt-1 max-w-md text-[13.5px] leading-relaxed text-ink2">{text}</p>
+      <button className="btn mt-4" onClick={onAction}>{action}</button>
+    </div>
+  );
+}
 
 export default function Radar() {
   const { companies, companyId, setViewing, acting, meta } = useSession();
   const [kinds, setKinds] = useState(() => Object.keys(meta.radar_labels));
-  const [minRel, setMinRel] = useState(25);
+  const [minRel, setMinRel] = useState(DEFAULT_MIN);
   const [view, setView] = useState("all");
+  const reset = () => { setKinds(Object.keys(meta.radar_labels)); setMinRel(DEFAULT_MIN); setView("all"); };
   const query = useQuery({ queryKey: ["radar", companyId, acting], queryFn: () => api.radar(companyId), enabled: companyId !== null });
   const toggleKind = (k) => setKinds((ks) => (ks.includes(k) ? ks.filter((x) => x !== k) : [...ks, k]));
 
@@ -58,22 +101,32 @@ export default function Radar() {
                 the <Link className="link" to="/dna">Company DNA</Link> page.
               </p>
             )}
-            {view === "saved" && !data.can_mark && (
+            {view === "saved" && !data.can_mark && all.length > 0 && (
               <Notice tone="info" className="mb-4">Saved items are private. Select this company under “Acting as” to see its saved items.</Notice>
             )}
             {items.length ? (
               <div className="grid items-start gap-4 xl:grid-cols-2">
                 {items.map((it) => <ItemCard key={`${it.kind}:${it.ref_id}`} item={it} canMark={data.can_mark} />)}
               </div>
+            ) : !all.length ? (
+              <NoRadar name={data.company.name} owner={data.can_mark} />
+            ) : view === "saved" ? (
+              data.can_mark && <EmptyFilter icon={Bookmark} title="Nothing saved yet"
+                                            text="Use Save on any radar item to keep it here. Saved items are visible only to your company."
+                                            action="Show all items" onAction={() => setView("all")} />
             ) : (
-              <Empty icon={SearchX}>No stored item matches these filters. Companies without evidence-backed capabilities have no radar items.</Empty>
+              <EmptyFilter icon={SlidersHorizontal} title="No item matches these filters"
+                           text={`${all.length} items are on this company's radar, but none are in the selected areas at relevance ${minRel} or higher.`}
+                           action="Reset filters" onAction={reset} />
             )}
-            <p className="meta mt-5 max-w-4xl leading-relaxed">
-              {items.length} items. Relevance = 70% text similarity (multilingual embeddings) + 30% shared capability
-              tags, then adjusted for the company's stated priorities and feedback (shown as a ranking note). Closed
-              funding calls and items the company marked “not useful” are never listed.
-            </p>
-            {data.past_events.length > 0 && kinds.includes("event") && (
+            {items.length > 0 && (
+              <p className="meta mt-5 max-w-4xl leading-relaxed">
+                {items.length} of {all.length} items. Relevance = 70% text similarity (multilingual embeddings) + 30% shared
+                capability tags, then adjusted for the company's stated priorities and feedback (shown as a ranking note).
+                Closed funding calls and items the company marked “not useful” are never listed.
+              </p>
+            )}
+            {data.past_events.length > 0 && kinds.includes("event") && all.length > 0 && (
               <div className="mt-4">
                 <Disclosure title={`Past events found on the source pages (${data.past_events.length}) - not offered as opportunities`}>
                   <ul className="space-y-1.5 text-[13px] text-ink2">

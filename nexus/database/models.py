@@ -13,7 +13,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from nexus.utils.validators import utcnow
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 class Base(DeclarativeBase):
@@ -45,6 +45,19 @@ class Company(Base):
     is_demo: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
+
+    # --- directory verification (schema v3). Every displayed directory fact carries its own source.
+    # {field: {"value", "source", "url", "retrieved_at", "seed": {"value", "agrees", "dataset", "url"}?}}
+    field_sources: Mapped[dict] = mapped_column(JSON, default=dict)
+    missing_fields: Mapped[list] = mapped_column(JSON, default=list)  # not published on the profile page
+    last_verified_at: Mapped[datetime | None] = mapped_column(DateTime)  # when the official profile was read
+    profile_fetch_status: Mapped[str | None] = mapped_column(String(200))  # ok | ok_cached | failed: ... | not_fetched
+    directory_snapshot_id: Mapped[str | None] = mapped_column(String(60))  # crawl that last confirmed the record
+    listing_status: Mapped[str | None] = mapped_column(String(40))  # listed | related_link_only | not_in_latest_listing
+    # Blue Science Park does not publish member vs partner per organisation: never inferred.
+    membership_classification: Mapped[str] = mapped_column(
+        String(60), default="member_or_partner_not_individually_disclosed")
+    aliases: Mapped[list] = mapped_column(JSON, default=list)  # other names / profile URLs seen for the same record
 
     capabilities: Mapped[list["CompanyCapability"]] = relationship(back_populates="company", cascade="all, delete-orphan")
     revisions: Mapped[list["CompanyProfileRevision"]] = relationship(back_populates="company", cascade="all, delete-orphan")
@@ -294,6 +307,19 @@ class SavedItem(Base):
     action: Mapped[str] = mapped_column(String(12))  # saved | useful | not_useful
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
     __table_args__ = (UniqueConstraint("company_id", "kind", "ref_id", "action"),)
+
+
+class DirectorySnapshot(Base):
+    """One reading of the Blue Science Park member directory (live crawl) or an imported audited seed."""
+    __tablename__ = "directory_snapshot"
+    id: Mapped[str] = mapped_column(String(60), primary_key=True)
+    kind: Mapped[str] = mapped_column(String(20))  # live_crawl | audited_seed
+    source: Mapped[str] = mapped_column(String(500))
+    taken_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
+    stable_end: Mapped[bool] = mapped_column(Boolean, default=False)  # pagination reached its last page
+    card_count: Mapped[int] = mapped_column(Integer, default=0)  # directory cards loaded across all pages
+    unique_profiles: Mapped[int] = mapped_column(Integer, default=0)
+    summary: Mapped[dict] = mapped_column(JSON, default=dict)  # full audit summary
 
 
 class EmbeddingCache(Base):

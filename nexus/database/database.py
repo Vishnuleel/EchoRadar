@@ -41,6 +41,15 @@ MIGRATIONS = {
     2: ["ALTER TABLE company ADD COLUMN need_priorities JSON DEFAULT '[]'",
         "ALTER TABLE opportunity ADD COLUMN base_relevance FLOAT DEFAULT 0",
         "ALTER TABLE opportunity ADD COLUMN adjustments JSON DEFAULT '[]'"],
+    3: ["ALTER TABLE company ADD COLUMN field_sources JSON DEFAULT '{}'",
+        "ALTER TABLE company ADD COLUMN missing_fields JSON DEFAULT '[]'",
+        "ALTER TABLE company ADD COLUMN last_verified_at DATETIME",
+        "ALTER TABLE company ADD COLUMN profile_fetch_status VARCHAR(200)",
+        "ALTER TABLE company ADD COLUMN directory_snapshot_id VARCHAR(60)",
+        "ALTER TABLE company ADD COLUMN listing_status VARCHAR(40)",
+        "ALTER TABLE company ADD COLUMN membership_classification VARCHAR(60) "
+        "DEFAULT 'member_or_partner_not_individually_disclosed'",
+        "ALTER TABLE company ADD COLUMN aliases JSON DEFAULT '[]'"],
 }
 
 

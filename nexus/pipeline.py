@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import time
 from datetime import datetime
+from pathlib import Path
 
 import numpy as np
 from sqlalchemy import select
@@ -58,23 +59,47 @@ def refresh_company(s: Session, client: HttpClient, member: company_sources.Memb
             "warnings": draft.warnings, "quarantined": len(draft.quarantined)}
 
 
-def ingest(s: Session, client: HttpClient | None = None, deep_slugs: list[str] | None = None,
-           limit: int | None = None, research: bool = True, funding: bool = True, testbeds: bool = True) -> list[dict]:
+def sync_directory(s: Session, client: HttpClient | None = None, deep_slugs: list[str] | None = None,
+                   seed_path=None) -> tuple[dict, dict]:
+    """Directory Agent + Company Intelligence Agent: every listed profile, with per-field provenance.
+
+    Returns (directory audit summary, {"claims", "warnings"}). The audited seed is reconciled when
+    `seed_path` is given (default: the copy under data/sources, if present).
+    """
+    from nexus.agents import directory_agent
+    from nexus.utils.config import SEED_PATH
+
     client = client or HttpClient()
     deep_slugs = DEFAULT_DEEP_SLUGS if deep_slugs is None else deep_slugs
+    seed_path = SEED_PATH if seed_path is None else seed_path
+    seed = directory_agent.load_seed(seed_path) if seed_path and Path(seed_path).exists() else None
+    totals = {"claims": 0, "warnings": []}
+
+    def refresh(member):
+        out = refresh_company(s, client, member, deep=member.slug in deep_slugs)
+        totals["claims"] += out["claims"]
+        totals["warnings"] += [f"{member.name}: {w}" for w in out["warnings"]]
+        return out["company"]
+
+    summary = directory_agent.sync_directory(s, client, refresh=refresh, seed=seed)
+    _drain(s, client, "member_directory")
+    totals["warnings"] = [f"{f['url']}: {f['status']}" for f in summary["failed_urls"]] + totals["warnings"]
+    return summary, totals
+
+
+def ingest(s: Session, client: HttpClient | None = None, deep_slugs: list[str] | None = None,
+           research: bool = True, funding: bool = True, testbeds: bool = True, seed_path=None) -> list[dict]:
+    client = client or HttpClient()
     trace = []
 
     t = time.time()
-    members, errors = company_sources.fetch_member_directory(client, limit)
-    _drain(s, client, "member_directory")
-    n_claims, warnings = 0, list(errors)
-    for m in members:
-        out = refresh_company(s, client, m, deep=m.slug in deep_slugs)
-        n_claims += out["claims"]
-        warnings += [f"{m.name}: {w}" for w in out["warnings"]]
+    summary, totals = sync_directory(s, client, deep_slugs, seed_path)
     s.commit()
-    trace.append({"agent": "Company Intelligence Agent", "seconds": round(time.time() - t, 1),
-                  "result": f"{len(members)} profiles, {n_claims} evidence-backed claims", "warnings": warnings})
+    trace.append({"agent": "Company Intelligence Agent (directory sync)", "seconds": round(time.time() - t, 1),
+                  "result": f"{summary['profiles_opened']} profiles, {totals['claims']} evidence-backed claims; "
+                            f"directory listed {summary['unique_listed_profiles']} profiles"
+                            + (" (end of listing confirmed)" if summary["stable_end"] else " (end NOT confirmed)"),
+                  "warnings": totals["warnings"]})
 
     if research:
         t = time.time()
@@ -474,6 +499,15 @@ def save_trace(trace: list[dict], backend: str) -> None:
 
     (DATA_DIR / "last_run.json").write_text(json.dumps(
         {"finished_at": utcnow().isoformat(timespec="seconds"), "embedding_backend": backend, "trace": trace}, indent=1))
+
+
+def save_directory_audit(summary: dict) -> None:
+    """The latest directory audit summary as a readable file next to the database."""
+    import json
+
+    from nexus.utils.config import DATA_DIR
+
+    (DATA_DIR / "directory_audit.json").write_text(json.dumps(summary, indent=1, ensure_ascii=False), encoding="utf-8")
 
 
 def load_trace() -> dict | None:

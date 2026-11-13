@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, Building2, Coins, FlaskConical, ShieldCheck, Sparkles } from "lucide-react";
+import { BookOpen, Building2, Banknote, FlaskConical, ShieldCheck, Sparkles } from "lucide-react";
 import { api } from "../api";
 import { Badge, Card, HypothesisCard, HypothesisNotice, Notice, PageHeader, QueryState, SectionTitle, SourceLink, Stat, day, stamp } from "../components/ui";
 
@@ -44,7 +44,7 @@ export default function Overview() {
                 <Stat value={n.verified_capabilities} label="Verified capability claims" sub={`${n.inferences} inferred interests kept separate`} icon={ShieldCheck} tone="fact" />
                 <Stat value={n.research} label="Research records discovered" sub="OpenAlex" icon={BookOpen} tone="cyan" />
                 <Stat value={(st.open ?? 0) + (st.upcoming ?? 0)} label="Open or upcoming funding calls"
-                      sub={`${st.closed ?? 0} closed, ${st.unknown ?? 0} unknown of ${n.funding}`} icon={Coins} tone="inf" />
+                      sub={`${st.closed ?? 0} closed, ${st.unknown ?? 0} unknown of ${n.funding}`} icon={Banknote} tone="inf" />
                 <Stat value={n.testbeds + n.events + n.news} label="Test environments, events, news" sub={`${n.testbeds} / ${n.events} / ${n.news}`} icon={FlaskConical} tone="pink" />
                 <Stat value={n.hypotheses} label="Collaboration hypotheses" sub="generated, not confirmed" icon={Sparkles} tone="hyp" />
               </div>

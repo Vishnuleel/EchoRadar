@@ -1,12 +1,12 @@
 import clsx from "clsx";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bookmark, BookOpen, CalendarDays, Coins, FlaskConical, HelpCircle, Lightbulb, Newspaper, ShieldCheck,
+import { Bookmark, BookOpen, CalendarDays, Banknote, FlaskConical, HelpCircle, Lightbulb, Newspaper, ShieldCheck,
          ArrowRightCircle, ThumbsDown, ThumbsUp } from "lucide-react";
 import { api } from "../api";
 import { Badge, Ring, SourceLink, day } from "./ui";
 
 export const KIND = {
-  funding: { icon: Coins, color: "rgb(var(--inf))", label: "Funding" },
+  funding: { icon: Banknote, color: "rgb(var(--inf))", label: "Funding" },
   testbed: { icon: FlaskConical, color: "rgb(var(--pink))", label: "Testing" },
   event: { icon: CalendarDays, color: "rgb(var(--user))", label: "Events" },
   research: { icon: BookOpen, color: "rgb(var(--brand))", label: "Research" },

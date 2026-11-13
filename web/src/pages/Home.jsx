@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import { ArrowRight, Bot, Building2, CalendarDays, Coins, Lightbulb, SendHorizontal, ShieldAlert, ShieldCheck, Sparkles, Trash2, User } from "lucide-react";
+import { ArrowRight, Bot, Building2, CalendarDays, Banknote, Lightbulb, SendHorizontal, ShieldAlert, ShieldCheck, Sparkles, Trash2, User } from "lucide-react";
 import { api } from "../api";
 import { useSession } from "../store";
 import ItemCard, { KIND } from "../components/ItemCard";
@@ -274,7 +274,7 @@ export default function Home() {
             <Hero data={data} />
             <div className="mb-7 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
               <Stat value={n.companies} label="Member profiles" sub={`${n.companies_website} enriched from own website`} icon={Building2} />
-              <Stat value={n.funding} label="Funding calls" sub="Vinnova open data" icon={Coins} tone="inf" />
+              <Stat value={n.funding} label="Funding calls" sub="Vinnova open data" icon={Banknote} tone="inf" />
               <Stat value={n.testbeds + n.events} label="Test environments and events" sub="Blue Science Park, MTC" icon={CalendarDays} tone="user" />
               <Stat value={n.research + n.news} label="Research and news items" sub="OpenAlex, regional news" icon={KIND.research.icon} tone="cyan" />
               <Stat value={n.hypotheses} label="Collaboration hypotheses" sub="not confirmed collaborations" icon={Sparkles} tone="hyp" />

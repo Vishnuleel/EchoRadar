@@ -1,0 +1,54 @@
+{
+ "snapshot_id": "bsp-live-20261113T211511Z",
+ "taken_at": "2026-11-13T21:15:11",
+ "directory_url": "https://www.bluesciencepark.se/bli-medlem/",
+ "method": "paginated_grid",
+ "pages_read": [
+  "https://www.bluesciencepark.se/bli-medlem/",
+  "https://www.bluesciencepark.se/bli-medlem/2/",
+  "https://www.bluesciencepark.se/bli-medlem/3/",
+  "https://www.bluesciencepark.se/bli-medlem/4/",
+  "https://www.bluesciencepark.se/bli-medlem/5/"
+ ],
+ "announced_pages": 4,
+ "loaded_card_count": 56,
+ "unique_listed_profiles": 56,
+ "stable_end": true,
+ "profiles_opened": 56,
+ "found_outside_listing": [],
+ "new_records": [],
+ "duplicates": [
+  {
+   "url": "https://www.bluesciencepark.se/medlem/hundtjanst-blekinge/",
+   "canonical": "https://www.bluesciencepark.se/medlem/hundtjanst-blekinge-ab/"
+  }
+ ],
+ "failed_urls": [],
+ "listing_errors": [],
+ "not_in_latest_listing": [],
+ "companies_stored": 56,
+ "missing_fields_by_column": {
+  "name": 0,
+  "description": 0,
+  "industry": 0,
+  "employees": 1,
+  "founded": 0,
+  "location": 0,
+  "website": 0
+ },
+ "membership_classification": "not published per organisation; left as member_or_partner_not_individually_disclosed",
+ "coverage_statement": "The public directory listed 56 unique profiles on 4 pages; the page after the last one loaded no further cards.",
+ "seed_dataset": "Blue Science Park member directory – audited NEXUS seed v3.0-audited (2026-11-13)",
+ "seed_records": 55,
+ "seed_matches": 55,
+ "seed_matched_by": {
+  "profile_url": 55
+ },
+ "seed_unmatched": [],
+ "seed_disagreements_by_field": {
+  "website": 15,
+  "description": 5,
+  "location": 1
+ },
+ "seed_scope_note": "This audit verifies the listed profile facts against Blue Science Park individual member pages. It does NOT establish full directory completeness: the official directory has a dynamic 'Ladda mer' control, and Blue Science Park states it has over 80 members. The current audited package includes 55 organisations discovered from official profile pages / official related-member references. Run the crawler and reconcile every dynamic listing before claiming full coverage."
+}

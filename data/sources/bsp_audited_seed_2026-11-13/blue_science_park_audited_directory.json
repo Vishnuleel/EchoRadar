@@ -1,0 +1,1434 @@
+{
+  "dataset_name": "Blue Science Park member directory – audited NEXUS seed",
+  "version": "3.0-audited",
+  "audit_date": "2026-11-13",
+  "primary_source": "https://www.bluesciencepark.se/bli-medlem/",
+  "scope_note": "This audit verifies the listed profile facts against Blue Science Park individual member pages. It does NOT establish full directory completeness: the official directory has a dynamic 'Ladda mer' control, and Blue Science Park states it has over 80 members. The current audited package includes 55 organisations discovered from official profile pages / official related-member references. Run the crawler and reconcile every dynamic listing before claiming full coverage.",
+  "membership_note": "Blue Science Park distinguishes membership and partnership in its application and fee description, but individual directory cards/profile pages do not consistently expose the exact membership class. Do not infer partner vs member. Use member_or_partner_not_individually_disclosed unless a source explicitly identifies the status.",
+  "verified_profile_facts_count": 55,
+  "record_count": 55,
+  "records": [
+    {
+      "id": "bsp-001",
+      "organisation_name": "3D Vision",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Digital visualisering"
+      ],
+      "description_original_sv": "Skapar fotorealistiska visualiseringar, animationer och digitala interaktiva upplevelser för branscher som nyproduktion, industri, arkitektur och event",
+      "employee_range": "1-10",
+      "founded_year": 2010,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.3dvision.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/3d-vision/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/3d-vision/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-002",
+      "organisation_name": "AddSecure – Smartgrids",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "IoT"
+      ],
+      "description_original_sv": "Erbjuder kommunikationsplattformar och lösningar för övervakning, analys och feldetektering i elnät. Samarbetar med energibolag för att förbättra leveranssäkerhet och optimera elnätets prestanda",
+      "employee_range": "200+",
+      "founded_year": 2000,
+      "locations": [
+        "Karlskrona",
+        "Stockholm"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.addsecure.se/elnatslosningar",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/addsecure/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/addsecure/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-003",
+      "organisation_name": "Affärsverken",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Återvinning",
+        "Energi",
+        "Färjerederi",
+        "Infrastruktur"
+      ],
+      "description_original_sv": "Levererar el, värme och fiber, samlar in avfall och driver skärgårdstrafik i Karlskrona",
+      "employee_range": "200+",
+      "founded_year": 1990,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.affarsverken.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/affarsverken/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/affarsverken/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-004",
+      "organisation_name": "AFRY",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Konstruktion",
+        "Konsultverksamhet",
+        "Projektledning",
+        "Tillverkning"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom konstruktion, projektledning, bygg och fastighet.",
+      "employee_range": "11-50",
+      "founded_year": 2018,
+      "locations": [
+        "Karlskrona",
+        "Stockholm"
+      ],
+      "country": "Sweden",
+      "official_website": "https://afry.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/afry/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/afry/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-005",
+      "organisation_name": "AllBinary",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Företagsutveckling",
+        "Rådgivning"
+      ],
+      "description_original_sv": "Fokuserar på att förvandla innovativa idéer till verklighet genom rådgivning och investeringar i teknikföretag och startups, med erfarenhet inom proptech, marinetech, telekom och försvarsindustrin",
+      "employee_range": "0",
+      "founded_year": 2022,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://allbinary.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/allbinary/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/allbinary/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-006",
+      "organisation_name": "Almi",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Finansiering",
+        "Rådgivning"
+      ],
+      "description_original_sv": "Erbjuder rådgivning, lån och riskkapital för att stödja små och medelstora företags utveckling och tillväxt",
+      "employee_range": "1-10",
+      "founded_year": 1994,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.almi.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/almi/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/almi/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-007",
+      "organisation_name": "Atea",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Konsultverksamhet"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom teknik, infrastruktur och systemintegration, inklusive rådgivning, implementering och underhåll av IT-lösningar.",
+      "employee_range": "200+",
+      "founded_year": 1992,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.atea.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/atea/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/atea/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-008",
+      "organisation_name": "Ballou",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Hosting"
+      ],
+      "description_original_sv": "Erbjuder webbhotellstjänster, utvecklar och tillhandahåller tillämpningstjänster med internet som kommunikationsmedel samt datakonsulting.",
+      "employee_range": "1-10",
+      "founded_year": 1995,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.ballou.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/ballou/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/ballou/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-009",
+      "organisation_name": "Baltic Offshore",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Sjökabelinstallation"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom installation, underhåll och reparation av undervattenskablar för telekommunikation och kraftöverföring",
+      "employee_range": "11-50",
+      "founded_year": 1974,
+      "locations": [
+        "Kalmar"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.balticoffshore.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/baltic-offshore/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/baltic-offshore/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-010",
+      "organisation_name": "Blekinge Business Incubator",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Företagsinkubator"
+      ],
+      "description_original_sv": "Erbjuder professionell och engagerad rådgivning i en kreativ och experimentell miljö för att hjälpa entreprenörer att starta nya företag eller skala upp befintliga verksamheter i Blekinge",
+      "employee_range": "1-10",
+      "founded_year": 2004,
+      "locations": [
+        "Karlshamn",
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://b-b-i.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/blekinge-business-incubator/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/blekinge-business-incubator/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-011",
+      "organisation_name": "Blekinge Tekniska Högskola",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Högskola"
+      ],
+      "description_original_sv": "Erbjuder utbildning och forskning inom teknik, IT, fysisk planering, industriell ekonomi, design samt hälsa och vård.",
+      "employee_range": "200+",
+      "founded_year": 1989,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.bth.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/blekinge-tekniska-hogskola/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/blekinge-tekniska-hogskola/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-012",
+      "organisation_name": "C Marine AB",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Fartygsdesign",
+        "Fartygskonstruktion"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom konceptdesign, grundläggande design, projektledning, analys, kompositstrukturell design och produktionsstöd",
+      "employee_range": "1-10",
+      "founded_year": 2012,
+      "locations": [
+        "Ronneby"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.cmarine.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/c-marine-ab/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/c-marine-ab/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-013",
+      "organisation_name": "Cleura",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Databehandling",
+        "Hosting"
+      ],
+      "description_original_sv": "Cleura erbjuder molnbaserad IT-infrastruktur som tjänst, inklusive Compliant Cloud, publikt moln och privat moln, med fokus på organisationer med höga regulatoriska krav.",
+      "employee_range": "11-50",
+      "founded_year": 2002,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://cleura.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/cleura/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/cleura/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-014",
+      "organisation_name": "Compani 56",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Digital fullservicebyrå"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom digital marknadsföring, strategi, design och utveckling.",
+      "employee_range": "11-50",
+      "founded_year": 2013,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://compani56.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/compani-56/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/compani-56/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-015",
+      "organisation_name": "DNV Cyber",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Cybersäkerhet"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom IT- och OT-säkerhet, riskhantering, hotidentifiering, regelverksefterlevnad samt incidentrespons för företag med komplexa behov",
+      "employee_range": null,
+      "founded_year": 2024,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.dnv.com/cyber/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/dnv-cyber/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/dnv-cyber/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [
+        "employee_range"
+      ],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-016",
+      "organisation_name": "DXC Technology",
+      "record_type": "directory_initial_listing",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Konsultverksamhet"
+      ],
+      "description_original_sv": "Tillhandahåller tjänster för systemintegration, systemutveckling, drift och underhåll, projektledning och strategisk konsultation för stora och medelstora företag i Europa",
+      "employee_range": "101-200",
+      "founded_year": 1996,
+      "locations": [
+        "Karlskrona",
+        "Solna"
+      ],
+      "country": "Sweden",
+      "official_website": "https://dxc.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/dxc-technology/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/dxc-technology/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-017",
+      "organisation_name": "Njord X",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Marinteknik"
+      ],
+      "description_original_sv": "NjordX levererar helhetslösningar för den marina sektorn – från hydroakustiska system och navigation till kommunikation, IT och säkerhet. De tar ansvar hela vägen från projektstart till installation, driftsättning samt service och support, och levererar globalt.",
+      "employee_range": "11-50",
+      "founded_year": 1963,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://njordx.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/njord-x/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/njord-x/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-018",
+      "organisation_name": "HiQ",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Konsultverksamhet"
+      ],
+      "description_original_sv": "Erbjuder skräddarsydda mjukvarulösningar inom system- och mjukvaruutveckling, DevOps och molntjänster, uppkopplade produkter och enheter, cybersäkerhet samt design och UX.",
+      "employee_range": "200+",
+      "founded_year": 1995,
+      "locations": [
+        "Karlskrona",
+        "Stockholm"
+      ],
+      "country": "Sweden",
+      "official_website": "https://hiq.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/hiq/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/hiq/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-019",
+      "organisation_name": "Sweco",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Konsultverksamhet"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom arkitektur, teknik och miljö för planering och utformning av framtidens hållbara samhällen och städer",
+      "employee_range": "200+",
+      "founded_year": 2007,
+      "locations": [
+        "Karlskrona",
+        "Stockholm"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.sweco.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/sweco/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/sweco/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-020",
+      "organisation_name": "NKT",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Industri"
+      ],
+      "description_original_sv": "Erbjuder design, produktion och installation av högspänningskablar för kraftöverföring, särskilt för förnybar energi och offshore-vindkraft",
+      "employee_range": "200+",
+      "founded_year": 1891,
+      "locations": [
+        "Karlskrona",
+        "Malmö",
+        "Stockholm"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.nkt.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/nkt/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/nkt/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-021",
+      "organisation_name": "EmbeddedArt",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Försvarssektorn"
+      ],
+      "description_original_sv": "Erbjuder produkter, tjänster och tekniska lösningar inom försvarsområdet, inklusive UV-sensorer och system för sjöövervakning, samt expertis inom IoT och undervattensteknik.",
+      "employee_range": "11-50",
+      "founded_year": 2009,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.embeddedart.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/embeddedart/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/embeddedart/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-022",
+      "organisation_name": "Ericsson",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Telecom"
+      ],
+      "description_original_sv": "Utvecklar och tillhandahåller infrastruktur, programvara och tjänster för informations- och kommunikationsteknologi till teleoperatörer och företag",
+      "employee_range": "200+",
+      "founded_year": 1877,
+      "locations": [
+        "Karlskrona",
+        "Stockholm"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.ericsson.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/ericsson/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/ericsson/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-023",
+      "organisation_name": "Knowit",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Konsultverksamhet"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom systemutveckling, programmering, IT-säkerhet och AI, med fokus på att stödja kunder inom offentlig sektor, industri och telekom",
+      "employee_range": "11-50",
+      "founded_year": 1990,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.knowit.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/knowit/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/knowit/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-024",
+      "organisation_name": "Yellowfish",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "IoT",
+        "Övervakning",
+        "Telematik"
+      ],
+      "description_original_sv": "Erbjuder tjänster under varumärket Fleetmonitor, som hjälper kunder att förbättra kontrollen och optimera användningen av godsvagnar, lokomotiv och containrar genom realtidsövervakning och analysverktyg",
+      "employee_range": "1-10",
+      "founded_year": 2009,
+      "locations": [
+        "Ronneby"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.yellowfishab.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/yellowfish/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/yellowfish/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-025",
+      "organisation_name": "MJ MarCable Consulting AB",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Konsultverksamhet"
+      ],
+      "description_original_sv": "Erbjuder teknisk och marknadsmässig expertis för att stödja intressenter inom elkraftkabelindustrin genom alla projektfaser, med målet att öka framgång och minska risker.",
+      "employee_range": "1-10",
+      "founded_year": 2020,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.marcable-consulting.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/mj-marcable-consulting-ab/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/mj-marcable-consulting-ab/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-026",
+      "organisation_name": "GE 99",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Konsultverksamhet"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom hållbarhetspolicy, väsentlighetsanalys och hållbarhetsrapportering enligt GRI-standarder, samt stöd för att följa EU:s CSRD-direktiv",
+      "employee_range": "1-10",
+      "founded_year": 2010,
+      "locations": [
+        "Nättraby"
+      ],
+      "country": "Sweden",
+      "official_website": "https://ge99.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/ge-99/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/ge-99/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-027",
+      "organisation_name": "Länsstyrelsen Blekinge",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Offentlig verksamhet"
+      ],
+      "description_original_sv": "Ansvarar för den statliga förvaltningen i länet och arbetar med frågor som rör regional utveckling, miljöskydd, samhällsplanering och kulturmiljö",
+      "employee_range": "101-200",
+      "founded_year": 1975,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.lansstyrelsen.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/lansstyrelsen-blekinge/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/lansstyrelsen-blekinge/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-028",
+      "organisation_name": "Kiwa",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Besiktning",
+        "Certifiering",
+        "Provning"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom besiktning, provning, certifiering, teknisk konsultation och utbildning för att skapa ett säkrare och mer hållbart samhälle",
+      "employee_range": "500+",
+      "founded_year": 1999,
+      "locations": [
+        "Karlskrona",
+        "Solna"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.kiwa.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/kiwa/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/kiwa/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-029",
+      "organisation_name": "Hundtjänst Blekinge AB",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Bevakningsföretag",
+        "Skolor och utbildning"
+      ],
+      "description_original_sv": "Specialiserade tjänstehundar för säkerhet och miljö. Medlemsföretaget erbjuder specialtränade hundar för att hitta dold elektronisk utrustning, lokalisera invasiva arter och upptäcka läckage i kyl- och värmesystem.",
+      "employee_range": "1-10",
+      "founded_year": 2025,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://hundtjanstblekinge.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/hundtjanst-blekinge/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/hundtjanst-blekinge/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-030",
+      "organisation_name": "Region Blekinge",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Offentlig verksamhet"
+      ],
+      "description_original_sv": "Ansvarar för hälso- och sjukvård, folkhälsa, regional utveckling, infrastruktur, kollektivtrafik, kultur och bildning i Blekinge",
+      "employee_range": "200+",
+      "founded_year": 1863,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://regionblekinge.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/region-blekinge/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/region-blekinge/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-031",
+      "organisation_name": "SAAB",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Fartygskonstruktion"
+      ],
+      "description_original_sv": "Utvecklar, konstruerar och underhåller örlogsmarina produkter och system, inklusive nästa generations ubåtar och Visbykorvetter.",
+      "employee_range": "200+",
+      "founded_year": 1980,
+      "locations": [
+        "Karlskrona",
+        "Malmö"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.saab.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/saab/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/saab/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-032",
+      "organisation_name": "Ocean Harvesting",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Energi"
+      ],
+      "description_original_sv": "Utvecklar och tillverkar kraftverk för produktion av elenergi från havsvågor, inklusive drift, underhåll, försäljning och licensiering av dessa system",
+      "employee_range": "1-10",
+      "founded_year": 2007,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://oceanharvesting.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/ocean-harvesting/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/ocean-harvesting/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-033",
+      "organisation_name": "Stena Line",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Färjerederi"
+      ],
+      "description_original_sv": "Erbjuder passagerar- och frakttransporter på 18 linjer i Nordeuropa",
+      "employee_range": "200+",
+      "founded_year": 1962,
+      "locations": [
+        "Göteborg",
+        "Halmstad",
+        "Karlskrona",
+        "Nynäshamn",
+        "Trelleborg"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.stenaline.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/stena-line/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/stena-line/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-034",
+      "organisation_name": "Karlskrona Kommun",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Offentlig verksamhet"
+      ],
+      "description_original_sv": "Ansvarar för kommunal service såsom utbildning, vård och omsorg, stadsplanering, kultur och fritid, samt teknisk infrastruktur",
+      "employee_range": "200+",
+      "founded_year": 1971,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.karlskrona.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/karlskrona-kommun/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/karlskrona-kommun/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-035",
+      "organisation_name": "Försvarsmakten",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Offentlig verksamhet"
+      ],
+      "description_original_sv": "Ansvarar för sjöövervakning, logistik, teknisk tjänst och stöd till marina förband genom Marinbasen. Hemvärnet har även en enhet i området",
+      "employee_range": "200+",
+      "founded_year": 1520,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.forsvarsmakten.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/forsvarsmakten/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/forsvarsmakten/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-036",
+      "organisation_name": "FMV",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Offentlig verksamhet"
+      ],
+      "description_original_sv": "Ansvarar för att upphandla, utveckla och leverera materiel och tjänster till Försvarsmakten, inklusive tekniskt komplexa och långsiktiga upphandlingar",
+      "employee_range": "200+",
+      "founded_year": 1968,
+      "locations": [
+        "Stockholm"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.fmv.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/fmv/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/fmv/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-037",
+      "organisation_name": "Kustbevakningen",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Offentlig verksamhet"
+      ],
+      "description_original_sv": "Ansvarar för sjöövervakning, miljöräddningstjänst till sjöss och gränskontroll, med uppdrag att skydda liv och miljö i Sveriges maritima områden",
+      "employee_range": "200+",
+      "founded_year": 1989,
+      "locations": [
+        "Göteborg",
+        "Härnösand",
+        "Karlskrona",
+        "Malmö",
+        "Nyköping",
+        "Stockholm"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.kustbevakningen.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/kustbevakningen/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/kustbevakningen/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-038",
+      "organisation_name": "Softhouse",
+      "record_type": "official_member_profile_or_related_member_link",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Mjukvaruutveckling"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom mjukvaruutveckling, digital transformation, AI och maskininlärning, samt apputveckling",
+      "employee_range": "200+",
+      "founded_year": 1996,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.softhouse.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/softhouse/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/softhouse/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-039",
+      "organisation_name": "Midcon",
+      "record_type": "official_news_member",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Dokumenthantering",
+        "IT-infrastruktur"
+      ],
+      "description_original_sv": "Erbjuder produkter och tjänster inom dokumenthantering, IT-infrastruktur och mötesteknik, inklusive installation och support",
+      "employee_range": "11-50",
+      "founded_year": 1955,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.midcon.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/midcon/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/midcon/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-040",
+      "organisation_name": "Malvacom",
+      "record_type": "official_news_member",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Dataprogrammering"
+      ],
+      "description_original_sv": "Malvacom AB är ett IT-konsultbolag i Karlskrona, grundat 2009, med kontor även i Karlshamn och Stockholm. Utvecklar mjukvara för myndigheter och B2B inom embedded firmware, mobila plattformar, webb, systemintegration och AI-automation.",
+      "employee_range": "11-50",
+      "founded_year": 2009,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://malvacom.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/malvacom/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/malvacom/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-041",
+      "organisation_name": "Spirius",
+      "record_type": "official_news_member",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Telecom"
+      ],
+      "description_original_sv": "Erbjuder meddelandetjänster och IoT-lösningar via smarta SIM-kort.",
+      "employee_range": "1-10",
+      "founded_year": 2009,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://spirius.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/spirius/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/spirius/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-042",
+      "organisation_name": "Lassen Construction",
+      "record_type": "official_news_member",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Anläggningsdykeri",
+        "Undervattensrelaterade arbeten"
+      ],
+      "description_original_sv": "Entreprenadföretag med spetskompetens inom marina entreprenader, vattenbyggnad, marin anläggningsproduktion och miljömuddring. Verksamheten omfattar dykentreprenader, kaj- och hamnbyggnation, marina installationer samt reparation och underhåll i kust- och vattenmiljö.",
+      "employee_range": "11-50",
+      "founded_year": 2004,
+      "locations": [
+        "Malmö"
+      ],
+      "country": "Sweden",
+      "official_website": "https://lcab.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/lassen-construction/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/lassen-construction/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-043",
+      "organisation_name": "Lysa",
+      "record_type": "official_news_member",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Finansbolag"
+      ],
+      "description_original_sv": "Lysa gör ett smart sparande tillgängligt för fler genom en enkel, billig och automatiserad investeringstjänst. Användaren investerar i en fondportfölj som anpassas efter individuella förutsättningar.",
+      "employee_range": "51-100",
+      "founded_year": 2015,
+      "locations": [
+        "Karlskrona",
+        "Stockholm"
+      ],
+      "country": "Sweden",
+      "official_website": "https://lysa.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/lysa/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/lysa/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Blank values are not inferred. Membership class (member vs partner) is not exposed per organisation in the public directory extract.",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page"
+    },
+    {
+      "id": "bsp-044",
+      "organisation_name": "WIP",
+      "record_type": "additional_official_member_profile_discovered_via_related_member_links",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Dataprogrammering",
+        "Mobil datakommunikation",
+        "Systemutveckling"
+      ],
+      "description_original_sv": "WIP erbjuder systemutvecklings- och rådgivningstjänster inom datakommunikation samt utvecklar och säljer produkter som möjliggör digitalisering och säker mobilitet för företag.",
+      "employee_range": "11-50",
+      "founded_year": 2000,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.wip.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/wip/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/wip/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Found through an official Blue Science Park member profile or its 'Fler medlemmar' links; not proof that this is the entire dynamic directory."
+    },
+    {
+      "id": "bsp-045",
+      "organisation_name": "Telenor",
+      "record_type": "additional_official_member_profile_discovered_via_related_member_links",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Telecom"
+      ],
+      "description_original_sv": "Telenor Sverige AB utvecklar, äger och driver mobila och fasta telekommunikationsnät samt erbjuder tjänster inom bredband, TV och telefoni.",
+      "employee_range": "200+",
+      "founded_year": 2013,
+      "locations": [
+        "Karlskrona",
+        "Stockholm"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.telenor.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/telenor/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/telenor/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Found through an official Blue Science Park member profile or its 'Fler medlemmar' links; not proof that this is the entire dynamic directory."
+    },
+    {
+      "id": "bsp-046",
+      "organisation_name": "Försäkringskassan",
+      "record_type": "additional_official_member_profile_discovered_via_related_member_links",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Offentlig verksamhet"
+      ],
+      "description_original_sv": "Ansvarar för stora delar av de offentliga trygghetssystemen i Sverige, inklusive utredning, beslut och utbetalning av förmåner, bidrag och andra ersättningar",
+      "employee_range": "200+",
+      "founded_year": 2005,
+      "locations": [
+        "Stockholm"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.forsakringskassan.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/forsakringskassan/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/forsakringskassan/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Found through an official Blue Science Park member profile or its 'Fler medlemmar' links; not proof that this is the entire dynamic directory."
+    },
+    {
+      "id": "bsp-047",
+      "organisation_name": "Indigo Ipex",
+      "record_type": "additional_official_member_profile_discovered_via_related_member_links",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Konsultverksamhet"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom förändringsledning och utbildningsprogram för att stärka kunders interna förändringskraft",
+      "employee_range": "1-10",
+      "founded_year": 2007,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://indigoipex.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/indigo-ipex/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/indigo-ipex/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Found through an official Blue Science Park member profile or its 'Fler medlemmar' links; not proof that this is the entire dynamic directory."
+    },
+    {
+      "id": "bsp-048",
+      "organisation_name": "Nexer",
+      "record_type": "additional_official_member_profile_discovered_via_related_member_links",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Konsultverksamhet"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom strategi, teknik och kommunikation, inklusive AI, maskininlärning, molntjänster och IT-säkerhet.",
+      "employee_range": "200+",
+      "founded_year": 1986,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://nexergroup.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/nexer/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/nexer/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Found through an official Blue Science Park member profile or its 'Fler medlemmar' links; not proof that this is the entire dynamic directory."
+    },
+    {
+      "id": "bsp-049",
+      "organisation_name": "Hi Story",
+      "record_type": "additional_official_member_profile_discovered_via_related_member_links",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Audioguider",
+        "Ljudproduktion"
+      ],
+      "description_original_sv": "Erbjuder teknik och produktion för audioguider och ljudupplevelser, inklusive appar och hörlursteater",
+      "employee_range": "1-10",
+      "founded_year": 2012,
+      "locations": [
+        "Malmö"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.hi-story.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/hi-story/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/hi-story/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Found through an official Blue Science Park member profile or its 'Fler medlemmar' links; not proof that this is the entire dynamic directory."
+    },
+    {
+      "id": "bsp-050",
+      "organisation_name": "Veridens",
+      "record_type": "additional_official_member_profile_discovered_via_related_member_links",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Digitala certifieringar",
+        "Digitala lösningar"
+      ],
+      "description_original_sv": "Erbjuder en digital plattform som effektiviserar hela processen för ansökan, revision och certifiering genom att sömlöst koppla samman alla parter i certifieringsprocessen",
+      "employee_range": "1-10",
+      "founded_year": 2006,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.veridens.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/varidens/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/varidens/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Found through an official Blue Science Park member profile or its 'Fler medlemmar' links; not proof that this is the entire dynamic directory."
+    },
+    {
+      "id": "bsp-051",
+      "organisation_name": "Nicon",
+      "record_type": "additional_official_member_profile_discovered_via_related_member_links",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Konsultverksamhet"
+      ],
+      "description_original_sv": "Erbjuder tjänster inom projektledning, processoptimering och teknisk rådgivning för industrisektorn",
+      "employee_range": "1-10",
+      "founded_year": 2010,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.nicon.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/nicon/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/nicon/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Found through an official Blue Science Park member profile or its 'Fler medlemmar' links; not proof that this is the entire dynamic directory."
+    },
+    {
+      "id": "bsp-052",
+      "organisation_name": "Factor10",
+      "record_type": "additional_official_member_profile_discovered_via_related_member_links",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Konsultverksamhet",
+        "Programutveckling"
+      ],
+      "description_original_sv": "Erbjuder avancerad programvaruutveckling med fokus på att skapa exponentiellt värde genom att leverera högkvalitativa och effektiva lösningar för sina kunder",
+      "employee_range": "1-10",
+      "founded_year": 2012,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://factor10.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/factor10/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/factor10/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Found through an official Blue Science Park member profile or its 'Fler medlemmar' links; not proof that this is the entire dynamic directory."
+    },
+    {
+      "id": "bsp-053",
+      "organisation_name": "Techinova",
+      "record_type": "additional_official_member_profile_discovered_via_related_member_links",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Kommunkationsutrustning"
+      ],
+      "description_original_sv": "Techinova utvecklar och tillverkar produkter med elektronik och programvara för kommunikation (radionätverk) och automation, anpassade för energisektorns behov. De erbjuder även tjänster kopplade till utredning och driftsättning samt handel med materiel och utrustning såsom kablage, antenner och kopplingsutrustning.",
+      "employee_range": "11-50",
+      "founded_year": 2010,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.techinova.se/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/techinova/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/techinova/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Found through an official Blue Science Park member profile or its 'Fler medlemmar' links; not proof that this is the entire dynamic directory."
+    },
+    {
+      "id": "bsp-054",
+      "organisation_name": "Kingspan BAGA",
+      "record_type": "additional_official_member_profile_discovered_via_related_member_links",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Avloppsrening",
+        "Vattenhantering"
+      ],
+      "description_original_sv": "Erbjuder produkter och tjänster för avloppsrening, inklusive minireningsverk, slamavskiljare, bioModuler, pumpstationer och fettavskiljare, anpassade för nordiskt klimat",
+      "employee_range": "11-50",
+      "founded_year": 1992,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.kingspan.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/kingspan-baga/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/kingspan-baga/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Found through an official Blue Science Park member profile or its 'Fler medlemmar' links; not proof that this is the entire dynamic directory."
+    },
+    {
+      "id": "bsp-055",
+      "organisation_name": "Roxtec",
+      "record_type": "additional_official_member_profile_discovered_via_related_member_links",
+      "membership_classification": "member_or_partner_not_individually_disclosed",
+      "industry_original_sv": [
+        "Industri"
+      ],
+      "description_original_sv": "Erbjuder modulbaserade tätningslösningar för kablar och rör, skyddar mot flera risker och används i olika branscher globalt",
+      "employee_range": "200+",
+      "founded_year": 1990,
+      "locations": [
+        "Karlskrona"
+      ],
+      "country": "Sweden",
+      "official_website": "https://www.roxtec.com/",
+      "blue_science_park_profile_url": "https://www.bluesciencepark.se/medlem/roxtec/",
+      "evidence_url": "https://www.bluesciencepark.se/medlem/roxtec/",
+      "evidence_status": "official_member_profile_opened_and_fields_checked",
+      "profile_audit_status": "profile_page_opened_and_core_fields_transcribed",
+      "source_field_provenance": "Blue Science Park individual member profile page",
+      "missing_fields": [],
+      "last_verified_date": "2026-11-13",
+      "notes": "Found through an official Blue Science Park member profile or its 'Fler medlemmar' links; not proof that this is the entire dynamic directory."
+    }
+  ]
+}

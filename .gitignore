@@ -10,3 +10,4 @@ NEXUS_local_package.zip
 node_modules/
 web/dist/
 data/test_results.xml
+data/nexus_before_*.db

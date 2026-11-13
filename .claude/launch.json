@@ -1,7 +1,7 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "nexus-api", "runtimeExecutable": "python", "runtimeArgs": ["-m", "api"], "port": 8000 },
+    { "name": "nexus-api", "runtimeExecutable": ".venv/Scripts/python.exe", "runtimeArgs": ["-m", "api"], "port": 8000 },
     { "name": "nexus-web", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "web", "run", "dev"], "port": 5173 }
   ]
 }

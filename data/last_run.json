@@ -1,29 +1,35 @@
 {
- "finished_at": "2026-11-13T14:32:13",
+ "finished_at": "2026-11-13T21:16:03",
  "embedding_backend": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
  "trace": [
   {
+   "agent": "Company Intelligence Agent (directory sync)",
+   "seconds": 0,
+   "result": "56 profiles, 392 evidence-backed claims",
+   "warnings": []
+  },
+  {
    "agent": "Innovation Combination Agent",
-   "seconds": 0.19,
+   "seconds": 0.24,
    "result": "287 complementary pairs and 66 three-company combinations from 56 profiles",
    "warnings": []
   },
   {
    "agent": "Ranking Agent",
-   "seconds": 0.31,
+   "seconds": 0.32,
    "result": "353 candidates scored against 200 research records and 15 open/upcoming calls",
    "warnings": []
   },
   {
    "agent": "Verification Agent",
-   "seconds": 0.02,
+   "seconds": 0.01,
    "result": "353 hypotheses passed, 0 rejected for unsupported claims",
    "warnings": []
   },
   {
    "agent": "Opportunity bridge (radar)",
-   "seconds": 0.13,
-   "result": "705 company-specific radar items; 292 hypotheses stored",
+   "seconds": 0.07,
+   "result": "710 company-specific radar items; 292 hypotheses stored",
    "warnings": []
   }
  ]

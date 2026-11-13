@@ -10,6 +10,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 os.environ["NEXUS_EMBEDDINGS"] = "hash"
+os.environ["NEXUS_SEED_PATH"] = ""  # tests pass their own seed explicitly
 
 from nexus.integrations.company_sources import CrawlResult, MemberRecord, PageText  # noqa: E402
 from nexus.integrations.http_cache import FetchResult  # noqa: E402

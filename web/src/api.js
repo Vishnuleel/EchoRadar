@@ -40,4 +40,5 @@ export const api = {
   rate: (body) => request("/blueprint/feedback", { method: "POST", body: JSON.stringify(body) }),
   evaluation: () => request("/evaluation"),
   staff: () => request("/staff"),
+  directory: () => request("/directory"),
 };

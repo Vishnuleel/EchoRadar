@@ -36,9 +36,10 @@ The Streamlit pages are being replaced by a React app (`web/`) served by a small
 same `nexus/` engine. The Streamlit app still works and is unchanged.
 
 ```powershell
-pip install -r requirements.txt
+py -m venv .venv                            # own environment: avoids clashes with globally installed torch tooling
+.venv\Scripts\python.exe -m pip install -r requirements.txt
 cd web; npm install; npm run build; cd ..   # once, and after frontend changes
-python -m api                               # http://localhost:8000 serves the API and the app
+.venv\Scripts\python.exe -m api             # http://localhost:8000 serves the API and the app
 ```
 
 While developing the frontend, run `python -m api` and, in a second terminal, `npm --prefix web run dev`

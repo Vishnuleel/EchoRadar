@@ -183,6 +183,44 @@ def _claim(cl) -> dict:
                           "retrieved_at": e.retrieved_at} if e else None)}
 
 
+FIELD_LABELS = {"name": "Name", "description": "Description (official Swedish text)", "industry": "Industry",
+                "employees": "Employees", "founded": "Founded", "location": "Locations", "website": "Website"}
+
+
+def _verification(c: Company) -> dict:
+    """Where each directory fact on this profile came from, and how current the check is."""
+    sources = c.field_sources or {}
+    fields = []
+    for f, label in FIELD_LABELS.items():
+        src = sources.get(f) or {}
+        value = getattr(c, f)
+        fields.append({"field": f, "label": label, "value": value, "source": src.get("source"),
+                       "url": src.get("url"), "retrieved_at": src.get("retrieved_at"), "seed": src.get("seed"),
+                       "published": f not in (c.missing_fields or [])})
+    status = ("verified" if c.profile_fetch_status in ("ok", "ok_cached") and c.listing_status == "listed" else
+              "not_listed" if c.listing_status == "not_in_latest_listing" else
+              "check_failed" if (c.profile_fetch_status or "").startswith("failed") else
+              "outside_listing" if c.listing_status in ("related_link_only", "seed_only") else "not_verified")
+    return {"status": status, "fields": fields, "missing_fields": list(c.missing_fields or []),
+            "last_verified_at": c.last_verified_at, "fetch_status": c.profile_fetch_status,
+            "listing_status": c.listing_status, "snapshot_id": c.directory_snapshot_id,
+            "membership_classification": c.membership_classification, "aliases": list(c.aliases or []),
+            "profile_url": c.directory_url}
+
+
+@router.get("/directory")
+def directory(s: Session = Depends(get_db)):
+    """Latest directory audit: coverage, seed reconciliation, missing fields."""
+    from nexus.agents import directory_agent
+
+    def build():
+        snap = directory_agent.latest_snapshot(s)
+        companies = repo.companies(s)
+        return {"snapshot": snap.summary if snap else None,
+                "status_counts": dict(Counter(_verification(c)["status"] for c in companies))}
+    return cache.get("directory", build)
+
+
 @router.get("/companies/{company_id}/dna")
 def dna(company_id: int, s: Session = Depends(get_db), acting: int | None = Depends(acting_company)):
     c = _company(s, company_id)
@@ -207,7 +245,7 @@ def dna(company_id: int, s: Session = Depends(get_db), acting: int | None = Depe
         "recommendations": [_rec(r, names, company_id) for r in repo.recommendations(s, company_id, 8)],
         "revisions": [{"when": r.created_at, "author": r.author, "summary": r.change_summary}
                       for r in sorted(c.revisions, key=lambda r: r.created_at, reverse=True)],
-        "private": private, "can_edit": owner}
+        "private": private, "can_edit": owner, "verification": _verification(c)}
 
 
 class Refine(BaseModel):

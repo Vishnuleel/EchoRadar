@@ -2,7 +2,69 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../api";
 import { useSession } from "../store";
-import { Bar, Empty, HypothesisCard, HypothesisNotice, Notice, PageHeader, QueryState, SectionTitle, SourceLink, day } from "../components/ui";
+import { BadgeCheck, CircleDashed, GitCompareArrows } from "lucide-react";
+import { Bar, Empty, HypothesisCard, HypothesisNotice, Notice, PageHeader, QueryState, SectionTitle, SourceLink, day, stamp } from "../components/ui";
+
+const FIELD_NAMES = { name: "name", description: "description", industry: "industry", employees: "employee band",
+                      founded: "founding year", location: "location", website: "website" };
+
+/** Audit summary of the latest member directory crawl (and the reconciled audited seed). */
+function DirectoryCoverage() {
+  const q = useQuery({ queryKey: ["directory"], queryFn: api.directory });
+  const snap = q.data?.snapshot;
+  if (!q.data) return null;
+  if (!snap) {
+    return <Notice tone="info" className="mb-8">No directory audit has run yet. Run <code>python scripts/sync_directory.py</code> to crawl the member directory and record coverage.</Notice>;
+  }
+  const verified = q.data.status_counts.verified ?? 0;
+  const missing = Object.entries(snap.missing_fields_by_column).filter(([, n]) => n > 0);
+  const differs = Object.entries(snap.seed_disagreements_by_field ?? {});
+  const stat = (value, label) => (
+    <div><div className="font-display text-2xl font-semibold tabular-nums">{value}</div><div className="meta mt-0.5">{label}</div></div>
+  );
+  return (
+    <section className="card mb-9 p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Member directory coverage</h2>
+          <p className="meta mt-0.5">Snapshot {snap.snapshot_id} · {stamp(snap.taken_at)} UTC · <SourceLink url={snap.directory_url}>public directory</SourceLink></p>
+        </div>
+        <span className={snap.stable_end ? "inline-flex items-center gap-1.5 rounded-full border border-fact/35 bg-fact/10 px-2.5 py-0.5 text-[12px] font-medium text-fact"
+                                         : "inline-flex items-center gap-1.5 rounded-full border border-hyp/40 bg-hyp/10 px-2.5 py-0.5 text-[12px] font-medium text-hyp"}>
+          {snap.stable_end ? <BadgeCheck size={13} /> : <CircleDashed size={13} />}
+          {snap.stable_end ? "End of listing confirmed" : "End of listing not confirmed"}
+        </span>
+      </div>
+      <div className="mt-5 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-6">
+        {stat(snap.loaded_card_count, `cards loaded on ${snap.announced_pages ?? "?"} pages`)}
+        {stat(snap.unique_listed_profiles, "unique listed profiles")}
+        {stat(`${verified}/${snap.companies_stored}`, "profiles verified")}
+        {stat(snap.new_records.length, "new since last sync")}
+        {stat(snap.failed_urls.length, "failed profile URLs")}
+        {stat(snap.not_in_latest_listing.length, "no longer listed")}
+      </div>
+      <div className="mt-5 grid gap-4 border-t border-line/70 pt-4 text-[13px] leading-relaxed text-ink2 lg:grid-cols-2">
+        <p>
+          {snap.coverage_statement} Coverage refers to the public directory only.
+          {snap.seed_scope_note && " The audited seed notes that Blue Science Park states it has over 80 members, so some members may not be listed publicly."}
+          {" "}Fields not published on a profile: {missing.length ? missing.map(([f, n]) => `${FIELD_NAMES[f]} (${n})`).join(", ") : "none"}.
+          Member versus partner status is not published per organisation and is not stated.
+        </p>
+        {snap.seed_records !== undefined && (
+          <p className="flex gap-2">
+            <GitCompareArrows size={15} className="mt-0.5 shrink-0 text-inf" />
+            <span>
+              Audited seed: {snap.seed_matches} of {snap.seed_records} records matched
+              {snap.duplicates.length > 0 && ` (${snap.duplicates.length} via an old profile URL that now redirects)`}
+              {snap.seed_unmatched.length > 0 && `; unmatched: ${snap.seed_unmatched.map((u) => u.name).join(", ")}`}.
+              {differs.length > 0 && ` Its values differ from the live official pages on ${differs.map(([f, n]) => `${n} ${FIELD_NAMES[f]}${n > 1 ? "s" : ""}`).join(", ")}; the official wording is shown and the seed values are kept for review on each company's Directory record.`}
+            </span>
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
 
 export default function Staff() {
   const { setViewing } = useSession();
@@ -17,6 +79,7 @@ export default function Staff() {
         <b className="text-inf">SIMULATED:</b> this page has no staff login in the prototype. It only shows public profile data
         and anonymous aggregates; no company's private questions, saved items or ratings are exposed.
       </Notice>
+      <DirectoryCoverage />
       <QueryState query={query}>
         {(d) => {
           const max = Math.max(1, ...d.shared_interests.map((r) => r.members));

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import { ClipboardCheck, FileText, Fingerprint, Home, LayoutDashboard, Menu, Moon, Radar, Share2, Sun, Users, X } from "lucide-react";
+import { FileText, Fingerprint, Home, LayoutDashboard, Menu, Moon, Radar, Share2, Sun, Users, X } from "lucide-react";
 import { api } from "../api";
 import { useSession } from "../store";
 import { Badge, CompanyPicker, Notice, PageSkeleton } from "./ui";
@@ -19,35 +19,16 @@ const NAV = [
     { to: "/graph", label: "Innovation Graph", icon: Share2 },
     { to: "/staff", label: "Staff View", icon: Users },
   ] },
-  { title: "Quality", items: [
-    { to: "/evaluation", label: "Evaluation", icon: ClipboardCheck },
-  ] },
 ];
-
-export function Logo({ size = 34 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
-      <rect width="40" height="40" rx="11" fill="rgb(var(--brand) / 0.14)" />
-      <circle cx="20" cy="20" r="12.5" fill="none" stroke="rgb(var(--brand))" strokeWidth="1.8" opacity=".55" />
-      <circle cx="20" cy="20" r="7" fill="none" stroke="rgb(var(--cyan))" strokeWidth="1.8" />
-      <circle cx="20" cy="20" r="2.2" fill="rgb(var(--cyan))" />
-      <path d="M20 20 L29 11" stroke="rgb(var(--hyp))" strokeWidth="1.8" strokeLinecap="round" />
-      <circle cx="29" cy="11" r="3" fill="rgb(var(--hyp))" />
-    </svg>
-  );
-}
 
 function Sidebar({ onNavigate }) {
   const { companies, acting, setActing, theme, setTheme } = useSession();
   const health = useQuery({ queryKey: ["health"], queryFn: api.health, refetchInterval: 30000, retry: false });
   return (
     <div className="flex h-full flex-col gap-5 overflow-y-auto px-4 py-5">
-      <div className="flex items-center gap-3 px-1">
-        <Logo />
-        <div>
-          <div className="font-display text-lg font-semibold leading-none tracking-wide">NEXUS</div>
-          <div className="meta mt-1 leading-tight">The Innovation Connection Engine</div>
-        </div>
+      <div className="px-2">
+        <div className="font-display text-[22px] font-semibold leading-none tracking-[0.18em]">NEXUS</div>
+        <div className="meta mt-1.5 leading-tight">The Innovation Connection Engine</div>
       </div>
 
       <nav className="space-y-4" aria-label="Pages">
@@ -89,6 +70,10 @@ function Sidebar({ onNavigate }) {
             <li><Badge kind="HYPOTHESIS" /> generated proposal</li>
           </ul>
         </div>
+        <NavLink to="/evaluation" onClick={onNavigate}
+                 className={({ isActive }) => clsx("block px-1 text-[12px] underline-offset-2 hover:underline", isActive ? "text-brand" : "text-muted hover:text-ink2")}>
+          Method and evaluation
+        </NavLink>
         <div className="flex items-center justify-between border-t border-line px-1 pt-3">
           <span className="flex items-center gap-2 text-[11.5px] text-muted" title={health.data?.embedding_backend}>
             <span className={clsx("h-2 w-2 rounded-full", health.isError ? "bg-pink" : health.data ? "bg-fact" : "bg-muted")} />
@@ -118,7 +103,7 @@ export default function Shell() {
 
       {/* small screens: top bar and drawer */}
       <div className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-bg/85 px-4 py-2.5 backdrop-blur lg:hidden">
-        <div className="flex items-center gap-2.5"><Logo size={28} /><span className="font-display font-semibold tracking-wide">NEXUS</span></div>
+        <span className="font-display text-lg font-semibold tracking-[0.18em]">NEXUS</span>
         <button className="btn !px-2" onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={18} /></button>
       </div>
       {open && (

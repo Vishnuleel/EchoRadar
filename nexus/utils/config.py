@@ -14,6 +14,11 @@ except Exception:  # pragma: no cover
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "data"
+# Audited Blue Science Park seed (second source, reconciled against the live directory on every sync).
+# NEXUS_SEED_PATH overrides it; an empty value switches seed reconciliation off.
+_seed_env = os.getenv("NEXUS_SEED_PATH")
+SEED_PATH = (Path(_seed_env) if _seed_env else None) if _seed_env is not None else \
+    DATA_DIR / "sources" / "bsp_audited_seed_2026-11-13" / "blue_science_park_audited_directory.json"
 
 
 @dataclass(frozen=True)
