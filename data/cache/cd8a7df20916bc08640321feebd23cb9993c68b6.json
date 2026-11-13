@@ -1,0 +1,1 @@
+{"url": "https://www.lcab.se/robots.txt", "final_url": "https://www.lcab.se/robots.txt", "http_status": 200, "retrieved_at": "2026-11-13T12:06:15.227615", "text": "# START YOAST BLOCK\n# ---------------------------\nUser-agent: *\nDisallow:\n\nSitemap: https://www.lcab.se/sitemap_index.xml\n# ---------------------------\n# END YOAST BLOCK"}

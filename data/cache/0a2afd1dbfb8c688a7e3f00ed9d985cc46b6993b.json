@@ -1,0 +1,1 @@
+{"url": "https://balticoffshore.se/robots.txt", "final_url": "https://balticoffshore.se/robots.txt", "http_status": 200, "retrieved_at": "2026-11-13T12:05:58.796886", "text": "# START YOAST BLOCK\n# ---------------------------\nUser-agent: *\nDisallow:\n\nSitemap: https://balticoffshore.se/sitemap_index.xml\n# ---------------------------\n# END YOAST BLOCK"}

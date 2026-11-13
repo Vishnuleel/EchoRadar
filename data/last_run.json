@@ -1,0 +1,30 @@
+{
+ "finished_at": "2026-11-13T14:32:13",
+ "embedding_backend": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+ "trace": [
+  {
+   "agent": "Innovation Combination Agent",
+   "seconds": 0.19,
+   "result": "287 complementary pairs and 66 three-company combinations from 56 profiles",
+   "warnings": []
+  },
+  {
+   "agent": "Ranking Agent",
+   "seconds": 0.31,
+   "result": "353 candidates scored against 200 research records and 15 open/upcoming calls",
+   "warnings": []
+  },
+  {
+   "agent": "Verification Agent",
+   "seconds": 0.02,
+   "result": "353 hypotheses passed, 0 rejected for unsupported claims",
+   "warnings": []
+  },
+  {
+   "agent": "Opportunity bridge (radar)",
+   "seconds": 0.13,
+   "result": "705 company-specific radar items; 292 hypotheses stored",
+   "warnings": []
+  }
+ ]
+}

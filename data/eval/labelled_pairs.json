@@ -1,0 +1,224 @@
+{
+ "description": "Candidate company pairs labelled for capability COMPLEMENTARITY (0 = not complementary, 1 = plausible, 2 = strong).",
+ "labelled_by": "NEXUS development team (AI-assisted), from the public member-directory descriptions. NOT labelled by Blue Science Park staff or independent domain experts.",
+ "labelled_on": "2026-11-13",
+ "caveat": "The labeller also wrote the capability relation table, so this set is biased in favour of NEXUS. It is a sanity check, not a validation. 36 pairs are too few for statistically meaningful conclusions.",
+ "pairs": [
+  {
+   "a": "baltic-offshore",
+   "b": "nkt",
+   "label": 2,
+   "rationale": "Cable manufacturer and cable installer/repairer sit next to each other in the value chain"
+  },
+  {
+   "a": "baltic-offshore",
+   "b": "ocean-harvesting",
+   "label": 2,
+   "rationale": "A wave power plant needs a subsea export cable installed"
+  },
+  {
+   "a": "njord-x",
+   "b": "c-marine-ab",
+   "label": 2,
+   "rationale": "Navigation/communication systems are integrated into newly designed vessels"
+  },
+  {
+   "a": "embeddedart",
+   "b": "c-marine-ab",
+   "label": 2,
+   "rationale": "Underwater sensors and unmanned systems need a lightweight carrier design"
+  },
+  {
+   "a": "embeddedart",
+   "b": "baltic-offshore",
+   "label": 2,
+   "rationale": "Underwater sensor systems could monitor installed subsea cables"
+  },
+  {
+   "a": "njord-x",
+   "b": "baltic-offshore",
+   "label": 2,
+   "rationale": "Hydroacoustic survey equipment supports cable route survey and fault location"
+  },
+  {
+   "a": "lassen-construction",
+   "b": "embeddedart",
+   "label": 2,
+   "rationale": "Underwater works and dredging need underwater sensing"
+  },
+  {
+   "a": "lassen-construction",
+   "b": "njord-x",
+   "label": 1,
+   "rationale": "Sonar can guide diving work; plausible but generic supplier relation"
+  },
+  {
+   "a": "ocean-harvesting",
+   "b": "c-marine-ab",
+   "label": 2,
+   "rationale": "Wave energy device needs lightweight composite structure design"
+  },
+  {
+   "a": "ocean-harvesting",
+   "b": "nkt",
+   "label": 2,
+   "rationale": "Wave power needs power cables"
+  },
+  {
+   "a": "ocean-harvesting",
+   "b": "roxtec",
+   "label": 1,
+   "rationale": "Cable entries on offshore devices need sealing; narrow fit"
+  },
+  {
+   "a": "addsecure",
+   "b": "affarsverken",
+   "label": 2,
+   "rationale": "Grid monitoring provider and a local grid operator"
+  },
+  {
+   "a": "yellowfish",
+   "b": "affarsverken",
+   "label": 2,
+   "rationale": "Fleet monitoring for an operator of vehicles and archipelago vessels"
+  },
+  {
+   "a": "yellowfish",
+   "b": "stena-line",
+   "label": 1,
+   "rationale": "Telematics and a ferry operator; fit depends on vessel vs vehicle focus"
+  },
+  {
+   "a": "dnv-cyber",
+   "b": "njord-x",
+   "label": 2,
+   "rationale": "OT security for navigation and communication systems on vessels"
+  },
+  {
+   "a": "dnv-cyber",
+   "b": "stena-line",
+   "label": 1,
+   "rationale": "Cyber risk services for a ship operator; a customer relation more than innovation"
+  },
+  {
+   "a": "knowit",
+   "b": "embeddedart",
+   "label": 1,
+   "rationale": "AI competence applied to sensor data; plausible"
+  },
+  {
+   "a": "nexer",
+   "b": "njord-x",
+   "label": 1,
+   "rationale": "AI/ML on hydroacoustic and navigation data; plausible"
+  },
+  {
+   "a": "3d-vision",
+   "b": "c-marine-ab",
+   "label": 1,
+   "rationale": "Visualising vessel designs; plausible but small"
+  },
+  {
+   "a": "3d-vision",
+   "b": "baltic-offshore",
+   "label": 1,
+   "rationale": "Visualising subsea cable projects; plausible"
+  },
+  {
+   "a": "saab",
+   "b": "embeddedart",
+   "label": 1,
+   "rationale": "Both naval/underwater defence; supplier relation plausible, largely similar"
+  },
+  {
+   "a": "kustbevakningen",
+   "b": "embeddedart",
+   "label": 1,
+   "rationale": "Authority with surveillance mandate and a surveillance sensor supplier"
+  },
+  {
+   "a": "techinova",
+   "b": "addsecure",
+   "label": 1,
+   "rationale": "Communication electronics and grid monitoring; plausible"
+  },
+  {
+   "a": "kiwa",
+   "b": "ocean-harvesting",
+   "label": 1,
+   "rationale": "New energy device needs independent testing"
+  },
+  {
+   "a": "roxtec",
+   "b": "nkt",
+   "label": 1,
+   "rationale": "Cable sealing and cable manufacturing; adjacent products"
+  },
+  {
+   "a": "spirius",
+   "b": "yellowfish",
+   "label": 1,
+   "rationale": "IoT SIM connectivity and telematics; supplier relation"
+  },
+  {
+   "a": "knowit",
+   "b": "hiq",
+   "label": 0,
+   "rationale": "Two similar IT consultancies; similar, not complementary"
+  },
+  {
+   "a": "nexer",
+   "b": "softhouse",
+   "label": 0,
+   "rationale": "Two similar software/AI consultancies"
+  },
+  {
+   "a": "atea",
+   "b": "dxc-technology",
+   "label": 0,
+   "rationale": "Two similar IT infrastructure/integration providers"
+  },
+  {
+   "a": "cleura",
+   "b": "ballou",
+   "label": 0,
+   "rationale": "Both hosting/cloud providers"
+  },
+  {
+   "a": "malvacom",
+   "b": "wip",
+   "label": 0,
+   "rationale": "Both IT development consultancies"
+  },
+  {
+   "a": "almi",
+   "b": "allbinary",
+   "label": 0,
+   "rationale": "Both financing/advisory"
+  },
+  {
+   "a": "lysa",
+   "b": "baltic-offshore",
+   "label": 0,
+   "rationale": "Savings service and cable installer; unrelated"
+  },
+  {
+   "a": "compani-56",
+   "b": "nkt",
+   "label": 0,
+   "rationale": "Digital marketing agency and cable manufacturer; unrelated for technology innovation"
+  },
+  {
+   "a": "hi-story",
+   "b": "saab",
+   "label": 0,
+   "rationale": "Audio guides and naval shipbuilding; unrelated"
+  },
+  {
+   "a": "forsakringskassan",
+   "b": "lassen-construction",
+   "label": 0,
+   "rationale": "Social insurance agency and marine contractor; unrelated"
+  }
+ ]
+}

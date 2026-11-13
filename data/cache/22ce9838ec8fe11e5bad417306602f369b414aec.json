@@ -1,0 +1,1 @@
+{"url": "https://www.cmarine.se/robots.txt", "final_url": "https://www.cmarine.se/robots.txt", "http_status": 200, "retrieved_at": "2026-11-13T12:06:07.249645", "text": "User-agent: *\nDisallow: /wp-admin/\nAllow: /wp-admin/admin-ajax.php\n"}

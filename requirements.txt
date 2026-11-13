@@ -1,0 +1,16 @@
+streamlit>=1.40
+plotly>=5.20
+sqlalchemy>=2.0
+pydantic>=2.6
+networkx>=3.2
+scikit-learn>=1.4
+numpy>=1.26
+pandas>=2.1
+requests>=2.31
+beautifulsoup4>=4.12
+reportlab>=4.0
+python-dotenv>=1.0
+sentence-transformers>=3.0
+pytest>=8.0
+# Optional: only needed if OPENAI_API_KEY is set (LLM-written explanations)
+# openai>=1.40

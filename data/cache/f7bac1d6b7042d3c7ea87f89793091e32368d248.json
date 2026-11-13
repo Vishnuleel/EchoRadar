@@ -1,0 +1,1 @@
+{"url": "https://www.njordx.com/robots.txt", "final_url": "https://www.njordx.com/robots.txt", "http_status": 200, "retrieved_at": "2026-11-13T12:06:23.977910", "text": "User-agent: *\nDisallow: /wp-admin/\nAllow: /wp-admin/admin-ajax.php\n\nSitemap: https://www.njordx.com/wp-sitemap.xml\n"}

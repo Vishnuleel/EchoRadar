@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+data/models/
+data/nexus_test*.db
+.pytest_cache/
+NEXUS_local_package.zip
+
+node_modules/
+web/dist/
+data/test_results.xml
