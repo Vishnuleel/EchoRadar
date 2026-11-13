@@ -268,82 +268,130 @@ def recompute(s: Session, embedder=None, now: datetime | None = None) -> list[di
 
     # Radar: company-specific relevance for every monitoring area, adjusted by stated needs and feedback
     t = time.time()
-    all_funding = list(s.scalars(select(FundingOpportunity)))
-    sets = {
-        "research": ctx.research,
-        "funding": _item_set(s, [f for f in all_funding if opportunity_agent.current_status(f, now) != "closed"], embedder),
-        "testbed": _item_set(s, [x for x in ctx.testbeds.rows if x.kind != "event"], embedder),
-        "event": _item_set(s, [e for e in s.scalars(select(Event)) if e.starts_at is None or e.starts_at >= now], embedder),
-        "news": _item_set(s, [n for n in s.scalars(select(NewsUpdate))
-                              if n.published_at and (now - n.published_at).days <= 180], embedder),
-    }
-    limits = {"research": (10, 25.0), "funding": (10, 25.0), "testbed": (4, 10.0), "event": (6, 10.0), "news": (6, 22.0)}
+    sets = _radar_sets(s, embedder, now, ctx.research, ctx.testbeds)
     companies_by_id = {c.id: c for c in s.scalars(select(Company))}
-    marks: dict[int, dict] = {}
-    for m in s.scalars(select(SavedItem)):
-        marks.setdefault(m.company_id, {}).setdefault(m.action, set()).add((m.kind, m.ref_id))
+    marks = _radar_marks(s)
     n_radar = 0
     for p in profiles:
-        if p.vector is None or not p.capabilities:
-            continue
-        caps = set(p.capabilities) | set(p.interests)
-        needs = list(companies_by_id[p.id].need_priorities or [])
-        boosted = {k for n in needs for k in radar.NEED_TO_KINDS.get(n, [])}
-        mine = marks.get(p.id, {})
-        liked_kinds = {k for k, _ in mine.get("useful", set())}
-        for kind, items in sets.items():
-            if not len(items):
-                continue
-            k, floor = limits[kind]
-            scored_items = me.bridge(p.vector, caps, items.vectors, items.caps, ctx.semantic)
-            for d in scored_items:
-                row = items.rows[d["index"]]
-                d["adjust"], d["final"] = [], d["relevance"]
-                if kind == "news" and p.id in (row.mentioned_company_ids or []):
-                    d["final"] = max(d["final"], 90.0)
-                    d["adjust"].append("names your company")
-                if kind in boosted:
-                    d["final"] = min(100.0, d["final"] + radar.PRIORITY_BOOST)
-                    d["adjust"].append(f"+{radar.PRIORITY_BOOST:.0f} because you marked this area as a current priority")
-                if kind in liked_kinds:
-                    d["final"] = min(100.0, d["final"] + radar.FEEDBACK_BOOST)
-                    d["adjust"].append(f"+{radar.FEEDBACK_BOOST:.0f} because you rated similar items as useful")
-            scored_items.sort(key=lambda d: -d["final"])
-            for d in scored_items[:k]:
-                row = items.rows[d["index"]]
-                if d["final"] < floor or (kind, row.id) in mine.get("not_useful", set()):
-                    continue  # items the company marked as not useful are not offered again
-                names = ", ".join(tx.CAPABILITIES[c].name for c in d["shared_capabilities"][:3])
-                if kind == "research":
-                    why = research_agent.explain_relevance(row, d["shared_capabilities"], d["cosine"])
-                    action = "Read the publication and note which methods or data could apply to your products."
-                elif kind == "funding":
-                    why = (f"The call text relates to {names} in your profile (text similarity {d['cosine']:.2f})." if names else
-                           f"The call text is close to your profile (text similarity {d['cosine']:.2f}).")
-                    action = opportunity_agent.funding_next_action(row, now)
-                elif kind == "testbed":
-                    why = (f"A published environment for testing and collaboration close to your profile"
-                           + (f" ({names})" if names else "") + f" (text similarity {d['cosine']:.2f}).")
-                    action = f"Check the requirements with {row.source_name} and ask what access is possible for your case."
-                elif kind == "event":
-                    why = (f"The topic relates to {names} in your profile." if names else
-                           f"A networking format in the Blue Science Park ecosystem (text similarity {d['cosine']:.2f}).")
-                    action = ("Register through the source page; places are limited." if row.starts_at else
-                              f"Ask {row.organiser} when the next occasion takes place.")
-                else:
-                    why = ("The article names your company." if p.id in (row.mentioned_company_ids or []) else
-                           (f"A regional development touching {names}." if names else
-                            f"A regional development close to your profile (text similarity {d['cosine']:.2f})."))
-                    action = "Read the article and consider whether the project or actor behind it is relevant to contact."
-                s.add(Opportunity(company_id=p.id, kind=kind, ref_id=row.id, relevance=round(d["final"], 1),
-                                  base_relevance=d["relevance"], adjustments=d["adjust"], semantic=d["cosine"],
-                                  matched_capabilities=d["shared_capabilities"], why=why, next_action=action))
-                n_radar += 1
+        n_radar += _radar_for_profile(s, p, companies_by_id[p.id], sets, marks.get(p.id, {}), ctx.semantic, now)
     s.commit()
     trace.append({"agent": "Opportunity bridge (radar)", "seconds": round(time.time() - t, 2),
                   "result": f"{n_radar} company-specific radar items; {len(rows)} hypotheses stored",
                   "warnings": []})
     return trace
+
+
+# ------------------------------------------------------------------------------------------------
+# Radar: (items kept per kind, relevance floor)
+RADAR_LIMITS = {"research": (10, 25.0), "funding": (10, 25.0), "testbed": (4, 10.0), "event": (6, 10.0), "news": (6, 22.0)}
+
+
+def _radar_sets(s: Session, embedder, now: datetime, research: ranking_agent.ItemSet | None = None,
+                testbeds: ranking_agent.ItemSet | None = None) -> dict[str, ranking_agent.ItemSet]:
+    """The records every company's radar is ranked against, one ItemSet per monitoring area."""
+    if research is None:
+        research = _item_set(s, list(s.scalars(select(ResearchPublication))), embedder)
+    testbed_rows = testbeds.rows if testbeds is not None else list(s.scalars(select(Testbed)))
+    all_funding = list(s.scalars(select(FundingOpportunity)))
+    return {
+        "research": research,
+        "funding": _item_set(s, [f for f in all_funding if opportunity_agent.current_status(f, now) != "closed"], embedder),
+        "testbed": _item_set(s, [x for x in testbed_rows if x.kind != "event"], embedder),
+        "event": _item_set(s, [e for e in s.scalars(select(Event)) if e.starts_at is None or e.starts_at >= now], embedder),
+        "news": _item_set(s, [n for n in s.scalars(select(NewsUpdate))
+                              if n.published_at and (now - n.published_at).days <= 180], embedder),
+    }
+
+
+def _radar_marks(s: Session, company_id: int | None = None) -> dict[int, dict]:
+    """{company_id: {action: {(kind, ref_id), ...}}} from the saved / useful / not useful marks."""
+    q = select(SavedItem) if company_id is None else select(SavedItem).where(SavedItem.company_id == company_id)
+    marks: dict[int, dict] = {}
+    for m in s.scalars(q):
+        marks.setdefault(m.company_id, {}).setdefault(m.action, set()).add((m.kind, m.ref_id))
+    return marks
+
+
+def _radar_for_profile(s: Session, p, company: Company, sets: dict, mine: dict, semantic: bool, now: datetime) -> int:
+    """Add the Opportunity rows (radar items) of one company. Returns the number of rows added."""
+    if p.vector is None or not p.capabilities:
+        return 0
+    caps = set(p.capabilities) | set(p.interests)
+    needs = list(company.need_priorities or [])
+    boosted = {k for n in needs for k in radar.NEED_TO_KINDS.get(n, [])}
+    liked_kinds = {k for k, _ in mine.get("useful", set())}
+    n_radar = 0
+    for kind, items in sets.items():
+        if not len(items):
+            continue
+        k, floor = RADAR_LIMITS[kind]
+        scored_items = me.bridge(p.vector, caps, items.vectors, items.caps, semantic)
+        for d in scored_items:
+            row = items.rows[d["index"]]
+            d["adjust"], d["final"] = [], d["relevance"]
+            if kind == "news" and p.id in (row.mentioned_company_ids or []):
+                d["final"] = max(d["final"], 90.0)
+                d["adjust"].append("names your company")
+            if kind in boosted:
+                d["final"] = min(100.0, d["final"] + radar.PRIORITY_BOOST)
+                d["adjust"].append(f"+{radar.PRIORITY_BOOST:.0f} because you marked this area as a current priority")
+            if kind in liked_kinds:
+                d["final"] = min(100.0, d["final"] + radar.FEEDBACK_BOOST)
+                d["adjust"].append(f"+{radar.FEEDBACK_BOOST:.0f} because you rated similar items as useful")
+        scored_items.sort(key=lambda d: -d["final"])
+        for d in scored_items[:k]:
+            row = items.rows[d["index"]]
+            if d["final"] < floor or (kind, row.id) in mine.get("not_useful", set()):
+                continue  # items the company marked as not useful are not offered again
+            names = ", ".join(tx.CAPABILITIES[c].name for c in d["shared_capabilities"][:3])
+            if kind == "research":
+                why = research_agent.explain_relevance(row, d["shared_capabilities"], d["cosine"])
+                action = "Read the publication and note which methods or data could apply to your products."
+            elif kind == "funding":
+                why = (f"The call text relates to {names} in your profile (text similarity {d['cosine']:.2f})." if names else
+                       f"The call text is close to your profile (text similarity {d['cosine']:.2f}).")
+                action = opportunity_agent.funding_next_action(row, now)
+            elif kind == "testbed":
+                why = (f"A published environment for testing and collaboration close to your profile"
+                       + (f" ({names})" if names else "") + f" (text similarity {d['cosine']:.2f}).")
+                action = f"Check the requirements with {row.source_name} and ask what access is possible for your case."
+            elif kind == "event":
+                why = (f"The topic relates to {names} in your profile." if names else
+                       f"A networking format in the Blue Science Park ecosystem (text similarity {d['cosine']:.2f}).")
+                action = ("Register through the source page; places are limited." if row.starts_at else
+                          f"Ask {row.organiser} when the next occasion takes place.")
+            else:
+                why = ("The article names your company." if p.id in (row.mentioned_company_ids or []) else
+                       (f"A regional development touching {names}." if names else
+                        f"A regional development close to your profile (text similarity {d['cosine']:.2f})."))
+                action = "Read the article and consider whether the project or actor behind it is relevant to contact."
+            s.add(Opportunity(company_id=p.id, kind=kind, ref_id=row.id, relevance=round(d["final"], 1),
+                              base_relevance=d["relevance"], adjustments=d["adjust"], semantic=d["cosine"],
+                              matched_capabilities=d["shared_capabilities"], why=why, next_action=action))
+            n_radar += 1
+    return n_radar
+
+
+def recompute_radar(s: Session, company_id: int, embedder=None, now: datetime | None = None) -> int:
+    """Rebuild the radar items of ONE company from stored data (after useful / not useful feedback).
+
+    Marks only influence the owning company's radar, so this gives the same rows as a full
+    recompute() for that company without touching hypotheses or any other company.
+    """
+    from sqlalchemy import delete
+
+    embedder = embedder or get_embedder()
+    now = now or utcnow()
+    company = s.get(Company, company_id)
+    profile = next((p for p in combination_agent.load_profiles(s, embedder) if p.id == company_id), None)
+    s.execute(delete(Opportunity).where(Opportunity.company_id == company_id))
+    n = 0
+    if company is not None and profile is not None:
+        sets = _radar_sets(s, embedder, now)
+        n = _radar_for_profile(s, profile, company, sets, _radar_marks(s, company_id).get(company_id, {}),
+                               embedder.is_semantic, now)
+    s.commit()
+    return n
 
 
 # ------------------------------------------------------------------------------------------------

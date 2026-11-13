@@ -93,8 +93,15 @@ def company_items(s: Session, company_id: int, kinds: list[str] | None = None, m
     for m in s.scalars(select(SavedItem).where(SavedItem.company_id == company_id)):
         marks.setdefault((m.kind, m.ref_id), set()).add(m.action)
     out = []
-    for o in s.scalars(q.order_by(Opportunity.relevance.desc())):
-        row = s.get(MODEL[o.kind], o.ref_id)
+    ops = list(s.scalars(q.order_by(Opportunity.relevance.desc())))
+    # one query per monitoring area instead of one per item
+    ref_ids: dict[str, set] = {}
+    for o in ops:
+        ref_ids.setdefault(o.kind, set()).add(o.ref_id)
+    rows = {(kind, r.id): r for kind, ids in ref_ids.items()
+            for r in s.scalars(select(MODEL[kind]).where(MODEL[kind].id.in_(ids)))}
+    for o in ops:
+        row = rows.get((o.kind, o.ref_id))
         d = describe(o.kind, row, now) if row is not None else None
         if d is None or (d["status"] == "past" and not include_past_events):
             continue
