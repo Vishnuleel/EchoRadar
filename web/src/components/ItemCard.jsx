@@ -122,13 +122,13 @@ export default function ItemCard({ item: it, canMark, compact }) {
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line/70 pt-3.5">
           {canMark ? (
             <>
-              <button className={clsx("btn", marks.has("saved") && "btn-on")} onClick={() => toggle("saved")} aria-pressed={marks.has("saved")}>
+              <button type="button" className={clsx("btn", marks.has("saved") && "btn-on")} onClick={() => toggle("saved")} aria-pressed={marks.has("saved")}>
                 <Bookmark size={14} fill={marks.has("saved") ? "currentColor" : "none"} />{marks.has("saved") ? "Saved" : "Save"}
               </button>
-              <button className={clsx("btn", marks.has("useful") && "btn-on")} onClick={() => toggle("useful")} aria-pressed={marks.has("useful")}>
+              <button type="button" className={clsx("btn", marks.has("useful") && "btn-on")} onClick={() => toggle("useful")} aria-pressed={marks.has("useful")}>
                 <ThumbsUp size={14} />{marks.has("useful") ? "Marked useful" : "Useful"}
               </button>
-              <button className="btn" onClick={() => toggle("not_useful")} title="Hide this item and stop offering it">
+              <button type="button" className="btn" onClick={() => toggle("not_useful")} title="Hide this item and stop offering it">
                 <ThumbsDown size={14} />Not useful
               </button>
             </>

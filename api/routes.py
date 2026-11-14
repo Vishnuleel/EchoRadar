@@ -97,10 +97,19 @@ def _radar_items(s: Session, company_id: int, audience: str) -> list[dict]:
 
 # ---- meta ---------------------------------------------------------------------------------------
 @router.get("/health")
-def health():
+def health(s: Session = Depends(get_db)):
+    """Engine state for the status line: embeddings (or fallback), sign-in mode, and how fresh the data is."""
+    from sqlalchemy import func
+
+    from nexus.database.models import MonitorTask
+    from nexus.utils.config import get_settings
+
     emb = get_embedder()
+    run = pipeline.load_trace() or {}
+    checked = s.scalar(select(func.max(MonitorTask.last_success_at)))
     return {"status": "ok", "embedding_backend": emb.backend, "semantic": emb.is_semantic,
-            "fallback_reason": emb.fallback_reason, "auth_mode": auth_mode()}
+            "fallback_reason": emb.fallback_reason, "auth_mode": auth_mode(),
+            "offline": get_settings().offline, "ranked_at": run.get("finished_at"), "sources_checked_at": checked}
 
 
 @router.get("/meta")

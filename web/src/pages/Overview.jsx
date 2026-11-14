@@ -23,7 +23,7 @@ function CapabilityBars({ rows }) {
         ))}
       </ul>
       {rows.length > 16 && (
-        <button className="btn mt-3" onClick={() => setAll(!all)}>{all ? "Show top 16" : `Show all ${rows.length} capabilities`}</button>
+        <button type="button" className="btn mt-3" onClick={() => setAll(!all)}>{all ? "Show top 16" : `Show all ${rows.length} capabilities`}</button>
       )}
     </>
   );

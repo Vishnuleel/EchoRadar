@@ -254,7 +254,7 @@ function Refine({ data }) {
           <button type="button" className="btn !px-4 !py-2" disabled={busy} onClick={() => save.mutate(true)}>
             {busy && save.variables === true ? "Calculating..." : "See changes before saving"}
           </button>
-          <button className="btn btn-primary !px-4 !py-2" disabled={busy}>
+          <button type="submit" className="btn btn-primary !px-4 !py-2" disabled={busy}>
             {busy && save.variables === false ? "Saving..." : "Save and update my results"}
           </button>
           {busy && <span className="meta">The ranking is being recalculated with your changes...</span>}
@@ -396,7 +396,7 @@ export default function CompanyDNA() {
                       <div className="min-w-0">
                         <h2 className="text-2xl font-semibold leading-tight">{c.name}</h2>
                         <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                          <button onClick={() => setTab("directory")} className="rounded-full transition hover:brightness-110"><VerificationBadge v={data.verification} /></button>
+                          <button type="button" onClick={() => setTab("directory")} className="rounded-full transition hover:brightness-110"><VerificationBadge v={data.verification} /></button>
                           <SourceLink url={c.directory_url} className="text-xs">official profile</SourceLink>
                         </div>
                       </div>

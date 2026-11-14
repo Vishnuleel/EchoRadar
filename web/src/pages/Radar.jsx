@@ -46,7 +46,7 @@ function EmptyFilter({ icon: Icon, title, text, action, onAction }) {
       <span className="grid h-11 w-11 place-items-center rounded-xl bg-surface2 text-ink2"><Icon size={19} /></span>
       <h2 className="mt-3 text-base font-semibold">{title}</h2>
       <p className="mt-1 max-w-md text-[13.5px] leading-relaxed text-ink2">{text}</p>
-      <button className="btn mt-4" onClick={onAction}>{action}</button>
+      <button type="button" className="btn mt-4" onClick={onAction}>{action}</button>
     </div>
   );
 }

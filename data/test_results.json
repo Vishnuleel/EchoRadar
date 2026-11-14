@@ -1,26 +1,131 @@
 {
- "run_at": "2026-11-13T14:35:59+00:00",
+ "run_at": "2026-11-14T00:45:03+00:00",
  "live_included": true,
- "total": 55,
- "passed": 55,
+ "total": 105,
+ "passed": 105,
  "failed": 0,
  "skipped": 0,
- "seconds": 30.308,
- "command": "-m pytest -q --junitxml=/home/user/nexus/data/test_results.xml",
+ "seconds": 35.266,
+ "command": "-m pytest -q --junitxml=C:\\Users\\viedu\\Downloads\\NEXUS_local_package\\nexus\\data\\test_results.xml",
  "cases": [
+  {
+   "file": "test_api",
+   "name": "test_meta_and_health",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 1.694
+  },
+  {
+   "file": "test_api",
+   "name": "test_read_endpoints_answer[/api/overview]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.164
+  },
+  {
+   "file": "test_api",
+   "name": "test_read_endpoints_answer[/api/evaluation]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.169
+  },
+  {
+   "file": "test_api",
+   "name": "test_read_endpoints_answer[/api/staff]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.157
+  },
+  {
+   "file": "test_api",
+   "name": "test_read_endpoints_answer[/api/graph]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.166
+  },
+  {
+   "file": "test_api",
+   "name": "test_home_and_radar_match_engine",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.181
+  },
+  {
+   "file": "test_api",
+   "name": "test_graph_focus_and_filter",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.177
+  },
+  {
+   "file": "test_api",
+   "name": "test_marks_are_private_and_rerank_only_the_owner",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.207
+  },
+  {
+   "file": "test_api",
+   "name": "test_company_radar_update_equals_full_recompute",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.211
+  },
+  {
+   "file": "test_api",
+   "name": "test_dna_private_section_and_refine_need_the_owner",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.293
+  },
+  {
+   "file": "test_api",
+   "name": "test_private_refinements_stay_private_until_shared",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.373
+  },
+  {
+   "file": "test_api",
+   "name": "test_preview_changes_nothing_and_saving_gives_the_previewed_result",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.268
+  },
+  {
+   "file": "test_api",
+   "name": "test_token_mode_ignores_the_client_supplied_company",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.181
+  },
+  {
+   "file": "test_api",
+   "name": "test_every_displayed_profile_fact_links_to_its_exact_source",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.244
+  },
+  {
+   "file": "test_api",
+   "name": "test_assistant_boundary_and_blueprint",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.219
+  },
   {
    "file": "test_boundaries",
    "name": "test_a_relevant_request_returns_evidence",
    "outcome": "passed",
    "live": false,
-   "seconds": 1.809
+   "seconds": 0.246
   },
   {
    "file": "test_boundaries",
    "name": "test_b_unrelated_request_is_redirected",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.191
+   "seconds": 0.146
   },
   {
    "file": "test_boundaries",
@@ -34,14 +139,14 @@
    "name": "test_human_decisions_are_escalated_to_staff",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.211
+   "seconds": 0.145
   },
   {
    "file": "test_boundaries",
    "name": "test_c_prompt_injection_is_refused",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.197
+   "seconds": 0.15
   },
   {
    "file": "test_boundaries",
@@ -62,14 +167,14 @@
    "name": "test_e_company_privacy_enforcement",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.258
+   "seconds": 0.157
   },
   {
    "file": "test_boundaries",
    "name": "test_queries_are_logged_only_for_the_acting_company",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.221
+   "seconds": 0.15
   },
   {
    "file": "test_company_profiles",
@@ -90,7 +195,7 @@
    "name": "test_evidence_url_validation_rejects_bad_urls",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.001
+   "seconds": 0.0
   },
   {
    "file": "test_company_profiles",
@@ -104,7 +209,7 @@
    "name": "test_missing_evidence_creates_no_claims",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.0
+   "seconds": 0.001
   },
   {
    "file": "test_company_profiles",
@@ -118,210 +223,392 @@
    "name": "test_profile_update_and_persistence",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.152
+   "seconds": 0.108
   },
   {
    "file": "test_company_profiles",
    "name": "test_database_persistence_across_sessions",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.121
+   "seconds": 0.087
   },
   {
    "file": "test_company_profiles",
    "name": "test_member_directory_page_parsing",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.002
+   "seconds": 0.001
   },
   {
    "file": "test_company_profiles",
    "name": "test_schema_migration_from_v1",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.088
+   "seconds": 0.097
+  },
+  {
+   "file": "test_directory",
+   "name": "test_listing_reads_every_page_and_confirms_the_end",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_directory",
+   "name": "test_listing_without_a_readable_last_page_is_not_complete",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_directory",
+   "name": "test_profile_heading_is_the_name_and_list_fields_are_clean",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.0
+  },
+  {
+   "file": "test_directory",
+   "name": "test_sync_records_provenance_and_never_guesses",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.082
+  },
+  {
+   "file": "test_directory",
+   "name": "test_seed_is_a_second_source_and_never_overwrites_the_live_page",
+   "outcome": "passed",
+   "live": true,
+   "seconds": 0.084
   },
   {
    "file": "test_end_to_end",
    "name": "test_innovation_blueprint_generation",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.211
+   "seconds": 0.147
   },
   {
    "file": "test_end_to_end",
    "name": "test_export_functionality",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.339
+   "seconds": 0.279
   },
   {
    "file": "test_end_to_end",
    "name": "test_unsupported_combinations_are_not_invented",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.238
+   "seconds": 0.154
   },
   {
    "file": "test_end_to_end",
    "name": "test_verification_rejects_unsupported_facts",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.188
+   "seconds": 0.146
   },
   {
    "file": "test_end_to_end",
    "name": "test_end_to_end_company_discovery_workflow",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.259
+   "seconds": 0.221
   },
   {
    "file": "test_end_to_end",
    "name": "test_events_and_news_monitoring",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.379
+   "seconds": 0.179
   },
   {
    "file": "test_end_to_end",
    "name": "test_knowledge_graph_construction",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.27
+   "seconds": 0.228
   },
   {
    "file": "test_end_to_end",
    "name": "test_pipeline_ingest_with_mocked_sources",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.16
+   "seconds": 0.15
   },
   {
    "file": "test_end_to_end",
    "name": "test_ui_pages_render_without_exceptions[pages/0_Home.py]",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.81
+   "seconds": 1.128
   },
   {
    "file": "test_end_to_end",
    "name": "test_ui_pages_render_without_exceptions[pages/1_Innovation_Overview.py]",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.383
+   "seconds": 0.331
   },
   {
    "file": "test_end_to_end",
    "name": "test_ui_pages_render_without_exceptions[pages/2_Company_DNA.py]",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.335
+   "seconds": 0.472
   },
   {
    "file": "test_end_to_end",
    "name": "test_ui_pages_render_without_exceptions[pages/3_Innovation_Graph.py]",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.46
+   "seconds": 0.339
   },
   {
    "file": "test_end_to_end",
    "name": "test_ui_pages_render_without_exceptions[pages/4_Opportunity_Radar.py]",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.356
+   "seconds": 0.333
   },
   {
    "file": "test_end_to_end",
    "name": "test_ui_pages_render_without_exceptions[pages/5_Innovation_Blueprint.py]",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.449
+   "seconds": 0.41
   },
   {
    "file": "test_end_to_end",
    "name": "test_ui_pages_render_without_exceptions[pages/6_Evaluation.py]",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.328
+   "seconds": 0.333
   },
   {
    "file": "test_end_to_end",
    "name": "test_ui_pages_render_without_exceptions[pages/7_Staff_View.py]",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.345
+   "seconds": 0.34
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_statement_status[Vi utvecklar hydroakustiska system f\\xf6r marina milj\\xf6er.-hydroakustiska-current]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_statement_status[We develop sonar systems for offshore inspection.-sonar-current]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_statement_status[Vi erbjuder inte l\\xe4ngre sonarsystem.-sonar-historical]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_statement_status[Vi erbjuder inte sonar, utan ROV-inspektion.-sonar-negated]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_statement_status[Vi erbjuder inte sonar, utan ROV-inspektion.-ROV-current]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_statement_status[We do not offer sonar systems.-sonar-negated]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_statement_status[Tidigare tillverkade vi sonarsystem f\\xf6r marinen.-sonar-historical]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_statement_status[We previously built sonar systems for navies.-sonar-historical]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_statement_status[Until 2015 we manufactured sonar buoys.-sonar-historical]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_statement_status[V\\xe5r kund bygger obemannade undervattensfarkoster.-undervattensfarkoster-third_party]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_statement_status[Our customer operates ROV fleets in the North Sea.-ROV-third_party]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_statement_status[V\\xe5ra kunder inom sj\\xf6fart anv\\xe4nder v\\xe5ra sonarsystem varje dag.-sonar-current]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_statement_status[Hem | Om oss | Tj\\xe4nster | Sonar | Kontakt-Sonar-navigation]",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_fabricated_or_misattributed_quotes_are_rejected",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_negated_historical_and_third_party_text_creates_no_capability",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_audit_findings_company_name_and_old_history_are_not_capabilities",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_evidence",
+   "name": "test_refresh_preserves_user_corrections_and_removals",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.098
+  },
+  {
+   "file": "test_gemini",
+   "name": "test_request_matches_the_documented_api",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_gemini",
+   "name": "test_only_supported_model_claims_are_stored_and_labelled",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_gemini",
+   "name": "test_model_failure_falls_back_to_rules_and_says_so",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_gemini",
+   "name": "test_disabled_without_key",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.0
   },
   {
    "file": "test_integrations",
    "name": "test_openalex_response_parsing",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.002
+   "seconds": 0.001
   },
   {
    "file": "test_integrations",
    "name": "test_vinnova_response_parsing",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.005
+   "seconds": 0.001
   },
   {
    "file": "test_integrations",
    "name": "test_api_failure_handling",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.091
+   "seconds": 0.083
   },
   {
    "file": "test_integrations",
    "name": "test_duplicate_research_detection",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.086
+   "seconds": 0.083
   },
   {
    "file": "test_integrations",
    "name": "test_stale_opportunity_handling",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.181
+   "seconds": 0.153
   },
   {
    "file": "test_integrations",
    "name": "test_http_cache_reuses_and_offline",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.001
+   "seconds": 0.011
   },
   {
    "file": "test_integrations",
    "name": "test_live_openalex_search",
    "outcome": "passed",
    "live": true,
-   "seconds": 0.812
+   "seconds": 0.919
   },
   {
    "file": "test_integrations",
    "name": "test_live_vinnova_calls",
    "outcome": "passed",
    "live": true,
-   "seconds": 14.253
+   "seconds": 5.877
   },
   {
    "file": "test_integrations",
    "name": "test_live_member_directory",
    "outcome": "passed",
    "live": true,
-   "seconds": 5.171
+   "seconds": 14.421
   },
   {
    "file": "test_matching_engine",
    "name": "test_semantic_similarity_calculation",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.003
+   "seconds": 0.001
   },
   {
    "file": "test_matching_engine",
@@ -335,14 +622,14 @@
    "name": "test_complementarity_calculation",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.001
+   "seconds": 0.0
   },
   {
    "file": "test_matching_engine",
    "name": "test_stated_interest_and_priority_change_the_score",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.001
+   "seconds": 0.0
   },
   {
    "file": "test_matching_engine",
@@ -384,11 +671,74 @@
    "name": "test_different_company_ranking_results",
    "outcome": "passed",
    "live": false,
-   "seconds": 0.199
+   "seconds": 0.151
   },
   {
    "file": "test_matching_engine",
    "name": "test_ranking_metrics_helpers",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_monitor",
+   "name": "test_forty_query_rotation_is_fair",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.242
+  },
+  {
+   "file": "test_monitor",
+   "name": "test_schedule_survives_a_restart_and_overlapping_workers_are_blocked",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.126
+  },
+  {
+   "file": "test_monitor",
+   "name": "test_changes_are_detected_once_and_failures_keep_previous_evidence",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.138
+  },
+  {
+   "file": "test_monitor",
+   "name": "test_each_research_query_has_its_own_baseline",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.082
+  },
+  {
+   "file": "test_monitor",
+   "name": "test_a_crashing_collector_does_not_stop_the_batch",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.091
+  },
+  {
+   "file": "test_translation",
+   "name": "test_language_check",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.001
+  },
+  {
+   "file": "test_translation",
+   "name": "test_numbers_and_dates_must_survive",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.0
+  },
+  {
+   "file": "test_translation",
+   "name": "test_translations_are_stored_once_and_keyed_by_the_exact_original",
+   "outcome": "passed",
+   "live": false,
+   "seconds": 0.074
+  },
+  {
+   "file": "test_translation",
+   "name": "test_items_get_english_fields_next_to_the_original",
    "outcome": "passed",
    "live": false,
    "seconds": 0.001

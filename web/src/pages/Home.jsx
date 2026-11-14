@@ -215,7 +215,7 @@ function Assistant() {
         <div className="border-b border-line p-4">
           <div className="flex items-center justify-between gap-2">
             <h2 className="flex items-center gap-2 text-lg font-semibold"><Sparkles size={17} className="text-cyan" />Ask the assistant</h2>
-            {chat.length > 0 && <button className="btn !px-2" onClick={() => setChat([])} title="Clear conversation"><Trash2 size={14} /></button>}
+            {chat.length > 0 && <button type="button" className="btn !px-2" onClick={() => setChat([])} title="Clear conversation"><Trash2 size={14} /></button>}
           </div>
           <p className="meta mt-1 leading-relaxed">{meta.scope}</p>
         </div>
@@ -229,7 +229,7 @@ function Assistant() {
               <p className="meta">Try a relevant request, an unrelated one, and an override attempt:</p>
               <div className="flex flex-col gap-2">
                 {meta.examples.map((ex) => (
-                  <button key={ex} onClick={() => send(ex)}
+                  <button type="button" key={ex} onClick={() => send(ex)}
                           className="rounded-xl border border-line bg-surface2/60 px-3 py-2 text-left text-[13px] text-ink2 transition hover:border-brand/50 hover:text-ink">
                     {ex}
                   </button>
@@ -255,7 +255,7 @@ function Assistant() {
         <form className="flex gap-2 border-t border-line p-3" onSubmit={(e) => { e.preventDefault(); send(); }}>
           <input className="input" value={text} onChange={(e) => setText(e.target.value)} maxLength={2000}
                  placeholder="Ask about funding, testing, events, research or partners" aria-label="Your question" />
-          <button className="btn btn-primary !px-3" disabled={!text.trim() || ask.isPending} aria-label="Send"><SendHorizontal size={16} /></button>
+          <button type="submit" className="btn btn-primary !px-3" disabled={!text.trim() || ask.isPending} aria-label="Send"><SendHorizontal size={16} /></button>
         </form>
       </div>
     </aside>

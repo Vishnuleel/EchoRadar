@@ -163,7 +163,7 @@ export function QueryState({ query, children }) {
       <Notice tone="error">
         <b className="text-ink">Could not load this view.</b> {query.error.message}. Check that the API is running
         (<code>python -m api</code>) and try again.
-        <button className="btn ml-2" onClick={() => query.refetch()}>Retry</button>
+        <button type="button" className="btn ml-2" onClick={() => query.refetch()}>Retry</button>
       </Notice>
     );
   }
@@ -175,7 +175,7 @@ export function Tabs({ tabs, value, onChange }) {
   return (
     <div className="mb-5 flex gap-1 overflow-x-auto border-b border-line" role="tablist">
       {tabs.map((t) => (
-        <button key={t.id} role="tab" aria-selected={value === t.id} onClick={() => onChange(t.id)}
+        <button type="button" key={t.id} role="tab" aria-selected={value === t.id} onClick={() => onChange(t.id)}
                 className={clsx("-mb-px whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm font-medium transition",
                                 value === t.id ? "border-brand text-ink" : "border-transparent text-muted hover:text-ink2")}>
           {t.label}
@@ -190,7 +190,7 @@ export function Segmented({ options, value, onChange }) {
   return (
     <div className="inline-flex rounded-lg border border-line bg-surface p-0.5">
       {options.map((o) => (
-        <button key={o.value} onClick={() => onChange(o.value)} aria-pressed={value === o.value}
+        <button type="button" key={o.value} onClick={() => onChange(o.value)} aria-pressed={value === o.value}
                 className={clsx("rounded-md px-3 py-1.5 text-[13px] font-medium transition",
                                 value === o.value ? "bg-brand text-white shadow" : "text-ink2 hover:text-ink")}>
           {o.label}
@@ -202,7 +202,7 @@ export function Segmented({ options, value, onChange }) {
 
 export function Chip({ active, onClick, children, color }) {
   return (
-    <button onClick={onClick} aria-pressed={active}
+    <button type="button" onClick={onClick} aria-pressed={active}
             className={clsx("inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[13px] font-medium transition",
                             active ? "border-brand/60 bg-brand/15 text-ink" : "border-line bg-surface text-muted hover:text-ink2")}>
       {color && <span className="h-2 w-2 rounded-full" style={{ background: color, opacity: active ? 1 : 0.4 }} />}
@@ -215,7 +215,7 @@ export function Disclosure({ title, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="rounded-xl border border-line bg-surface">
-      <button onClick={() => setOpen(!open)} aria-expanded={open}
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open}
               className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm font-medium text-ink2 hover:text-ink">
         <span>{title}</span>
         <ChevronDown size={16} className={clsx("shrink-0 transition", open && "rotate-180")} />

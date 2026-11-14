@@ -75,11 +75,20 @@ function Sidebar({ onNavigate }) {
           Method and evaluation
         </NavLink>
         <div className="flex items-center justify-between border-t border-line px-1 pt-3">
-          <span className="flex items-center gap-2 text-[11.5px] text-muted" title={health.data?.embedding_backend}>
-            <span className={clsx("h-2 w-2 rounded-full", health.isError ? "bg-pink" : health.data ? "bg-fact" : "bg-muted")} />
-            {health.isError ? "API offline" : health.data ? (health.data.semantic ? "Engine ready" : "Engine ready (fallback embeddings)") : "Connecting"}
+          <span className="min-w-0 text-[11.5px] leading-snug text-muted">
+            <span className="flex items-center gap-2"
+                  title={health.data ? (health.data.semantic ? `Embeddings: ${health.data.embedding_backend}`
+                    : `Fallback embeddings (${health.data.embedding_backend}): ${health.data.fallback_reason ?? "the multilingual model is not loaded"}. Matching quality is lower.`) : undefined}>
+              <span className={clsx("h-2 w-2 shrink-0 rounded-full", health.isError ? "bg-pink" : !health.data ? "bg-muted" : health.data.semantic ? "bg-fact" : "bg-inf")} />
+              {health.isError ? "API offline" : health.data ? (health.data.semantic ? "Engine ready" : "Fallback embeddings in use") : "Connecting"}
+            </span>
+            {health.data && (
+              <span className="mt-0.5 block pl-4" title="All findings come from stored copies of public sources; each card shows its own retrieval date.">
+                Stored data{health.data.offline ? " (offline mode)" : ""} · sources checked {(health.data.sources_checked_at ?? health.data.ranked_at ?? "").slice(0, 10) || "unknown"}
+              </span>
+            )}
           </span>
-          <button className="btn !px-2" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          <button type="button" className="btn !px-2" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                   aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}>
             {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
           </button>
@@ -104,13 +113,13 @@ export default function Shell() {
       {/* small screens: top bar and drawer */}
       <div className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-bg/85 px-4 py-2.5 backdrop-blur lg:hidden">
         <span className="font-display text-lg font-semibold tracking-[0.18em]">NEXUS</span>
-        <button className="btn !px-2" onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={18} /></button>
+        <button type="button" className="btn !px-2" onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={18} /></button>
       </div>
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
           <aside className="absolute inset-y-0 left-0 w-[290px] max-w-[88vw] border-r border-line bg-surface">
-            <button className="btn absolute right-3 top-4 z-10 !px-2" onClick={() => setOpen(false)} aria-label="Close menu"><X size={16} /></button>
+            <button type="button" className="btn absolute right-3 top-4 z-10 !px-2" onClick={() => setOpen(false)} aria-label="Close menu"><X size={16} /></button>
             <Sidebar onNavigate={() => setOpen(false)} />
           </aside>
         </div>

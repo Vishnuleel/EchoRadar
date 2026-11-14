@@ -109,7 +109,7 @@ function Canvas({ data, selected, picked, onSelect, styles }) {
         onNodeClick={(n) => onSelect(n.id)} onNodeHover={(n) => setHover(n?.id ?? null)} onBackgroundClick={() => { setHover(null); onSelect(null); }}
         cooldownTicks={160} onEngineStop={() => fg.current?.zoomToFit(500, 56)}
       />
-      <button className="btn absolute right-3 top-3 !px-2" onClick={() => fg.current?.zoomToFit(500, 56)} title="Fit to view"><Maximize2 size={14} /></button>
+      <button type="button" className="btn absolute right-3 top-3 !px-2" onClick={() => fg.current?.zoomToFit(500, 56)} title="Fit to view"><Maximize2 size={14} /></button>
       <div className="meta pointer-events-none absolute bottom-3 left-3 flex items-center gap-1.5"><MousePointerClick size={13} />Click a node to inspect it · scroll to zoom · drag to move</div>
     </div>
   );
@@ -202,7 +202,7 @@ export default function Graph() {
                         <span className="text-[11px] font-semibold uppercase tracking-wide text-ink2">{r.type.replace(/_/g, " ")}</span>
                         <Badge kind={r.status === "evidence" ? "FACT" : r.status === "hypothesis" ? "HYPOTHESIS" : r.status === "user" ? "USER" : "neutral"}>{r.status}</Badge>
                       </div>
-                      <button className="mt-1.5 text-left text-sm font-medium text-ink hover:text-brand" onClick={() => setSelected(r.other?.id)}>{r.other?.label}</button>
+                      <button type="button" className="mt-1.5 text-left text-sm font-medium text-ink hover:text-brand" onClick={() => setSelected(r.other?.id)}>{r.other?.label}</button>
                       {r.explanation && <p className="mt-1 text-[12.5px] leading-relaxed text-ink2">{r.explanation}</p>}
                       {r.url && <p className="mt-1 text-xs"><SourceLink url={r.url}>open</SourceLink></p>}
                     </li>

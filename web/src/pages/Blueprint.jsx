@@ -45,7 +45,7 @@ function RateForm({ hypothesisKey }) {
         <span className="label">Comment (optional, private)</span>
         <input className="input" value={comment} maxLength={2000} onChange={(e) => setComment(e.target.value)} />
       </label>
-      <button className="btn btn-primary !py-2" disabled={save.isPending}>Save rating</button>
+      <button type="submit" className="btn btn-primary !py-2" disabled={save.isPending}>Save rating</button>
       {save.isSuccess && <span className="flex items-center gap-1.5 text-[13px] text-fact"><CheckCircle2 size={15} />Rating saved.</span>}
       {save.isError && <span className="text-[13px] text-pink">{save.error.message}</span>}
     </form>
