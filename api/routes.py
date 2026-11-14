@@ -11,6 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from starlette.responses import Response
 
+from api.background import auto_monitor
 from api.core import acting_company, auth_mode, cache, get_db, write_lock
 from nexus import pipeline
 from nexus.agents import combination_agent, company_agent
@@ -113,7 +114,8 @@ def health(s: Session = Depends(get_db)):
     checked = s.scalar(select(func.max(MonitorTask.last_success_at)))
     return {"status": "ok", "embedding_backend": emb.backend, "semantic": emb.is_semantic,
             "fallback_reason": emb.fallback_reason, "auth_mode": auth_mode(),
-            "offline": get_settings().offline, "ranked_at": run.get("finished_at"), "sources_checked_at": checked}
+            "offline": get_settings().offline, "ranked_at": run.get("finished_at"), "sources_checked_at": checked,
+            "auto_monitor": auto_monitor.state}
 
 
 @router.get("/meta")
@@ -322,7 +324,7 @@ def dna(company_id: int, s: Session = Depends(get_db), acting: int | None = Depe
         private = {"feedback_count": len(privacy.get_feedback(s, acting, company_id)),
                    "interactions": [{"when": r.created_at, "kind": r.kind, "text": r.text[:160], "outcome": r.outcome}
                                     for r in rows[:30]], "interaction_count": len(rows)}
-    # Public view: official facts, NEXUS inferences and refinements the company chose to share.
+    # Public view: official facts, EchoRadar inferences and refinements the company chose to share.
     # Owner view adds unshared refinements, needs, priority areas, removed claims and the revision history.
     shared = owner or bool(c.share_refinements)
     visible = [x for x in claims if (x.active or owner) and (x.classification != "USER" or shared)]
@@ -540,7 +542,107 @@ def evaluation(s: Session = Depends(get_db)):
                 "radar_marks": dict(Counter(m.action for m in s.scalars(select(SavedItem)))),
                 "limitations": limits.read_text(encoding="utf-8") if limits.exists() else None}
     tests = DATA_DIR / "test_results.json"  # read on every request: a new test run must show at once
-    return {**cache.get("evaluation", build), "tests": json.loads(tests.read_text()) if tests.exists() else None}
+    return {**cache.get("evaluation", build), "tests": json.loads(tests.read_text()) if tests.exists() else None,
+            "study": ev.study_summary(s)}
+
+
+# ---- insights: missed calls, complete the team, timed task tests --------------------------------
+@router.get("/companies/{company_id}/missed")
+def missed_calls(company_id: int, s: Session = Depends(get_db)):
+    """Calls that fitted this member's public profile and closed in the last 12 months."""
+    from nexus.core import insights
+
+    _company(s, company_id)
+
+    def build():
+        profiles, _ = _profiles(s)
+        p = next((x for x in profiles if x.id == company_id), None)
+        out = insights.missed_calls(s, p, get_embedder()) if p is not None else {"items": [], "min_fit": insights.MISSED_MIN}
+        tbl = _tr(s)
+        for i in out["items"]:
+            i["title_en"] = translation.english(tbl, i["title"])
+        return out
+    return cache.get(f"missed@{company_id}", build)
+
+
+@router.get("/paper.pdf")
+def paper_pdf(company_id: int, inline: bool = False, s: Session = Depends(get_db),
+              acting: int | None = Depends(acting_company)):
+    """One company's edition of the paper as a PDF. The public view, unless the company itself asks."""
+    from nexus.core import answer_builder as ab
+    from nexus.core import paper_pdf as pp
+
+    c = _company(s, company_id)
+    aud = _audience(acting, company_id)
+    names, tbl, now = _names(s), _tr(s), utcnow()
+    items = _radar_items(s, company_id, aud)
+    n = repo.counts(s)
+    en = translation.english(tbl, c.description)
+    claims = repo.claims(s, company_id)
+    paper = {
+        "company": {"id": c.id, "name": c.name}, "generated_at": now, "items": items,
+        "lead": next((i for i in items if any("closes in" in f for f in i["flags"])), None),
+        "audience_note": "your own view, including your private priorities" if aud == OWNER else "public view",
+        "counts_line": f"{n['companies']} members · {n['funding']} funding calls · {n['testbeds'] + n['events']} test sites and "
+                       f"events · {n['research'] + n['news']} research and news items",
+        "proposals": [_rec(r, names, company_id) for r in repo.recommendations(s, company_id, 4, aud)],
+        "missed": missed_calls(company_id, s),
+        "profile": {"description": (en["text"] if en and en.get("available") else c.description),
+                    "capabilities": [{"name": cl.capability.name, "quote": cl.evidence.evidence_text, "url": cl.evidence.source_url}
+                                     for cl in ab._fact_caps(s, company_id)[:5]],
+                    "inferred": [cl.claim_text for cl in claims if cl.classification == "INFERENCE"][:4]},
+        "disclaimer": DISCLAIMER,
+    }
+    try:
+        data = pp.build(paper)
+    except Exception as exc:  # a PDF library problem must not break the site
+        raise HTTPException(503, f"PDF export unavailable: {exc}")
+    return Response(data, media_type="application/pdf",
+                    headers={"Content-Disposition": f'{"inline" if inline else "attachment"}; filename="{pp.filename(c.name, now)}"'})
+
+
+@router.get("/insights")
+def insights_view(s: Session = Depends(get_db)):
+    """For staff: missed calls across the park, roles that proposals lack and who has them, and real gaps."""
+    from nexus.core import insights
+
+    def build():
+        profiles, _ = _profiles(s)
+        return {"missed": insights.missed_overview(s, profiles, get_embedder()), "team": insights.team_gaps(s)}
+    return cache.get("insights", build)
+
+
+class StudyIn(BaseModel):
+    role: str = Field(pattern="^(bsp_staff|member|mentor_or_judge|other)$")
+    order: str = Field(pattern="^(without_first|with_first)$")
+    without_seconds: float | None = Field(default=None, ge=0, le=3600)
+    without_result: str | None = Field(default=None, pattern="^(found|gave_up)$")
+    without_found: str | None = Field(default=None, max_length=300)
+    without_fit: str | None = Field(default=None, pattern="^(yes|partly|no)$")
+    with_seconds: float | None = Field(default=None, ge=0, le=3600)
+    with_result: str | None = Field(default=None, pattern="^(found|gave_up)$")
+    with_found: str | None = Field(default=None, max_length=300)
+    with_fit: str | None = Field(default=None, pattern="^(yes|partly|no)$")
+    prefer: str | None = Field(default=None, pattern="^(nexus|without|either)$")
+    comment: str | None = Field(default=None, max_length=500)
+    practice: bool = False
+
+
+@router.get("/study")
+def study(s: Session = Depends(get_db)):
+    return ev.study_summary(s)
+
+
+@router.post("/study")
+def study_save(body: StudyIn, s: Session = Depends(get_db)):
+    """Store one timed task test. Only a role is stored, never a name."""
+    from nexus.database.models import StudySession
+
+    with write_lock:
+        row = StudySession(**body.model_dump())
+        s.add(row)
+        s.commit()
+    return {"id": row.id, "summary": ev.study_summary(s)}
 
 
 # ---- staff view ---------------------------------------------------------------------------------

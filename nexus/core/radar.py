@@ -63,6 +63,16 @@ def describe(kind: str, row, now: datetime | None = None) -> dict | None:
                  status="upcoming" if upcoming else ("past" if row.starts_at else "recurring"),
                  date_label=(row.date_text or "date not published") + f" - {fmt}" + (f" - {row.location}" if row.location else ""),
                  sort_date=row.starts_at, uncertainty=row.date_note or "")
+        d["terms"].append(("Organised by", row.organiser))
+        if row.speakers:
+            d["terms"].append(("Speaker (as published)", row.speakers))
+        named = row.sponsors or []
+        sponsors = [x["name"] for x in named if x.get("role") == "sponsor"]
+        partners = [x["name"] for x in named if x.get("role") == "partner"]
+        d["sponsors"], d["partners"] = sponsors, partners
+        d["terms"].append(("Sponsors", ", ".join(sponsors) if sponsors else "None is named on the source page."))
+        if partners:
+            d["terms"].append(("In collaboration with (as published)", ", ".join(partners)))
         if row.audience:
             d["terms"].append(("Intended audience", row.audience))
     elif kind == "research":

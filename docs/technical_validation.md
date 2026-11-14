@@ -7,11 +7,11 @@ Figures measured on 2026-11-13 (ingest) and re-measured on 2026-11-14 (tests, qu
 | Check | Result |
 |---|---|
 | Live ingest from all sources | 56 profiles, 200 OpenAlex works (25 queries), 92 Vinnova calls, 4 test-environment pages, 11 events, 22 news items |
-| Automated tests (2026-11-14) | 158 passed, 0 failed: 155 deterministic (mocked network, temporary database, hashing embedder) and 3 live (OpenAlex, Vinnova, member directory). Recorded in `data/test_results.json` and shown on the Evaluation page |
-| Interaction limits (2026-11-14) | 60 labelled questions (relevant, Swedish, contact route, unrelated, unclear, override, private data, human decision, follow-up) run through the real Ask NEXUS pipeline: 60 of 60 handled as labelled, and no refusal showed any record. The first run found one failure ("Help me with AI" searched instead of asking a clarifying question); the rule was fixed, not the label. Labels and rules were written by the same team: a check of stated behaviour, not proof against new wording |
+| Automated tests (2026-11-14) | 172 passed, 0 failed: 169 deterministic (mocked network, temporary database, hashing embedder) and 3 live (OpenAlex, Vinnova, member directory). Recorded in `data/test_results.json` and shown on the Evaluation page |
+| Interaction limits (2026-11-14) | 60 labelled questions (relevant, Swedish, contact route, unrelated, unclear, override, private data, human decision, follow-up) run through the real Ask EchoRadar pipeline: 60 of 60 handled as labelled, and no refusal showed any record. The first run found one failure ("Help me with AI" searched instead of asking a clarifying question); the rule was fixed, not the label. Labels and rules were written by the same team: a check of stated behaviour, not proof against new wording |
 | Profile accuracy (2026-11-14) | 40 of the 106 stored capability facts drawn at random (seed 20261114) and each quote checked against its capability: 36 supported, 4 partly (two public agencies that use rather than supply surveillance systems, one fact resting only on an industry label, one broad IT-services sentence), 0 unsupported. Reviewed by the team with AI assistance, not by the companies. A live re-read of softhouse.se found two wrong matches that were not stored ("Radar Group", a survey firm, read as radar; "your investments" read as financing); both terms were tightened |
 | Live profile check (2026-11-14) | The profiling agent re-run in the open from the Company profile page: Njord X read live (directory page and 5 website pages) in 14.8 s, 5 capabilities found, all already in the stored profile; nothing saved |
-| UI | The React paper interface (page turns, reader, sidebar, Ask NEXUS, Evaluation) checked in a browser at 1440 x 900 and at phone width on 2026-11-14 without console errors. The Streamlit fallback loads headless without exceptions |
+| UI | The React paper interface (page turns, reader, sidebar, Ask EchoRadar, Evaluation) checked in a browser at 1440 x 900 and at phone width on 2026-11-14 without console errors. The Streamlit fallback loads headless without exceptions |
 | Profile-edit journey through the real UI | For Baltic Offshore: setting "Testing opportunities" as a need moved three test-environment items to the top of the radar; adding the interest "machine learning for cable fault detection" was mapped to AI & machine learning and changed 2 of the top 5 partner recommendations |
 | Assistant | 21 varied questions (contact, location, members by name, counts, periods, how to apply, help, Swedish, off-topic) each answered by the right kind of answer after the question router was added; before it, about half were not |
 
@@ -39,6 +39,7 @@ Figures measured on 2026-11-13 (ingest) and re-measured on 2026-11-14 (tests, qu
 | Relevant, unrelated, unclear and escalation requests, prompt injection, role persistence, malicious web content, privacy | `tests/test_boundaries.py` |
 | Question router: kinds of question, member names and typos, periods, contact route, follow-ups, optional model sorting (mocked) | `tests/test_question_router.py` |
 | Live profile check, interaction-limits check, profile-accuracy audit | `tests/test_quality_checks.py` |
+| Missed calls and next rounds, park-wide overview, complete the team, real gaps, blueprint candidates, task test storage and summary | `tests/test_insights.py` |
 | Blueprint generation, export, unsupported combinations, verification rejection, full journey, events and news, graph, mocked ingest, UI pages | `tests/test_end_to_end.py` |
 
 ## Error handling

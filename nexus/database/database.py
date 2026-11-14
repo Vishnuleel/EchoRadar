@@ -54,6 +54,9 @@ MIGRATIONS = {
         "ALTER TABLE opportunity ADD COLUMN audience VARCHAR(10) DEFAULT 'public'",
         "ALTER TABLE collaboration_hypothesis ADD COLUMN visibility VARCHAR(30) DEFAULT 'public'",
         "ALTER TABLE recommendation ADD COLUMN audience VARCHAR(10) DEFAULT 'public'"],
+    7: [],  # study_session is a new table (created by create_all)
+    8: ["ALTER TABLE event ADD COLUMN speakers TEXT",
+        "ALTER TABLE event ADD COLUMN sponsors JSON DEFAULT '[]'"],
 }
 
 

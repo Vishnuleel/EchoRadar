@@ -1,9 +1,9 @@
-"""Ask NEXUS question router: decides, with explicit rules, what kind of question was asked.
+"""Ask EchoRadar question router: decides, with explicit rules, what kind of question was asked.
 
 route() reads one question and returns a Route of one of these kinds:
 
   park           about Blue Science Park itself: contact, address, opening hours, staff, membership, what it is
-  help           how to use NEXUS, what a page shows, what a label means
+  help           how to use EchoRadar, what a page shows, what a label means
   company        one or more named members (two or more: a comparison)
   apply          how to apply for funding
   count          "how many ..."
@@ -57,25 +57,25 @@ PARK_TOPICS = {
 }
 _PARK_NEEDS_MENTION = {"location", "staff"}  # "where is the test harbour" is not about the park
 
-# ---- help with NEXUS itself ----------------------------------------------------------------------
+# ---- help with EchoRadar itself ----------------------------------------------------------------------
 _HELP_PREFIX = (r"how (?:do|can|should) (?:i|we) (?:use|read|understand|find|open|get to)|how does|how do|what (?:is|are|does|do)|"
                 r"what's|explain|where (?:do|can) i (?:find|see)|hur (?:använder|läser|hittar|fungerar)(?: jag)?|"
                 r"vad (?:är|betyder|visar)|förklara")
 HELP_SECTIONS = {
-    "front": r"front page|this week page|the weekly|förstasida",
+    "front": r"front page|latest page|this week page|förstasida",
     "radar": r"(?:opportunity )?radar",
     "dna": r"company (?:dna|profile)|\bdna\b|profile page|profilsida",
     "blueprint": r"(?:innovation )?blueprint",
     "graph": r"(?:connections? )?graph|connection map|nätverkskarta",
     "staff": r"staff (?:desk|view)",
     "overview": r"overview|översikt",
-    "ask": r"ask nexus",
+    "ask": r"ask (?:echoradar|echo radar|nexus)",
 }
 HELP_LABELS = {"FACT": r"facts?\b|fakta", "INFERENCE": r"inferences?\b|inferred|härled", "USER": r"user (?:label|additions?)|\buser\b",
                "HYPOTHESIS": r"hypothes[ie]s"}
-_GENERAL_HELP = re.compile(r"^(?:help|hjälp|hi|hello|hej|hallå)[!?. ]*$|what can (?:you|nexus|i) (?:do|ask)|"
-                           r"how does (?:nexus|this(?: app| site)?|it) work|what (?:is|does) nexus\b|vad kan (?:du|jag)|"
-                           r"how (?:do|can) i use (?:nexus|this|the app)", re.I)
+_GENERAL_HELP = re.compile(r"^(?:help|hjälp|hi|hello|hej|hallå)[!?. ]*$|what can (?:you|echoradar|echo radar|nexus|i) (?:do|ask)|"
+                           r"how does (?:echoradar|echo radar|nexus|this(?: app| site)?|it) work|what (?:is|does) (?:echoradar|echo radar|nexus)\b|vad kan (?:du|jag)|"
+                           r"how (?:do|can) i use (?:echoradar|echo radar|nexus|this|the app)", re.I)
 
 # ---- other question shapes ----------------------------------------------------------------------
 _COUNT = re.compile(r"how many|hur många|number of|antal(?:et)?\b", re.I)
@@ -103,7 +103,7 @@ _VOCAB = ("fund", "financ", "finansier", "grant", "bidrag", "vinnova", "call", "
           "artikel", "partner", "collaborat", "samarbet", "compan", "företag", "bolag", "member", "medlem", "organi", "firm",
           "open", "öppn", "clos", "deadline", "stäng", "soon", "snart", "upcoming", "kommande", "next", "nästa", "this",
           "denna", "week", "veck", "month", "månad", "year", "today", "idag", "tomorrow", "imorgon", "latest", "recent",
-          "senaste", "newest", "apply", "ansök", "applica", "available", "eligib", "stored", "nexus", "blue", "science", "park",
+          "senaste", "newest", "apply", "ansök", "applica", "available", "eligib", "stored", "nexus", "echoradar", "echo", "blue", "science", "park",
           "help", "hjälp", "list", "show", "find", "give", "tell", "need", "want", "look", "search", "sök", "please", "about",
           "more", "info", "opportunit", "möjlighet", "help", "upcoming", "current", "aktuell", "work", "jobba", "arbet",
           "offer", "erbjud", "there", "any", "some", "all", "who", "which", "what", "where", "when", "how", "many",

@@ -251,9 +251,24 @@ def status(s: Session, limit_events: int = 25) -> dict:
     }
 
 
-def main() -> None:
+def cycle(s: Session, batch: int = 6) -> dict:
+    """One wake-up: run the due checks, and when anything changed, translate and re-rank once.
+
+    Re-ranking rewrites data/last_run.json, which tells the API to drop its cached pages, so the website
+    shows the new information on its next request. Used by `main()` and by the API's background worker."""
     from nexus import pipeline
     from nexus.core.embeddings import get_embedder
+
+    report = run_due(s, batch=batch)
+    report["reranked"] = False
+    if report["changes"]:  # new information: re-rank and translate, once per wake-up
+        trace = [pipeline.translate_new_texts(s)] + pipeline.recompute(s, get_embedder())
+        pipeline.save_trace(trace, get_embedder().backend)
+        report["reranked"] = True
+    return report
+
+
+def main() -> None:
     from nexus.database.database import get_sessionmaker
 
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -265,15 +280,13 @@ def main() -> None:
     while True:
         s = get_sessionmaker()()
         try:
-            report = run_due(s, batch=args.batch)
+            report = cycle(s, batch=args.batch)
             for r in report["ran"]:
                 print(f"{utcnow():%Y-%m-%d %H:%M} {r['source']}{(':' + r['target']) if r['target'] else ''}: "
                       + (f"{r['records']} records, {r['changes']} changes" if r["ok"] else f"FAILED ({r['error']})"))
             if report.get("skipped"):
                 print(report["skipped"])
-            if report["changes"]:  # new information: re-rank and translate, once per wake-up
-                trace = [pipeline.translate_new_texts(s)] + pipeline.recompute(s, get_embedder())
-                pipeline.save_trace(trace, get_embedder().backend)
+            if report["reranked"]:
                 print(f"re-ranked after {report['changes']} changes")
         finally:
             s.close()

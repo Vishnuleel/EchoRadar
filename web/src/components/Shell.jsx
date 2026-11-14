@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import { api } from "../api";
@@ -15,8 +15,8 @@ function Masthead({ onToggle, closeIcon: CloseIcon = PanelLeftClose, closeLabel 
   return (
     <div className="flex items-start justify-between gap-2 border-b-2 border-ink pb-3">
       <div>
-        <div className="font-serif text-[28px] font-bold leading-none tracking-tight">NEXUS</div>
-        <div className="kicker mt-1.5">Weekly · Blue Science Park</div>
+        <div className="font-serif text-[28px] font-bold leading-none tracking-tight">EchoRadar</div>
+        <div className="kicker mt-1.5">Blue Science Park</div>
       </div>
       <button type="button" onClick={onToggle} title={closeLabel} aria-label={closeLabel}
               className="rounded-md p-1.5 text-muted transition-colors hover:bg-surface2 hover:text-ink">
@@ -29,6 +29,18 @@ function Masthead({ onToggle, closeIcon: CloseIcon = PanelLeftClose, closeLabel 
 function Sidebar({ onNavigate, onToggle, drawer }) {
   const { companies, acting, setActing, theme, setTheme } = useSession();
   const health = useQuery({ queryKey: ["health"], queryFn: api.health, refetchInterval: 30000, retry: false });
+  const qc = useQueryClient();
+  const ranked = useRef(undefined);
+  // new information from the sources: the server re-ranked, so every page fetches its data again
+  useEffect(() => {
+    const at = health.data?.ranked_at;
+    if (at === undefined) return;
+    if (ranked.current !== undefined && ranked.current !== at) {
+      qc.invalidateQueries({ predicate: (q) => q.queryKey[0] !== "health" });
+    }
+    ranked.current = at;
+  }, [health.data?.ranked_at, qc]);
+  const auto = health.data?.auto_monitor;
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto px-5 py-5">
       <Masthead onToggle={onToggle} closeIcon={drawer ? X : PanelLeftClose} closeLabel={drawer ? "Close menu" : "Hide sidebar (Ctrl+B)"} />
@@ -68,7 +80,7 @@ function Sidebar({ onNavigate, onToggle, drawer }) {
             <li><Badge kind="USER" /></li>
             <li><Badge kind="HYPOTHESIS" /></li>
           </ul>
-          <p className="meta mt-1.5 leading-snug">Fact: public source. Inference: derived by NEXUS. User: entered by the company. Hypothesis: a proposal.</p>
+          <p className="meta mt-1.5 leading-snug">Fact: public source. Inference: derived by EchoRadar. User: entered by the company. Hypothesis: a proposal.</p>
         </div>
         <div className="rule-thin space-y-1.5 pt-3 font-sans text-[12.5px] text-muted">
           <div className="flex items-center gap-2"
@@ -79,14 +91,26 @@ function Sidebar({ onNavigate, onToggle, drawer }) {
           </div>
           {health.data && (
             <div title="All findings come from stored copies of public sources; each item shows its own retrieval date.">
-              Stored data{health.data.offline ? " (offline)" : ""} · checked {(health.data.sources_checked_at ?? health.data.ranked_at ?? "").slice(0, 10) || "unknown"}
+              Sources checked {(health.data.sources_checked_at ?? health.data.ranked_at ?? "").slice(0, 16).replace("T", " ") || "unknown"} UTC
+              {health.data.offline && " (offline: stored copies only)"}
             </div>
           )}
-          <div className="flex items-center justify-between pt-1">
-            <NavLink to="/evaluation" onClick={onNavigate}
-                     className={({ isActive }) => clsx("underline-offset-2 hover:underline", isActive ? "text-ink" : "hover:text-ink2")}>
-              Method and evaluation
-            </NavLink>
+          {auto?.enabled && (
+            <div title="While the site runs, every source is re-checked on its own schedule; new or changed records appear without a restart.">
+              Updates automatically{auto.running ? ": checking now" : ` · next check ${String(auto.next_cycle_at ?? "").slice(11, 16)} UTC`}
+            </div>
+          )}
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 pt-1">
+            <span className="flex gap-3 whitespace-nowrap">
+              <NavLink to="/evaluation" onClick={onNavigate}
+                       className={({ isActive }) => clsx("underline-offset-2 hover:underline", isActive ? "text-ink" : "hover:text-ink2")}>
+                Method and evaluation
+              </NavLink>
+              <NavLink to="/study" onClick={onNavigate}
+                       className={({ isActive }) => clsx("underline-offset-2 hover:underline", isActive ? "text-ink" : "hover:text-ink2")}>
+                Task test
+              </NavLink>
+            </span>
             <button type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                     className="underline-offset-2 hover:text-ink2 hover:underline">
               {theme === "dark" ? "Day edition" : "Night edition"}
@@ -134,7 +158,7 @@ export default function Shell() {
 
       {/* small screens: top bar and drawer */}
       <div className="sticky top-0 z-30 flex items-center justify-between border-b-2 border-ink bg-bg px-4 py-2.5 lg:hidden">
-        <span className="font-serif text-xl font-bold">NEXUS</span>
+        <span className="font-serif text-xl font-bold">EchoRadar</span>
         <button type="button" className="rounded-md p-1.5 text-ink2" onClick={() => setDrawer(true)} aria-label="Open menu"><PanelLeftOpen size={20} /></button>
       </div>
       {drawer && (
@@ -153,7 +177,7 @@ export default function Shell() {
             {loading ? <PageSkeleton />
               : metaError ? (
                 <Notice tone="error">
-                  <b className="text-ink">The NEXUS API is not reachable.</b> Start it with <code>python -m api</code> in the
+                  <b className="text-ink">The EchoRadar API is not reachable.</b> Start it with <code>python -m api</code> in the
                   project folder, then reload. ({metaError.message})
                 </Notice>
               ) : <Notice tone="sim">The database is empty. Run <code>python scripts/ingest.py</code> to retrieve public data first.</Notice>}

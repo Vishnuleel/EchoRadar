@@ -94,7 +94,7 @@ def funding_next_action(f: FundingOpportunity, now: datetime | None = None) -> s
     status = current_status(f, now)
     if status == "open":
         return (f"Read the call text and check the eligibility criteria before the deadline "
-                f"{f.deadline:%Y-%m-%d}. NEXUS has not checked eligibility.")
+                f"{f.deadline:%Y-%m-%d}. EchoRadar has not checked eligibility.")
     if status == "upcoming":
         return f"Call opens {f.opens_at:%Y-%m-%d}. Prepare a consortium and check the eligibility criteria."
     if status == "closed":

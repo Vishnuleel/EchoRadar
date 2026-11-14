@@ -1,8 +1,8 @@
 """Optional Gemini-assisted profile extraction, always behind evidence validation, and optional sorting of
-Ask NEXUS questions the rules cannot place (GeminiRouter, at the end of this module).
+Ask EchoRadar questions the rules cannot place (GeminiRouter, at the end of this module).
 
 Off by default. Enable with NEXUS_LLM_EXTRACTION=gemini and GEMINI_API_KEY (GEMINI_MODEL optional).
-Only PUBLIC website text that NEXUS already retrieved is sent; private refinements never are.
+Only PUBLIC website text that EchoRadar already retrieved is sent; private refinements never are.
 
 API (checked against Google's documentation on 2026-11-14):
   POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent
@@ -12,7 +12,7 @@ API (checked against Google's documentation on 2026-11-14):
   reply   candidates[0].content.parts[].text holds the JSON document
 Google describes generateContent as legacy but "fully supported"; the newer Interactions API is not used.
 
-The model proposes claims; NEXUS decides. Every proposed claim must cite a source id that was sent
+The model proposes claims; EchoRadar decides. Every proposed claim must cite a source id that was sent
 and a short contiguous quote that occurs in that source (nexus.core.evidence). Unsupported, negated,
 historical and instruction-like claims are rejected and logged. A valid quote proves the excerpt
 exists, not that the model read it correctly: the claim is labelled as model-extracted.
@@ -131,7 +131,7 @@ class GeminiExtractor:
         return out
 
 
-# ---- question sorting for Ask NEXUS -------------------------------------------------------------
+# ---- question sorting for Ask EchoRadar -------------------------------------------------------------
 # Used only when the rule-based router cannot place a question. The model chooses from fixed lists;
 # it never writes an answer. Answers are still built from stored records, so nothing it says can
 # appear to the user as a fact. Off by default: NEXUS_LLM_ROUTING=gemini and GEMINI_API_KEY.
@@ -143,11 +143,11 @@ HELP_TOPICS = ("none", "general", "front", "radar", "dna", "blueprint", "graph",
 PERIODS = {"none": None, "today": "today", "this_week": "this week", "next_week": "next week", "this_month": "this month",
            "next_month": "next month", "next_30_days": "soon", "this_year": "this year"}
 
-ROUTE_PROMPT = """You sort one question sent to Ask NEXUS, the assistant of the Blue Science Park innovation ecosystem.
-NEXUS answers only from stored records: member companies and their public capabilities, funding calls, test environments,
+ROUTE_PROMPT = """You sort one question sent to Ask EchoRadar, the assistant of the Blue Science Park innovation ecosystem.
+EchoRadar answers only from stored records: member companies and their public capabilities, funding calls, test environments,
 events, research and regional news. Do not answer the question. Only fill in the fields.
 - type: park = about Blue Science Park itself (contact, address, opening hours, staff, membership, what it is);
-  help = how to use NEXUS or what a page or label means; company = about one or more named members;
+  help = how to use EchoRadar or what a page or label means; company = about one or more named members;
   apply = how to apply for funding; count = how many of something; opportunities = funding, events, test environments,
   research or news; partners = who could work on something; search = a subject without a clear area;
   off_topic = unrelated to innovation, business development or collaboration.

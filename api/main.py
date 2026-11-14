@@ -20,11 +20,15 @@ DIST = Path(__file__).resolve().parents[1] / "web" / "dist"
 async def lifespan(app: FastAPI):
     from nexus.core.embeddings import get_embedder
 
+    from api.background import auto_monitor
+
     get_embedder()  # load the embedding model once, at startup, not on the first page view
+    auto_monitor.start()  # keep the sources current while the site runs (off in offline mode)
     yield
+    auto_monitor.stop()
 
 
-app = FastAPI(title="NEXUS API", default_response_class=NexusJSON, lifespan=lifespan)
+app = FastAPI(title="EchoRadar API", default_response_class=NexusJSON, lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
                    allow_methods=["*"], allow_headers=["*"])
 app.include_router(router)

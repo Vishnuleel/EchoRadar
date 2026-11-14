@@ -4,7 +4,7 @@
 
 A plain sequential orchestrator (`nexus/pipeline.py`) runs the agents. Each step writes a trace entry (agent,
 duration, counts, warnings) that the interface shows. By default no agent calls a language model; two optional,
-off-by-default paths use Gemini (website extraction behind quote validation, and sorting of Ask NEXUS questions
+off-by-default paths use Gemini (website extraction behind quote validation, and sorting of Ask EchoRadar questions
 the rules cannot place), and both fall back to the rules.
 
 | Agent | Module | Input | Output |
@@ -17,6 +17,7 @@ the rules cannot place), and both fall back to the rules.
 | Ranking | `agents/ranking_agent.py` + `core/scoring.py` | Candidates, research, open calls | Score with four visible components; personalised list per company |
 | Verification | `agents/verification_agent.py` | Scored candidates | Pass / pass with warnings / reject; checks evidence, freshness, structure, closed calls |
 | Brief Generator | `core/blueprint_generator.py` | One verified hypothesis | 13-section blueprint, Markdown and PDF |
+| Paper as PDF | `core/paper_pdf.py` | One company's findings, proposals, missed calls and profile, as the site shows them | A two-column newspaper PDF with every source link; the public edition, or the company's own when it reads as itself |
 | Boundary guard and privacy | `security/` | User requests, retrieved text, data access | Scope decision, quarantined text, ownership checks |
 | Question router and answer builder | `core/question_router.py`, `core/answer_builder.py` | An in-scope (or unclear) question | The kind of question (park, help, member, comparison, count, opportunities with a period, partners, how to apply), the members it names and the period; an answer assembled from stored records and fixed sentences |
 | Profile check | `agents/profile_check.py` | One member, on demand from its profile page | The profiling agents re-run in the open (directory page, website, boundary filter, extraction), compared with the stored profile: new, unchanged and no longer found. Saves nothing |
@@ -46,8 +47,14 @@ Private rows always carry the owning company and are read only through `security
 - Re-profiling replaces the public claims of a company but keeps user refinements and the claims a user removed.
 - News that names a member is attached to that member and ranked high on its radar.
 - Sources older than 120 days are marked stale: they lower the evidence score and raise a verification warning.
-- `python -m nexus.monitor --once` (or `--loop N`) re-checks every source on its own interval (24 hours by
-  default) and records what changed as change events; failures back off and are logged.
+- While the API runs, a background worker (`api/background.py`) wakes every 15 minutes (`NEXUS_MONITOR_INTERVAL`)
+  and runs the monitoring checks that are due; each source keeps its own interval (24 hours for the directory,
+  Vinnova, events and news; a week for test environments and research). What changed is recorded as change
+  events, and any change triggers translation of new texts and a re-rank. The re-rank rewrites
+  `data/last_run.json`, which drops the API's cached pages; the browser sees the new ranking time through
+  `/api/health` (polled every 30 seconds) and refetches its data, so new information appears without a restart
+  or reload. Off in offline mode or with `NEXUS_AUTO_MONITOR=0`. `python -m nexus.monitor --once` (or `--loop N`)
+  does the same from the command line; a lease lock stops two workers scanning at once.
 - On any member's profile page, "Read the sources live" re-runs the profiling agents and shows what is new,
   unchanged or no longer found compared with the stored profile. It does not save: rebuilding the stored
   profile is still a deliberate step (`scripts/ingest.py`), so a bad page cannot silently change a profile.

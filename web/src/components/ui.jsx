@@ -130,7 +130,7 @@ export function Notice({ tone = "hyp", children, className }) {
 
 export const HypothesisNotice = () => (
   <Notice>
-    <b className="text-ink">Hypotheses, not agreements.</b> NEXUS generated these from public information; no company has
+    <b className="text-ink">Hypotheses, not agreements.</b> EchoRadar generated these from public information; no company has
     been contacted, and funding eligibility has not been checked.
   </Notice>
 );

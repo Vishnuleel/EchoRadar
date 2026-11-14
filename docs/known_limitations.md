@@ -40,16 +40,23 @@
 
 **Monitoring sources**
 
+- Event sponsors: no stored event page names a sponsor. EchoRadar records sponsors and named partners only when a
+  page names them after an explicit phrase ("sponsras av", "sponsored by", "i samarbete med"), and otherwise
+  shows "None is named on the source page". The Marine Technology Center mentions "local partners" without naming
+  them, so none is listed. Speakers are copied as published; on the lunch programme the speaker line follows the
+  occasion it belongs to (checked against the one occasion whose text names its speaker).
+
 - Funding covers Vinnova only. EU, Energimyndigheten, Almi and regional programmes are not connected.
 - Of the 11 events found, 9 were already past at retrieval and are not offered; two recurring formats have no date.
   The event page states no year; the year is assumed from the retrieval date and this is shown next to the date.
 - Event and news parsing is tailored to the current layout of bluesciencepark.se and mtcos.se.
-- Test environments come from four pages; access terms are not published there, and NEXUS says so.
+- Test environments come from four pages; access terms are not published there, and EchoRadar says so.
 - Research relevance has little discriminating power: publications were retrieved by capability keyword.
 - The monitor (`python -m nexus.monitor`) has run once against the live sources (Vinnova, the events page and two
   OpenAlex queries answered over the network on 2026-11-14; the other checks used responses cached within 24 hours).
-  It is not registered as an operating-system service; someone has to start it. The first scan of each source only
-  records a baseline, so change alerts begin with the second scan.
+  Since 2026-11-14 it also runs inside the API while the site is up (every 15 minutes, only the checks that are due),
+  so nothing has to be started separately; when the site is not running, nothing is checked. The first scan of each
+  source only records a baseline, so change alerts begin with the second scan.
 
 **Matching and scoring**
 
@@ -60,6 +67,20 @@
 - The baseline comparison uses 36 pairs labelled by the development team, who also wrote the relation table. It
   is a sanity check, not a validation.
 
+**Insights**
+
+- "The opportunity you never saw" scores closed calls against each member's profile as it is today; the profile at
+  the time may have differed. The fit threshold (45) was set by hand after reading the 2026 calls, and a fit is not an
+  eligibility check. Public authorities are counted and flagged, not removed. The stored Vinnova data reaches back to
+  calls of 2026 only, so "the last 12 months" covers January to November 2026.
+- A new round of a programme is recognised only when its title matches apart from year, season or round number;
+  a renamed programme is not linked. Of the 75 closed calls, one currently has a recognised open round (Eureka SMART,
+  now as Call 10); none of the closed calls that fitted a member does.
+- "Complete the team" names members with public evidence of a missing role. Nobody has been asked, and a member
+  with the capability may still be the wrong partner (size, market, competition).
+- The task test stores what the participant says about the fit; EchoRadar does not check it. The clock is started and
+  stopped by hand.
+
 **Assistant and boundaries**
 
 - The assistant is rule-based: a boundary check, a question router (park, member, comparison, count, period,
@@ -68,7 +89,7 @@
 - Boundary and routing rules are pattern-based. The 60-question check on the Evaluation page passes 60 of 60, but
   the same team wrote the rules and the questions; a determined user can probably phrase an off-topic request that
   passes as in scope. Answers are still built only from stored records.
-- What NEXUS does not store about Blue Science Park itself (address, opening hours, staff) it says it does not
+- What EchoRadar does not store about Blue Science Park itself (address, opening hours, staff) it says it does not
   store. The contact email shown was copied from the contact page by hand and is not re-checked automatically.
 - Optional model-assisted sorting of unplaced questions (Gemini, off by default) has been tested only with recorded
   responses, never against the live API.

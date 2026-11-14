@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { api } from "../api";
 import { useSession } from "../store";
 import ItemCard from "../components/ItemCard";
+import DownloadPaper from "../components/DownloadPaper";
 import { Badge, CompanyPicker, Disclosure, Empty, HypothesisCard, QueryState } from "../components/ui";
 
 const AREAS = [
@@ -16,7 +17,7 @@ const AREAS = [
 const keyOf = (i) => `${i.kind}:${i.ref_id}`;
 const longDate = (d = new Date()) => d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
-/** The week's top three: closing deadlines first, then the strongest item of each area, never two of one kind first. */
+/** The top three: closing deadlines first, then the strongest item of each area, never two of one kind first. */
 function topThree(digest) {
   const pool = [...digest.urgent, ...digest.funding, ...digest.testing, ...digest.events, ...digest.knowledge];
   const seen = new Set();
@@ -41,9 +42,10 @@ function Masthead({ data }) {
             <CompanyPicker className="w-56" companies={companies} value={companyId} onChange={setViewing} />
           </div>
         ) : <span>Your edition</span>}
+        <DownloadPaper />
       </div>
       <h1 className="border-b-[3px] border-double border-ink py-3 text-center font-serif text-[52px] font-bold leading-none tracking-tight sm:text-[72px]">
-        NEXUS Weekly
+        EchoRadar
       </h1>
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink py-2 font-sans text-[13px] text-ink2">
         <span className="font-semibold uppercase tracking-[0.12em] text-ink">{data.company.name} edition</span>
@@ -66,7 +68,7 @@ function FrontPage({ data }) {
   if (!lead) {
     return (
       <Empty>
-        No findings this week: the public profile of {names[company.id]} names no technology or expertise NEXUS can
+        No findings yet: the public profile of {names[company.id]} names no technology or expertise EchoRadar can
         confirm. <Link className="link not-italic" to="/dna">Add a capability or interest</Link> to get a personal edition.
       </Empty>
     );
@@ -79,7 +81,7 @@ function FrontPage({ data }) {
           <ItemCard item={lead} canMark={canMark} lead />
         </div>
         <div className="lg:border-l lg:border-line lg:pl-8">
-          <div className="kicker mb-1">Also this week</div>
+          <div className="kicker mb-1">Also new</div>
           {also.map((it) => <ItemCard key={keyOf(it)} item={it} canMark={canMark} compact />)}
           <Link to="/radar" className="mt-4 inline-flex items-center gap-1 font-sans text-[14px] font-semibold text-brand hover:underline">
             All {digest.total} findings in the Radar <ArrowRight size={14} />
@@ -111,14 +113,14 @@ function FrontPage({ data }) {
   );
 }
 
-/** Fig. 1: this week's findings per area, drawn from the radar itself. */
+/** Fig. 1: the current findings per area, drawn from the radar itself. */
 function AreaFigure({ areas, total }) {
   const LABEL = { funding: "Funding", testbed: "Testing", event: "Events", research: "Research", news: "Regional news" };
   const max = Math.max(1, ...areas.map((a) => a.count));
   return (
     <figure>
       <div className="mb-1 flex items-end justify-between border-b-2 border-ink pb-1.5">
-        <h2 className="text-[26px] font-semibold">The week in figures</h2>
+        <h2 className="text-[26px] font-semibold">In figures</h2>
       </div>
       <div className="mt-4 space-y-3">
         {areas.map((a) => (
@@ -131,7 +133,7 @@ function AreaFigure({ areas, total }) {
       </div>
       <figcaption className="meta mt-3 border-t border-line pt-2 italic">
         Fig. 1. The {total} findings on this company's radar by area, with the highest fit score in each.
-        Source: NEXUS ranking of public records.
+        Source: EchoRadar ranking of public records.
       </figcaption>
     </figure>
   );

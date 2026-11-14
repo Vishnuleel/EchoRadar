@@ -1,4 +1,4 @@
-"""Evaluation: NEXUS complementarity ranking vs the similarity-only baseline, plus coverage,
+"""Evaluation: EchoRadar complementarity ranking vs the similarity-only baseline, plus coverage,
 freshness and ranking-differentiation metrics. Everything is computed from stored data at call
 time; nothing here is a hard-coded result."""
 from __future__ import annotations
@@ -140,7 +140,7 @@ BLOCKED = ("prompt_injection", "privacy_violation")
 
 
 def boundary_check(s: Session, embedder, path=BOUNDARY_PATH) -> dict:
-    """Run the labelled questions through the real Ask NEXUS pipeline (anonymous visitor, so nothing is
+    """Run the labelled questions through the real Ask EchoRadar pipeline (anonymous visitor, so nothing is
     stored, and without model-assisted sorting) and compare the outcome with the label.
 
     A case passes when the boundary outcome matches; when a question type is labelled, the router
@@ -190,3 +190,31 @@ def profile_audit(s: Session, path=AUDIT_PATH) -> dict | None:
                        "not_supported": labels.count("not_supported"),
                        "still_stored": sum(c["still_stored"] for c in data["cases"])}
     return data
+
+
+# ---- timed task tests ---------------------------------------------------------------------------
+def study_summary(s: Session) -> dict:
+    """Timed task tests (practice runs excluded). Medians, not means: a handful of sessions, one slow run."""
+    from statistics import median
+
+    from nexus.database.models import StudySession
+
+    rows = [r for r in s.scalars(select(StudySession).order_by(StudySession.created_at)) if not r.practice]
+
+    def side(prefix: str) -> dict:
+        done = [getattr(r, f"{prefix}_seconds") for r in rows if getattr(r, f"{prefix}_result") == "found"]
+        fits = [getattr(r, f"{prefix}_fit") for r in rows if getattr(r, f"{prefix}_fit")]
+        return {"found": len(done), "gave_up": sum(1 for r in rows if getattr(r, f"{prefix}_result") == "gave_up"),
+                "median_seconds": round(median(done)) if done else None,
+                "fit": {k: fits.count(k) for k in ("yes", "partly", "no")}}
+
+    paired = [r.without_seconds - r.with_seconds for r in rows
+              if r.without_result == "found" and r.with_result == "found"]
+    return {"n": len(rows), "practice_runs": s.query(StudySession).filter(StudySession.practice.is_(True)).count(),
+            "roles": {k: sum(1 for r in rows if r.role == k) for k in ("bsp_staff", "member", "mentor_or_judge", "other")},
+            "order": {k: sum(1 for r in rows if r.order == k) for k in ("without_first", "with_first")},
+            "without": side("without"), "with": side("with"),
+            "paired_median_saving_seconds": round(median(paired)) if paired else None, "paired_n": len(paired),
+            "prefer": {k: sum(1 for r in rows if r.prefer == k) for k in ("nexus", "without", "either")},
+            "comments": [r.comment for r in rows if r.comment][-10:],
+            "next_order": "without_first" if len(rows) % 2 == 0 else "with_first"}

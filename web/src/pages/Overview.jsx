@@ -117,7 +117,7 @@ export default function Overview() {
               <footer className="mt-12 border-t-[3px] border-double border-ink pt-4">
                 <div className="kicker mb-2">About this paper</div>
                 <p className="max-w-4xl font-serif text-[16px] leading-relaxed text-ink2">
-                  NEXUS Weekly is compiled by NEXUS for Blue Science Park members from public sources: the member directory,
+                  This paper is compiled by EchoRadar for Blue Science Park members from public sources, re-checked automatically while the site runs: the member directory,
                   company websites, Vinnova open data, OpenAlex, and the pages of Blue Science Park and Marine Technology Center
                   of Sweden. Every finding carries its source and retrieval date. Swedish texts are shown in machine translation
                   with the original one click away. Connections between members are generated proposals, not agreements.{" "}

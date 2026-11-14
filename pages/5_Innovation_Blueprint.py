@@ -45,7 +45,7 @@ with ui.db() as s:
                 hyp, note = pipeline.adhoc_hypothesis(s, chosen, ui.embedder())
             if hyp is None:
                 st.warning(note)
-                st.caption("NEXUS does not write a blueprint when it cannot support the combination with evidence.")
+                st.caption("EchoRadar does not write a blueprint when it cannot support the combination with evidence.")
                 st.stop()
         else:
             st.stop()

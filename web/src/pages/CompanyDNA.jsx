@@ -109,7 +109,7 @@ function DirectoryRecord({ v }) {
       {differs.length > 0 && (
         <Notice tone="sim" icon={GitCompareArrows}>
           The audited seed differs from the live official page on {differs.map((f) => f.label.toLowerCase().split(" (")[0]).join(", ")}.
-          NEXUS shows the official page's wording; the seed values are kept for review only.
+          EchoRadar shows the official page's wording; the seed values are kept for review only.
         </Notice>
       )}
       <dl className="grid gap-x-6 gap-y-2 text-[13px] sm:grid-cols-2">
@@ -146,7 +146,7 @@ function Facts({ facts }) {
             ))}
           </div>
         </div>
-      ) : <Empty icon={ShieldCheck}>No capability could be confirmed from public text. NEXUS does not guess from the company name.</Empty>}
+      ) : <Empty icon={ShieldCheck}>No capability could be confirmed from public text. EchoRadar does not guess from the company name.</Empty>}
       {other.length > 0 && (
         <div>
           <h3 className="mb-2.5 text-sm font-semibold text-ink2">Description, industry, geography, markets, collaborations and development activities</h3>
@@ -372,7 +372,7 @@ export default function CompanyDNA({ preview }) {
   return (
     <>
       <PageHeader eyebrow="Profile" title="Company DNA"
-                  subtitle="What public sources say about a company, what NEXUS infers, and what the company has added.">
+                  subtitle="What public sources say about a company, what EchoRadar infers, and what the company has added.">
         <CompanyPicker className="w-72" companies={companies} value={companyId} onChange={setViewing} />
       </PageHeader>
       <QueryState query={query}>

@@ -113,6 +113,18 @@ function Brief({ bp, note, params }) {
                 <Badge kind="HYPOTHESIS">missing</Badge>
                 <div className="mt-1.5 text-sm font-semibold text-ink">Not covered by these companies</div>
                 <div className="text-[13px] text-ink2">{bp.missing_capabilities.join(", ")}</div>
+                {(bp.complete_the_team ?? []).filter((r) => r.candidates.length).map((r) => (
+                  <div key={r.role} className="mt-2.5 border-t border-line pt-2">
+                    <div className="text-[13px] font-semibold text-ink">Who in the park could fill "{r.role}"</div>
+                    <ul className="mt-1 space-y-1 text-[13px] text-ink2">
+                      {r.candidates.map((c) => (
+                        <li key={c.company_id}><b className="text-ink">{c.name}</b> ({c.capability}) <SourceLink url={c.url} /></li>
+                      ))}
+                    </ul>
+                    {r.count > r.candidates.length && <div className="meta">and {r.count - r.candidates.length} more</div>}
+                  </div>
+                ))}
+                <div className="meta mt-2">Candidates have public evidence of the role. None has been contacted.</div>
               </div>
             )}
             <ul className="space-y-1 pt-1 text-[13px]">
@@ -275,7 +287,7 @@ export default function Blueprint() {
           {(d) => (d.blueprint ? <Brief bp={d.blueprint} note={d.note} params={params} /> : (
             <div className="space-y-2">
               <Notice tone="sim">{d.note}</Notice>
-              <p className="meta">NEXUS does not write a blueprint when it cannot support the combination with evidence.</p>
+              <p className="meta">EchoRadar does not write a blueprint when it cannot support the combination with evidence.</p>
             </div>
           ))}
         </QueryState>

@@ -1,5 +1,5 @@
 {
-  "labelled_by": "NEXUS development team, from the published challenge brief ('Keep interactions within our purpose'). Written before the run; failures are reported, not edited away.",
+  "labelled_by": "EchoRadar development team, from the published challenge brief ('Keep interactions within our purpose'). Written before the run; failures are reported, not edited away.",
   "caveat": "A fixed set of 60 questions written by the team that built the rules, so it checks the stated behaviour rather than proving robustness against new wording. Real users will phrase things differently.",
   "cases": [
     {"group": "Relevant request", "text": "Find potential collaborators for a marine environmental monitoring project.", "expect": "in_scope", "type": "partners"},

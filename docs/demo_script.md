@@ -16,12 +16,13 @@ side by side. Have a second browser tab on the Evaluation page (http://localhost
 
 ## 1. The problem (40 seconds)
 
-Show the front page, "NEXUS Weekly", closed on the desk.
+Show the front page ("Latest"), closed on the desk. Point at the sidebar: "Updates automatically", with the time of
+the next source check: the site re-checks its sources while it runs and shows new information without a restart.
 
 "A testbed, a funding call, the right partner. Blue Science Park asked: who is looking while a small company is busy
 building? The information is scattered over websites, research databases and funding portals, and judging what is
 relevant takes time. Blue Science Park also wanted a useful starting point before any company fills in a
-questionnaire. So NEXUS starts from public information about every member and answers one question: what should
+questionnaire. So EchoRadar starts from public information about every member and answers one question: what should
 this company know this week?"
 
 Point at the front page: the lead finding for Njord X, why it fits, the source line and the date.
@@ -63,9 +64,13 @@ If the network is slow, click **Use stored copies** instead: same steps, from th
    quoted evidence for each capability, research, an open call, a first experiment, risks. Every proposal is
    labelled HYPOTHESIS; no company has been contacted. **PDF** exports it.
 
+Optional (problem evidence, 20 seconds): scroll the radar to **The opportunity you never saw**. For EmbeddedArt: three
+calls that fitted and closed this year. "Across the park, 28 of the 75 calls that closed this year fitted at least one
+member. We cannot know who saw them; we can make sure the next round is not missed."
+
 ## 5. A boundary holds (60 seconds)
 
-Open **Ask NEXUS** and click the examples, in this order:
+Open **Ask EchoRadar** and click the examples, in this order:
 
 1. "We develop sensors. We need somewhere to test them." (the challenge's own example) → in scope, test environments
    with sources.
@@ -82,7 +87,8 @@ caveats are on the page: we wrote both the rules and the labels."
 ## 6. Value and next steps (30 seconds)
 
 "For a member: a profile it did not have to write, findings with their source and their next step, and a way to
-correct us. For staff: shared interests across members and connections worth facilitating, on the Staff desk.
+correct us. For staff: on the Staff desk, the calls the park did not see, and for every proposal that lacks a role,
+the members who could complete the team.
 Next: read every member's website rather than five, let members and staff rate the results, real sign-in, and a
 user test with three to five members, which we have not yet run."
 
@@ -92,6 +98,11 @@ Say this if asked, and keep it on the last slide: the engine, taxonomy, matching
 interface were written for this project; the libraries (SQLAlchemy, FastAPI, React, sentence-transformers and the
 models listed in the README) are reused. Data comes from the public directory, five member websites (any member
 can be read live), Vinnova open data, OpenAlex, and Blue Science Park and Marine Technology Center pages.
+
+Good to know while presenting: the Opportunity Radar opens on Funding and Research (the other areas are one click on
+their chips), the Connections graph opens on evidenced capabilities only (turn on "complements" and "potential
+collaboration" to show proposals), and **Download as PDF** on the front page or the **PDF** button under the paper
+saves the edition for the company in view.
 
 ## Backup plan
 

@@ -1,4 +1,4 @@
-"""Ask NEXUS question router: every kind of question gets its own answer, built from stored records.
+"""Ask EchoRadar question router: every kind of question gets its own answer, built from stored records.
 Runs on the fixture database; the optional model-assisted sorting is tested with a mocked HTTP session."""
 from datetime import datetime, timedelta
 

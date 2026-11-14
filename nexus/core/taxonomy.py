@@ -1,4 +1,4 @@
-"""NEXUS domain taxonomy.
+"""EchoRadar domain taxonomy.
 
 This file is *team-authored domain knowledge*, not retrieved data. It contains:
 

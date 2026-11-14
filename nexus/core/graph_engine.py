@@ -2,7 +2,7 @@
 
 Edge status tells the user how much to trust a relationship:
   evidence   - backed by a public source (HAS_CAPABILITY)
-  computed   - calculated by NEXUS from text (SIMILAR_TO, RELEVANT_TO, SUPPORTED_BY)
+  computed   - calculated by EchoRadar from text (SIMILAR_TO, RELEVANT_TO, SUPPORTED_BY)
   hypothesis - generated proposal (COMPLEMENTS, POTENTIAL_COLLABORATION); drawn dashed
 """
 from __future__ import annotations

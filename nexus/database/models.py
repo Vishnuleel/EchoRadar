@@ -13,7 +13,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from nexus.utils.validators import utcnow
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 8
 
 # Who may see a derived row (hypothesis, recommendation, radar item):
 #   "public"      computed from public evidence and explicitly shared refinements only
@@ -289,6 +289,9 @@ class Event(Base):
     format: Mapped[str] = mapped_column(String(20), default="unknown")  # in_person | online | unknown
     audience: Mapped[str | None] = mapped_column(Text)
     organiser: Mapped[str] = mapped_column(String(120))
+    speakers: Mapped[str | None] = mapped_column(Text)  # exactly as published ("Talare ...")
+    # sponsors and named partners, only when the source page names them: [{name, role, quote}]
+    sponsors: Mapped[list] = mapped_column(JSON, default=list)
     capability_keys: Mapped[list] = mapped_column(JSON, default=list)
     source_url: Mapped[str] = mapped_column(String(500))
     retrieved_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
@@ -406,3 +409,23 @@ class EmbeddingCache(Base):
     text_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
     backend: Mapped[str] = mapped_column(String(120), primary_key=True)
     vector: Mapped[bytes] = mapped_column(LargeBinary)
+
+
+class StudySession(Base):
+    """One timed task test: the same task done without and with EchoRadar. Stores a role, never a name."""
+    __tablename__ = "study_session"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
+    role: Mapped[str] = mapped_column(String(40))  # bsp_staff | member | mentor_or_judge | other
+    order: Mapped[str] = mapped_column(String(20))  # without_first | with_first
+    without_seconds: Mapped[float | None] = mapped_column(Float)
+    without_result: Mapped[str | None] = mapped_column(String(12))  # found | gave_up
+    without_found: Mapped[str | None] = mapped_column(Text)
+    without_fit: Mapped[str | None] = mapped_column(String(8))  # yes | partly | no (the participant's own view)
+    with_seconds: Mapped[float | None] = mapped_column(Float)
+    with_result: Mapped[str | None] = mapped_column(String(12))
+    with_found: Mapped[str | None] = mapped_column(Text)
+    with_fit: Mapped[str | None] = mapped_column(String(8))
+    prefer: Mapped[str | None] = mapped_column(String(12))  # nexus | without | either
+    comment: Mapped[str | None] = mapped_column(Text)
+    practice: Mapped[bool] = mapped_column(Boolean, default=False)  # a rehearsal, not counted

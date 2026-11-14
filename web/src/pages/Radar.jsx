@@ -5,10 +5,12 @@ import { ArrowRight, Bookmark, Fingerprint, MessageSquare, Radar as RadarIcon, S
 import { api } from "../api";
 import { useSession } from "../store";
 import ItemCard, { KIND } from "../components/ItemCard";
+import MissedCalls from "../components/MissedCalls";
 import { Chip, CompanyPicker, Disclosure, Notice, PageHeader, QueryState, Segmented, SourceLink, day } from "../components/ui";
 
 const VIEWS = [{ value: "all", label: "All items" }, { value: "saved", label: "Saved by us" }, { value: "open", label: "Funding: open only" }];
 const DEFAULT_MIN = 25;
+const DEFAULT_KINDS = ["funding", "research"]; // the page opens on funding and research; the other areas are one click away
 
 /** The company has no radar at all: explain why, and offer the ways forward. */
 function NoRadar({ name, owner }) {
@@ -18,7 +20,7 @@ function NoRadar({ name, owner }) {
         <h2 className="mt-4 text-xl font-semibold">No radar yet for {name}</h2>
         <p className="mt-2 text-[14px] leading-relaxed text-ink2">
           The radar ranks funding, test environments, events and research against a company's confirmed capabilities.
-          The public profile of {name} does not name a technology or expertise that NEXUS can confirm, so nothing is
+          The public profile of {name} does not name a technology or expertise that EchoRadar can confirm, so nothing is
           ranked rather than guessed.
         </p>
         <ol className="mt-5 space-y-2.5 text-[13.5px] text-ink2">
@@ -30,7 +32,7 @@ function NoRadar({ name, owner }) {
         </ol>
         <div className="mt-6 flex flex-wrap gap-2">
           <Link to="/dna" className="btn btn-primary !px-4 !py-2"><Fingerprint size={15} />{owner ? "Refine the profile" : "Open the profile"}<ArrowRight size={14} /></Link>
-          <Link to="/ask" className="btn !px-4 !py-2"><MessageSquare size={15} />Ask NEXUS</Link>
+          <Link to="/ask" className="btn !px-4 !py-2"><MessageSquare size={15} />Ask EchoRadar</Link>
         </div>
       </div>
     </div>
@@ -47,9 +49,9 @@ function EmptyFilter({ icon: Icon, title, text, action, onAction }) {
   );
 }
 
-export default function Radar() {
+export default function Radar({ preview }) {
   const { companies, companyId, setViewing, acting, meta } = useSession();
-  const [kinds, setKinds] = useState(() => Object.keys(meta.radar_labels));
+  const [kinds, setKinds] = useState(() => DEFAULT_KINDS.filter((k) => k in meta.radar_labels));
   const [minRel, setMinRel] = useState(DEFAULT_MIN);
   const [view, setView] = useState("all");
   const reset = () => { setKinds(Object.keys(meta.radar_labels)); setMinRel(DEFAULT_MIN); setView("all"); };
@@ -122,6 +124,7 @@ export default function Radar() {
                 Closed funding calls and items the company marked “not useful” are never listed.
               </p>
             )}
+            {!preview && <MissedCalls companyId={companyId} name={data.company.name} />}
             {data.past_events.length > 0 && kinds.includes("event") && all.length > 0 && (
               <div className="mt-4">
                 <Disclosure title={`Past events found on the source pages (${data.past_events.length}) - not offered as opportunities`}>

@@ -1,8 +1,8 @@
-"""Orchestration of the NEXUS agents.
+"""Orchestration of the EchoRadar agents.
 
 ingest()    - Company, Research and Opportunity agents retrieve public data (live or cached)
 recompute() - Combination -> Ranking -> Verification agents rebuild hypotheses and rankings
-answer_request() - boundary-checked free-text entry point ("Ask NEXUS")
+answer_request() - boundary-checked free-text entry point ("Ask EchoRadar")
 
 A plain sequential orchestrator is used on purpose: the flow is linear and deterministic, so a
 graph framework would add dependencies without adding behaviour. Each step records a trace entry
@@ -723,7 +723,7 @@ def adhoc_hypothesis(s: Session, company_ids: list[int], embedder=None, now: dat
     profiles = {p.id: p for p in combination_agent.load_profiles(s, embedder) if p.id in ids}
     if any(not profiles[i].capabilities for i in ids):
         names = ", ".join(profiles[i].name for i in ids if not profiles[i].capabilities)
-        return None, f"No evidence-backed capabilities are stored for: {names}. NEXUS cannot assess this combination."
+        return None, f"No evidence-backed capabilities are stored for: {names}. EchoRadar cannot assess this combination."
     if len(ids) == 2:
         cand = me.score_pair(profiles[ids[0]], profiles[ids[1]])
     else:
@@ -742,7 +742,7 @@ def adhoc_hypothesis(s: Session, company_ids: list[int], embedder=None, now: dat
             if len({v["company"] for v in assign.values()}) == 3 and (best is None or len(assign) > len(best[1])):
                 best = (concept, assign, missing)
         if n_pairs < 2 or best is None:
-            return None, ("NEXUS found no application concept in which all three companies contribute a distinct, "
+            return None, ("EchoRadar found no application concept in which all three companies contribute a distinct, "
                           "evidence-backed capability with at least two complementary relationships.")
         concept, assign, missing = best
         cov = len(assign) / len(concept.slots)
@@ -751,7 +751,7 @@ def adhoc_hypothesis(s: Session, company_ids: list[int], embedder=None, now: dat
         cand = me.Candidate("triad", tuple(ids), round(comp, 1), links[:8], concept.id, assign, missing,
                             round(cov, 2), concept.domain)
     if not cand.links:
-        return None, "NEXUS found no supported complementary relationship between these companies."
+        return None, "EchoRadar found no supported complementary relationship between these companies."
     ctx = build_context(s, embedder, now)
     sc = ranking_agent.score_candidate(cand, profiles, ctx)
     title, application = hypothesis_title(cand, profiles)

@@ -1,8 +1,8 @@
 {
  "description": "Candidate company pairs labelled for capability COMPLEMENTARITY (0 = not complementary, 1 = plausible, 2 = strong).",
- "labelled_by": "NEXUS development team (AI-assisted), from the public member-directory descriptions. NOT labelled by Blue Science Park staff or independent domain experts.",
+ "labelled_by": "EchoRadar development team (AI-assisted), from the public member-directory descriptions. NOT labelled by Blue Science Park staff or independent domain experts.",
  "labelled_on": "2026-11-13",
- "caveat": "The labeller also wrote the capability relation table, so this set is biased in favour of NEXUS. It is a sanity check, not a validation. 36 pairs are too few for statistically meaningful conclusions.",
+ "caveat": "The labeller also wrote the capability relation table, so this set is biased in favour of EchoRadar. It is a sanity check, not a validation. 36 pairs are too few for statistically meaningful conclusions.",
  "pairs": [
   {
    "a": "baltic-offshore",

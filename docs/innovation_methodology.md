@@ -2,7 +2,7 @@
 
 ## What is different
 
-Most recommenders connect companies that look alike. NEXUS looks for companies whose capabilities are
+Most recommenders connect companies that look alike. EchoRadar looks for companies whose capabilities are
 **different and fit together**, then bridges the combination to research, funding and test environments and
 writes it up as a hypothesis with its evidence.
 
@@ -75,7 +75,7 @@ uncertainties. The Blueprint page renders all of it.
 36 company pairs labelled 0–2 for complementarity (`data/eval/labelled_pairs.json`), 26 of them labelled
 complementary. Measured on the shipped database:
 
-| Metric | NEXUS complementarity | Similarity baseline |
+| Metric | EchoRadar complementarity | Similarity baseline |
 |---|---|---|
 | Precision@5 | 1.00 | 0.40 |
 | Precision@10 | 0.90 | 0.60 |
@@ -85,7 +85,7 @@ complementary. Measured on the shipped database:
 | Spearman with labels | 0.72 | 0.04 |
 
 **How much weight this carries:** the labels were written by the development team, who also wrote the relation
-table, so the comparison favours NEXUS by construction. 36 pairs is too few for statistical conclusions. It
+table, so the comparison favours EchoRadar by construction. 36 pairs is too few for statistical conclusions. It
 shows the engine does what it was designed to do, not that the design is right. Independent labels from Blue
 Science Park staff are the next step. Visible errors: Knowit / HiQ (two similar consultancies, labelled 0) scores
 48; two pairs labelled plausible score 0.

@@ -31,7 +31,7 @@ from nexus.utils.validators import utcnow
 
 BSP_PROFILE = "Blue Science Park member profile"
 NOT_DISCLOSED = "member_or_partner_not_individually_disclosed"
-# seed column -> NEXUS field
+# seed column -> EchoRadar field
 SEED_FIELDS = {"organisation_name": "name", "description_original_sv": "description", "industry_original_sv": "industry",
                "employee_range": "employees", "founded_year": "founded", "locations": "location",
                "official_website": "website"}

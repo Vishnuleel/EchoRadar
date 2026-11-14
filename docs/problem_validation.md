@@ -9,7 +9,7 @@ across 40+ members when they try to spot shared interests and broker collaborati
 
 ## Users
 
-| User | Need | Where NEXUS addresses it |
+| User | Need | Where EchoRadar addresses it |
 |---|---|---|
 | Member company (primary) | "What should we know this week?" with a reason and a next step | Home digest, Opportunity Radar |
 | Member company | A starting profile without filling in a questionnaire | Company DNA |
@@ -37,7 +37,7 @@ an assumption not yet checked with members.
 
 | Symptom | Cause behind it | Support |
 |---|---|---|
-| A call, test environment or event is found too late, or not at all | The information sits in many places with different formats: one funder's API, several web pages, a research database. Nothing joins them | B; O: NEXUS needs 9 separate sources for one weekly answer |
+| A call, test environment or event is found too late, or not at all | The information sits in many places with different formats: one funder's API, several web pages, a research database. Nothing joins them | B; O: EchoRadar needs 9 separate sources for one weekly answer. O: of the 75 Vinnova calls that closed in the last 12 months, 28 fitted at least one member's public profile (fit 45 or more), and 23 of 56 members had at least one such call (3 of them public authorities). Whether the members saw them is unknown (A) |
 | Most of what a member finds is not usable | Listings are not filtered for the reader: 75 of Vinnova's 92 recent calls were already closed; 9 of 11 published events were already past; the event page gives no year | O |
 | Judging relevance takes time | Relevance depends on what the company does, and there is no structured description of that: the directory has one or two sentences per member, and for 11 of 56 they name no technology at all | B; O |
 | A personalised service would need a long questionnaire first | No starting profile exists, so a service cannot be personal until the company invests time | B |
@@ -48,17 +48,28 @@ an assumption not yet checked with members.
 
 The causes share one root: **there is no evidence-based, comparable description of each member.** Every
 monitoring area in the brief (knowledge, events, testing, funding, member developments) depends on it, because
-relevance can only be judged against what a company does. So NEXUS solves that first (a profile from public
+relevance can only be judged against what a company does. So EchoRadar solves that first (a profile from public
 sources, facts kept apart from inferences, editable by the company) and only then ranks the scattered sources
 against it. Solving the root once makes every monitoring area cheaper to add; solving one area without it (a
 better funding search, for example) would still need a questionnaire per member.
 
-Within the brief's freedom to "choose one or two monitoring areas", NEXUS goes deepest on **testing and funding**,
+Within the brief's freedom to "choose one or two monitoring areas", EchoRadar goes deepest on **testing and funding**,
 the two areas in the brief's own example journey ("we develop sensors; we need somewhere to test them") and in the
 kick-off presentation, and adds **potential partners**, because the brief asks to "identify potential connections
 between companies" and the same profiles make that possible.
 
 ## Observed while building
+
+- **The opportunity you never saw (measured on 2026-11-14).** Every Vinnova call that closed in the last 12 months was
+  scored against every member's current public profile with the radar's matching. 28 of 75 fitted at least one member
+  (fit 45 or more; below that, unrelated calls start to appear). Example: three calls fitted EmbeddedArt and closed
+  between May and October 2026, among them "Needs-driven defense innovation for a secure Baltic Sea region" (open
+  24 March to 26 May). This shows the opportunities existed and fitted on paper; it does not show that anyone missed
+  them, or would have been eligible. Shown per member on the radar and for the whole park on the Staff desk.
+- **Proposals are short of a partner, the park is not.** 92 of 251 generated proposals lack a role; for every one
+  of the 30 missing roles at least one other member has public evidence of it (for example: 17 proposals lack a
+  vessel operator, and Stena Line and Affärsverken operate vessels). The only capability no member shows publicly is
+  seabed survey and inspection.
 
 - The member directory lists 56 organisations with one or two sentences each. For 11 of them that text is too
   general to identify any technology or expertise. Blue Science Park states it has over 80 members, so about a

@@ -45,7 +45,7 @@ with t1:
     else:
         metrics = ["precision@5", "precision@10", "recall@10", "ndcg@10", "spearman"]
         fig = go.Figure()
-        for name, key, color in (("NEXUS complementarity", "nexus", "#3987e5"), ("Similarity baseline", "baseline", "#d95926")):
+        for name, key, color in (("EchoRadar complementarity", "nexus", "#3987e5"), ("Similarity baseline", "baseline", "#d95926")):
             fig.add_trace(go.Bar(name=name, x=metrics, y=[cmp_[key][m] for m in metrics], marker=dict(color=color, cornerradius=4),
                                  text=[f"{cmp_[key][m]:.2f}" for m in metrics], textposition="outside",
                                  textfont=dict(color="#c3cee0"), hovertemplate="%{x}: %{y:.2f}<extra>" + name + "</extra>"))
@@ -55,11 +55,11 @@ with t1:
                           legend=dict(orientation="h", y=1.12), hoverlabel=dict(bgcolor="#101a2e", font_color="#e8eef9"))
         st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
         c1, c2 = st.columns(2)
-        c1.metric("Mean label of top-5 (0-2), NEXUS", cmp_["nexus"]["mean_label_top5"])
+        c1.metric("Mean label of top-5 (0-2), EchoRadar", cmp_["nexus"]["mean_label_top5"])
         c2.metric("Mean label of top-5 (0-2), baseline", cmp_["baseline"]["mean_label_top5"])
         df = pd.DataFrame(cmp_["rows"]).sort_values("nexus_complementarity", ascending=False)
         st.dataframe(df.rename(columns={"a": "Company A", "b": "Company B", "label": "Label (0-2)", "rationale": "Labelling rationale",
-                                        "nexus_complementarity": "NEXUS complementarity", "baseline_similarity": "Baseline cosine"}),
+                                        "nexus_complementarity": "EchoRadar complementarity", "baseline_similarity": "Baseline cosine"}),
                      hide_index=True, width="stretch", height=420)
         wrong = df[(df["label"] == 0) & (df["nexus_complementarity"] >= 30)]
         missed = df[(df["label"] >= 1) & (df["nexus_complementarity"] == 0)]

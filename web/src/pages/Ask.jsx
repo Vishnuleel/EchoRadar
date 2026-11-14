@@ -136,7 +136,7 @@ function Answer({ turn, disclaimer, onAsk }) {
   );
 }
 
-/** Ask NEXUS: questions in, sourced records out. Rule-based: no language model writes the answers. */
+/** Ask EchoRadar: questions in, sourced records out. Rule-based: no language model writes the answers. */
 export default function Ask({ preview }) {
   const { meta } = useSession();
   const [chat, setChat] = useState(chatMemory);
@@ -155,7 +155,7 @@ export default function Ask({ preview }) {
 
   return (
     <>
-      <PageHeader eyebrow="Inquiries" title="Ask NEXUS"
+      <PageHeader eyebrow="Inquiries" title="Ask EchoRadar"
                   subtitle="Ask about funding, testing, events, research, a member company or Blue Science Park itself. Answers are put together from stored, sourced records; no language model writes them." />
       <div className="grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <section>
@@ -195,7 +195,7 @@ export default function Ask({ preview }) {
           <div className="kicker mb-2 mt-8">How answers are made</div>
           <p className="font-serif text-[16px] leading-relaxed text-ink2">
             Every question first passes a boundary check: off-topic requests, attempts to override the service and
-            requests for private data are declined. NEXUS then works out what kind of question it is: about the park,
+            requests for private data are declined. EchoRadar then works out what kind of question it is: about the park,
             about a member, about a period, a count, or a subject. The answer is put together from stored records, and
             each one shows its source. {meta.scope}
           </p>

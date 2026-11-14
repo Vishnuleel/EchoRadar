@@ -11,7 +11,7 @@ from nexus.database.models import Company
 from nexus.security import privacy
 
 names = ui.setup("Company DNA")
-ui.header("Profile", "Company DNA", "What public sources say about a company, what NEXUS infers, and what the company has added.")
+ui.header("Profile", "Company DNA", "What public sources say about a company, what EchoRadar infers, and what the company has added.")
 
 ids = sorted(names, key=lambda i: names[i].lower())
 default = st.session_state.get("acting_company") or st.session_state.get("dna_company") or ids[0]
@@ -91,7 +91,7 @@ with ui.db() as s:
                         for r in rows:
                             claim_card(r)
         else:
-            st.info("No capability could be confirmed from public text. NEXUS does not guess from the company name.")
+            st.info("No capability could be confirmed from public text. EchoRadar does not guess from the company name.")
         other = [x for x in facts if x.claim_category != "capability"]
         if other:
             st.markdown("**Description, industry, geography, markets, collaborations and development activities**")

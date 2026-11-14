@@ -40,6 +40,20 @@ export const api = {
   blueprintUrl: (params) => `/api/blueprint${qs(params)}`,
   rate: (body) => request("/blueprint/feedback", { method: "POST", body: JSON.stringify(body) }),
   evaluation: () => request("/evaluation"),
+  // the PDF is fetched with the same sign-in header as the pages, then handed to the browser as a download
+  downloadPaper: async (companyId) => {
+    const res = await fetch(`/api/paper.pdf${qs({ company_id: companyId })}`, { headers: acting ? { "X-Acting-Company": String(acting) } : {} });
+    if (!res.ok) throw new Error(`PDF export failed (${res.status})`);
+    const name = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "")?.[1] ?? "echoradar.pdf";
+    const url = URL.createObjectURL(await res.blob());
+    const a = Object.assign(document.createElement("a"), { href: url, download: name });
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  },
+  missed: (companyId) => request(`/companies/${companyId}/missed`),
+  insights: () => request("/insights"),
+  study: () => request("/study"),
+  saveStudy: (body) => request("/study", { method: "POST", body: JSON.stringify(body) }),
   staff: () => request("/staff"),
   directory: () => request("/directory"),
   monitoring: () => request("/monitoring"),

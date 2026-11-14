@@ -9,7 +9,6 @@ import { Badge, Chip, CompanyPicker, Empty, HypothesisNotice, PageHeader, QueryS
 
 const DASH = { solid: null, dot: [1.5, 3], dash: [6, 4] };
 const SHAPE = { application: "diamond", funding: "square", testbed: "triangle", research: "hexagon" };
-const SHAPE_NOTE = { company: "circle", capability: "circle", application: "diamond", funding: "square", research: "hexagon", testbed: "triangle" };
 const endId = (end) => (typeof end === "object" ? end.id : end);
 
 function drawShape(ctx, shape, x, y, r) {
@@ -122,6 +121,80 @@ const NODE_COLOURS = { company: "#152B4E", application: "#A4482D", capability: "
 const EDGE_COLOURS = { HAS_CAPABILITY: "#267365", SIMILAR_TO: "#8A8F98", COMPLEMENTS: "#152B4E", RELEVANT_TO: "#966616",
                        SUPPORTED_BY: "#5C5496", POTENTIAL_COLLABORATION: "#A4482D" };
 
+/* The legend: every point in its real shape and colour, every line in its real style, in plain words. */
+const POINTS = [
+  ["company", "Member company", "a larger point is the company in focus"],
+  ["capability", "Capability", "something a member can do"],
+  ["application", "Proposed joint product", "what three members could build together"],
+  ["funding", "Funding call", "Vinnova"],
+  ["research", "Research", "OpenAlex"],
+  ["testbed", "Test environment", "a place to test or pilot"],
+];
+const LINES = [
+  ["HAS_CAPABILITY", "Has this capability", "quoted from a public source"],
+  ["COMPLEMENTS", "Proposed partners", "different capabilities that fit together"],
+  ["POTENTIAL_COLLABORATION", "Would take part in", "one role in the proposed product"],
+  ["SUPPORTED_BY", "Backed by", "the research or call that fits the proposal best"],
+  ["RELEVANT_TO", "Fits the focus company", "a top finding from its radar"],
+  ["SIMILAR_TO", "Similar profiles", "alike, not necessarily complementary"],
+];
+const BASIS = { evidence: "fact", computed: "calculated", hypothesis: "proposal" };
+const SVG_DASH = { solid: undefined, dot: "1.5 3", dash: "6 4" };
+
+function LegendShape({ type, color }) {
+  const c = 7, r = type === "capability" ? 3.6 : 4.6;
+  const shape = SHAPE[type];
+  let el;
+  if (shape === "diamond") el = <polygon points={`${c},${c - r * 1.25} ${c + r * 1.25},${c} ${c},${c + r * 1.25} ${c - r * 1.25},${c}`} />;
+  else if (shape === "square") el = <rect x={c - r} y={c - r} width={r * 2} height={r * 2} />;
+  else if (shape === "triangle") el = <polygon points={`${c},${c - r * 1.2} ${c + r * 1.15},${c + r} ${c - r * 1.15},${c + r}`} />;
+  else if (shape === "hexagon") el = <polygon points={Array.from({ length: 6 }, (_, i) => `${c + r * 1.1 * Math.cos((Math.PI / 3) * i)},${c + r * 1.1 * Math.sin((Math.PI / 3) * i)}`).join(" ")} />;
+  else el = <circle cx={c} cy={c} r={r} />;
+  return <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" className="shrink-0" style={{ fill: color }}>{el}</svg>;
+}
+
+function LegendLine({ style }) {
+  const hyp = style.status === "hypothesis";
+  return (
+    <svg width="30" height="10" viewBox="0 0 30 10" aria-hidden="true" className="shrink-0">
+      <line x1="1" y1="5" x2="29" y2="5" stroke={style.color} strokeWidth={hyp ? 2.2 : 1.6} strokeDasharray={SVG_DASH[style.dash]} strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function Legend({ nodeStyles, edgeStyles, shown }) {
+  return (
+    <div className="grid gap-x-8 gap-y-4 border-t border-line px-4 py-3.5 md:grid-cols-2" aria-label="Legend">
+      <div>
+        <div className="kicker mb-2">Points</div>
+        <ul className="grid gap-x-4 gap-y-1.5 sm:grid-cols-2">
+          {POINTS.map(([k, label, note]) => (
+            <li key={k} className="flex items-start gap-2 text-[13px] leading-snug">
+              <span className="mt-0.5"><LegendShape type={k} color={nodeStyles[k]?.color} /></span>
+              <span><span className="text-ink">{label}</span><span className="block text-[11.5px] text-muted">{note}</span></span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <div className="kicker mb-2">Lines <span className="normal-case tracking-normal text-muted">(solid: fact or calculated · dashed: proposal, nobody contacted)</span></div>
+        <ul className="space-y-1.5">
+          {LINES.map(([k, label, note]) => edgeStyles[k] && (
+            <li key={k} className={`flex items-start gap-2 text-[13px] leading-snug ${shown.includes(k) ? "" : "opacity-40"}`}>
+              <span className="mt-1"><LegendLine style={edgeStyles[k]} /></span>
+              <span>
+                <span className="text-ink">{label}</span>
+                <span className="ml-1.5 rounded-sm border border-line px-1 text-[10.5px] uppercase tracking-wide text-muted">{BASIS[edgeStyles[k].status] ?? edgeStyles[k].status}</span>
+                <span className="block text-[11.5px] text-muted">{note}{shown.includes(k) ? "" : " (hidden by the filter)"}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 /** On the desk the graph page shows a still figure; the live, draggable graph runs only when the page is open. */
 function GraphPreview() {
   const nodes = [[150, 120, "Njord X"], [420, 90, "EmbeddedArt"], [650, 170, "Knowit"], [280, 300, "Lassen"], [560, 330, "Nexer"],
@@ -160,7 +233,7 @@ function GraphFull() {
   const edgeStyles = useMemo(() => Object.fromEntries(Object.entries(meta.edge_styles).map(([k, v]) => [k, { ...v, color: EDGE_COLOURS[k] ?? v.color }])), [meta]);
   const allTypes = Object.keys(edgeStyles);
   const [focus, setFocus] = useState(companyId);
-  const [types, setTypes] = useState(allTypes);
+  const [types, setTypes] = useState(["HAS_CAPABILITY"]); // opens on the evidenced capabilities; the other lines are one click away
   const [selected, setSelected] = useState(null);
   const query = useQuery({ queryKey: ["graph", focus, [...types].sort().join(",")], queryFn: () => api.graph(focus, types), placeholderData: (prev) => prev });
   const styles = useMemo(() => ({ node: nodeStyles, edge: edgeStyles }), [meta]);
@@ -201,14 +274,10 @@ function GraphFull() {
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
             <div className="card overflow-hidden">
               <Canvas data={d} selected={current?.id} picked={nodeMap.has(selected) ? selected : null} onSelect={setSelected} styles={styles} />
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-line px-4 py-2.5">
-                <span className="meta tabular-nums">{d.nodes.length} nodes · {d.links.length} relationships</span>
-                {Object.entries(nodeStyles).map(([k, v]) => (
-                  <span key={k} className="flex items-center gap-1.5 text-[11.5px] text-ink2">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: v.color }} />{k === "application" ? "potential application" : k} <span className="text-muted">({SHAPE_NOTE[k]})</span>
-                  </span>
-                ))}
+              <div className="border-t border-line px-4 py-2">
+                <span className="meta tabular-nums">{d.nodes.length} points · {d.links.length} lines. Click a point to see its lines and why each one is there.</span>
               </div>
+              <Legend nodeStyles={nodeStyles} edgeStyles={edgeStyles} shown={types} />
             </div>
 
             <div className="space-y-3">

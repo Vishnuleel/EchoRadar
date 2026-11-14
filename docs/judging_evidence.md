@@ -13,6 +13,9 @@ rank the scattered sources against it, going deepest on testing, funding and par
 - Evidence: the brief, quoted; what we observed in the public data (75 of 92 Vinnova calls already closed, 9 of 11
   events already past, 11 of 56 directory entries naming no technology, about a third of members not in the
   public directory). Symptoms are separated from causes in `docs/problem_validation.md`.
+- The symptom measured, not assumed: of the 75 calls that closed in the last 12 months, 28 fitted at least one
+  member's public profile and 23 members had at least one (Staff desk; per member on the radar, for example three
+  for EmbeddedArt). It shows the opportunities existed; it does not show anyone missed them.
 - Gap: no interviews yet. Every assumption that only members can confirm is marked as an assumption.
 
 ## Feasibility (15%)
@@ -31,8 +34,8 @@ survive re-reading, a random audit, and a re-read that never saves silently.
 **What ran, was tested or was shown.**
 
 - Shown live: the profiling agents re-reading Njord X's directory page and website (about 15 s, nothing saved);
-  ranking that responds to a changed priority; Ask NEXUS answering, declining and refusing.
-- Tested: 158 automated tests pass, 3 of them live against OpenAlex, Vinnova and the member directory
+  ranking that responds to a changed priority; Ask EchoRadar answering, declining and refusing.
+- Tested: 172 automated tests pass, 3 of them live against OpenAlex, Vinnova and the member directory
   (`data/test_results.json`, Evaluation page). 60 of 60 labelled boundary questions run through the real pipeline.
   40 random profile facts audited: 36 supported, 4 partly, 0 wrong.
 - Structure: agents, engine, API and interface are separate (`docs/architecture.md`); the answers are built from
@@ -50,16 +53,21 @@ Blue Science Park staff get shared interests and connections worth facilitating.
 - Checked: by counting (the worked comparison in `docs/user_value_evaluation.md`), not with users. Drawbacks are
   listed there: the time saving is not measured, recall is unknown, and Njord X has not confirmed its profile.
 - Gap: no member has rated a finding yet. The ratings are built in and counted on the Evaluation page.
+- Ready to close the gap: the **Task test** page times the brief's own task without and with EchoRadar (alternating
+  order, role only, practice runs excluded) and feeds the Evaluation page. Run it with Blue Science Park staff and
+  any member at the event.
 
 ## Innovation (10%)
 
-**What is new.** Most recommenders suggest similar companies. NEXUS proposes members whose different capabilities
+**What is new.** Most recommenders suggest similar companies. EchoRadar proposes members whose different capabilities
 complement each other (77 written capability relations, gated by a shared application area), including
 three-company combinations, and connects each proposal to an open call, research and a test environment in an
 Innovation Blueprint. Everything rests on quoted public evidence and is labelled as a hypothesis.
 
 - Evidence: on 36 team-labelled pairs the complementarity ranking scores precision@5 1.0 against 0.4 for a
   similarity-only baseline (Evaluation page). The caveat is on the page: the team also wrote the relation table.
+- Complete the team: for every role a proposal lacks, EchoRadar names members elsewhere in the park with public evidence
+  of it (all 30 missing roles are covered by at least one member), and names the one real gap in the ecosystem.
 
 ## Presentation and demo (10%)
 
@@ -92,15 +100,16 @@ does not show when the first version was written.
 | Is this an LLM? | No language model writes any answer or profile. Extraction and answers are rules plus a multilingual embedding model for similarity. Two optional Gemini paths exist and are off by default; both fall back to the rules. |
 | How do you know the profiles are right? | Every fact shows the sentence it came from. A random sample of 40 was checked: 36 supported, 4 partly, none wrong. The companies themselves have not reviewed them yet; that is the pilot. |
 | What if a website tries to manipulate the agent? | Sentences that read like instructions are set aside before extraction (visible as the "Boundary filter" step) and logged; there is no model reading them that could obey. Tested with a planted page. |
-| How does it stay current? | A monitor re-checks each source on its own interval and records what changed; any profile can be re-read on demand, which shows what is new or no longer found before anything is saved. |
+| How does it stay current? | While the site runs, a background worker wakes every 15 minutes and re-checks the sources that are due (each has its own interval), records what changed, re-ranks when something did, and the open page refreshes its data without a reload; any profile can be re-read on demand, which shows what is new or no longer found before anything is saved. |
 | Does it scale to 40+ members? | It already holds all 56 public members. Re-ranking takes about a second; the limit is profile depth (5 of 56 websites read), not compute. |
 | Is a company told it is eligible? | Never. Each call shows Vinnova's own text and "eligibility has not been checked"; eligibility questions are referred to staff. |
 | What can another company see about us? | Only public facts. Refinements, saved items, ratings and questions stay with the company (tested); sharing refinements is opt-in. Sign-in is simulated in the demo and labelled as such. |
 | What did you test with real users? | Nothing yet, and we do not claim a time saving. The comparison we show is counted, not timed. |
-| What would you build next? | The pilot: all member websites, member review of profiles, ratings, staff rating of proposals; then real sign-in and a "what changed this week" view per member. |
+| What would you build next? | The pilot: all member websites, member review of profiles, ratings, staff rating of proposals; then real sign-in and a "what changed since your last visit" view per member. |
 
 ## Before the presentation
 
+0. **Run the Task test** with at least two or three people (Blue Science Park staff, a member, a mentor).
 1. **Record a backup video** of the demo script on the demo machine (Windows 11: Snipping Tool's Record, or
    Game Bar with Win+Alt+R). The jury counts "a recorded backup demo" as evidence.
 2. Rehearse the script twice against a clock.

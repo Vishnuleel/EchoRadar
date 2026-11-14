@@ -257,7 +257,7 @@ def build_profile(member: MemberRecord, crawl: CrawlResult | None = None, llm=No
             classification="INFERENCE", confidence=round(min(0.6, 0.25 + 0.1 * len(caps)), 2),
             verification_status="inferred",
             evidence_url=first[1],
-            evidence_text=f"Inferred by NEXUS from evidenced capabilities ({names}). "
+            evidence_text=f"Inferred by EchoRadar from evidenced capabilities ({names}). "
                           f"Not stated by the company. Domain key: {domain}",
             source_type="derived", retrieved_at=first[3]))
 

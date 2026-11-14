@@ -8,6 +8,7 @@ import Ask from "./pages/Ask";
 import Staff from "./pages/Staff";
 import Overview from "./pages/Overview";
 import Evaluation from "./pages/Evaluation";
+import TaskTest from "./pages/TaskTest";
 
 const GraphPage = lazy(() => import("./pages/Graph")); // the force-graph library is only loaded when needed
 function Graph(props) {
@@ -16,15 +17,16 @@ function Graph(props) {
 
 /** The paper, page by page. `page` is the printed page number. */
 export const SECTIONS = {
-  front: { path: "/front", title: "This week", kicker: "Front page", page: 1, Comp: Home },
+  front: { path: "/front", title: "Latest", kicker: "Front page", page: 1, Comp: Home },
   radar: { path: "/radar", title: "Opportunity Radar", kicker: "Opportunities", page: 2, Comp: Radar },
   dna: { path: "/dna", title: "Company profile", kicker: "Profile", page: 3, Comp: CompanyDNA },
   blueprint: { path: "/blueprint", title: "Innovation Blueprint", kicker: "Briefs", page: 4, Comp: Blueprint },
-  ask: { path: "/ask", title: "Ask NEXUS", kicker: "Inquiries", page: 5, Comp: Ask },
+  ask: { path: "/ask", title: "Ask EchoRadar", kicker: "Inquiries", page: 5, Comp: Ask },
   graph: { path: "/graph", title: "Connections graph", kicker: "Connections", page: 6, Comp: Graph },
   staff: { path: "/staff", title: "Staff desk", kicker: "Blue Science Park", page: 7, Comp: Staff },
   overview: { path: "/overview", title: "Overview", kicker: "Back page", page: 8, Comp: Overview },
   evaluation: { path: "/evaluation", title: "Method and evaluation", kicker: "About this paper", page: null, Comp: Evaluation },
+  study: { path: "/study", title: "Task test", kicker: "For testers", page: null, Comp: TaskTest },
 };
 export const ORDER = ["front", "radar", "dna", "blueprint", "ask", "graph", "staff", "overview"];
 
@@ -37,7 +39,7 @@ export const spreadPages = (k) => [k > 0 ? SHEETS[k - 1][1] : null, k < SHEETS.l
 
 /** The spread on which a section lies. */
 export function spreadOf(id) {
-  if (id === "evaluation") return SHEETS.length;
+  if (id === "evaluation" || id === "study") return SHEETS.length;
   for (let k = 0; k < SPREADS; k++) if (spreadPages(k).includes(id)) return k;
   return 0;
 }

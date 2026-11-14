@@ -61,7 +61,7 @@ bluesciencepark.se, mtcos.se, member websites and (once) huggingface.co for the 
 | Phase | Content |
 |---|---|
 | 1. Pilot (weeks 1–4) | Read all members' websites; staff review of taxonomy; 5 members review their profiles; collect ratings |
-| 2. Hardening (weeks 5–8) | Real sign-in (for example Microsoft Entra ID; token mode exists), register `python -m nexus.monitor --loop` as a service, show change events per member ("what changed this week"), e-mail digest |
+| 2. Hardening (weeks 5–8) | Real sign-in (for example Microsoft Entra ID; token mode exists), run the API as a service (it already re-checks the sources itself while it runs), show change events per member ("what changed since your last visit"), e-mail digest |
 | 3. Breadth (weeks 9–12) | More funders (EU Funding & Tenders, Energimyndigheten), more event sources, member news feeds |
 | 4. Scale | PostgreSQL + pgvector behind the existing FastAPI layer; hosted deployment of the React interface |
 

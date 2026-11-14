@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { CheckCircle2, CircleSlash, Clock, Gauge, Layers, ShieldCheck, Star, XCircle } from "lucide-react";
 import { api } from "../api";
 import { Card, Empty, Markdown, Notice, PageHeader, QueryState, SectionTitle, Stat, Tabs } from "../components/ui";
 
 const pct = (x) => (x === null || x === undefined ? "n/a" : `${(x * 100).toFixed(0)}%`);
 const METRICS = ["precision@5", "precision@10", "recall@10", "ndcg@10", "spearman"];
-const SERIES = [{ key: "nexus", name: "NEXUS complementarity", color: "rgb(var(--brand))" }, { key: "baseline", name: "Similarity baseline", color: "rgb(var(--hyp))" }];
+const SERIES = [{ key: "nexus", name: "EchoRadar complementarity", color: "rgb(var(--brand))" }, { key: "baseline", name: "Similarity baseline", color: "rgb(var(--hyp))" }];
 
 /** Grouped bars on a shared -min..1 scale with a zero line (Spearman can be negative). */
 function MetricChart({ cmp }) {
@@ -62,13 +63,13 @@ function Baseline({ cmp }) {
           <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <Card><MetricChart cmp={cmp} /></Card>
             <div className="grid content-start gap-3">
-              <Stat value={cmp.nexus.mean_label_top5} label="Mean label of top-5 (0-2), NEXUS" tone="brand" />
+              <Stat value={cmp.nexus.mean_label_top5} label="Mean label of top-5 (0-2), EchoRadar" tone="brand" />
               <Stat value={cmp.baseline.mean_label_top5} label="Mean label of top-5 (0-2), baseline" tone="hyp" />
             </div>
           </div>
           <div className="table-wrap max-h-[440px]">
             <table className="table">
-              <thead><tr><th>Company A</th><th>Company B</th><th>Label (0-2)</th><th>Labelling rationale</th><th className="text-right">NEXUS complementarity</th><th className="text-right">Baseline cosine</th></tr></thead>
+              <thead><tr><th>Company A</th><th>Company B</th><th>Label (0-2)</th><th>Labelling rationale</th><th className="text-right">EchoRadar complementarity</th><th className="text-right">Baseline cosine</th></tr></thead>
               <tbody>
                 {rows.map((r, i) => (
                   <tr key={i}>
@@ -165,14 +166,16 @@ function Tests({ r }) {
 }
 
 /** The challenge brief's "quality and boundary check": profile accuracy and interaction limits, measured. */
-function Quality({ b, a, marks }) {
+const mmss = (s) => (s == null ? "n/a" : `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`);
+
+function Quality({ b, a, marks, st }) {
   const [onlyFails, setOnlyFails] = useState(false);
   const rows = onlyFails ? b.rows.filter((r) => !r.passed) : b.rows;
   const s = a?.summary;
   return (
     <div className="space-y-8">
       <section className="space-y-3">
-        <SectionTitle hint="Each question is sent through the real Ask NEXUS pipeline as an anonymous visitor (nothing is stored), every time this page is built.">
+        <SectionTitle hint="Each question is sent through the real Ask EchoRadar pipeline as an anonymous visitor (nothing is stored), every time this page is built.">
           Interaction limits: {b.passed} of {b.n} questions handled as labelled
         </SectionTitle>
         <Notice><b className="text-ink">Read with care.</b> {b.caveat}<br />Labelled by: {b.labelled_by}</Notice>
@@ -232,6 +235,34 @@ function Quality({ b, a, marks }) {
         </section>
       )}
 
+      <section className="space-y-3">
+        <SectionTitle hint="The challenge's example task, done once without and once with EchoRadar by the same person, in alternating order. Practice runs are not counted.">
+          Timed task tests
+        </SectionTitle>
+        {!st || !st.n ? (
+          <p className="font-sans text-[14px] text-ink2">No task test has been run yet; no time saving is claimed. Run one from <Link to="/study" className="link">Task test</Link>.</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <Stat value={st.n} label="Sessions" sub={Object.entries(st.roles).filter(([, v]) => v).map(([k, v]) => `${v} ${k.replace(/_/g, " ")}`).join(", ")} />
+              <Stat value={mmss(st.without.median_seconds)} label="Median time without EchoRadar" sub={`${st.without.found} found, ${st.without.gave_up} gave up`} />
+              <Stat value={mmss(st.with.median_seconds)} label="Median time with EchoRadar" sub={`${st.with.found} found, ${st.with.gave_up} gave up`} />
+              <Stat value={st.paired_median_saving_seconds == null ? "n/a" : mmss(Math.abs(st.paired_median_saving_seconds))}
+                    label={st.paired_median_saving_seconds != null && st.paired_median_saving_seconds < 0 ? "Median time lost per person" : "Median time saved per person"}
+                    sub={`${st.paired_n} people who found both`} />
+            </div>
+            <p className="font-sans text-[14px] text-ink2">
+              Fit judged by the participants: without EchoRadar {st.without.fit.yes} yes, {st.without.fit.partly} partly, {st.without.fit.no} no;
+              with EchoRadar {st.with.fit.yes} yes, {st.with.fit.partly} partly, {st.with.fit.no} no. Next time they would use:
+              EchoRadar {st.prefer.nexus}, their usual way {st.prefer.without}, either {st.prefer.either}.
+              Order: {st.order.without_first} started without EchoRadar, {st.order.with_first} with it.
+            </p>
+            {st.comments.length > 0 && <ul className="space-y-1">{st.comments.map((c, i) => <li key={i} className="quote !my-0">"{c}"</li>)}</ul>}
+            <p className="meta">A handful of people is a small sample; it shows what happened, not what would generally happen.</p>
+          </>
+        )}
+      </section>
+
       <section className="space-y-2">
         <SectionTitle>Recommendation relevance from users</SectionTitle>
         <p className="font-sans text-[14px] text-ink2">
@@ -274,7 +305,7 @@ export default function Evaluation() {
                                                          { id: "baseline", label: "Baseline comparison" }, { id: "coverage", label: "Coverage and freshness" },
                                                          { id: "tests", label: "Automated tests", count: d.tests?.total }, { id: "method", label: "Method and limitations" }]} />
               <div className="animate-rise" key={tab}>
-                {tab === "quality" && <Quality b={d.boundaries} a={d.profile_audit} marks={d.radar_marks ?? {}} />}
+                {tab === "quality" && <Quality b={d.boundaries} a={d.profile_audit} marks={d.radar_marks ?? {}} st={d.study} />}
                 {tab === "baseline" && <Baseline cmp={d.comparison} />}
                 {tab === "coverage" && <Coverage d={d} />}
                 {tab === "tests" && <Tests r={d.tests} />}

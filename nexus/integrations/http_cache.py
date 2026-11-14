@@ -22,7 +22,7 @@ from nexus.utils.logging import get_logger
 from nexus.utils.validators import utcnow
 
 log = get_logger(__name__)
-USER_AGENT = "NEXUS-innovation-prototype/0.1 (BUILD Hackathon research prototype)"
+USER_AGENT = "EchoRadar-innovation-prototype/0.1 (BUILD Hackathon research prototype)"
 
 
 @dataclass

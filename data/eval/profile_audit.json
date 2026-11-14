@@ -1,7 +1,7 @@
 {
  "drawn": "40 of the stored capability FACT claims, drawn with random.Random(20261114) from the claims ordered by id, on 2026-11-14.",
  "population": 106,
- "labelled_by": "NEXUS development team (AI-assisted review of each quote against the capability name). NOT reviewed by the companies or by Blue Science Park.",
+ "labelled_by": "EchoRadar development team (AI-assisted review of each quote against the capability name). NOT reviewed by the companies or by Blue Science Park.",
  "scale": {
   "supported": "the quote states this capability as a current activity of this company",
   "partly": "related, but the quote is too broad or describes a user rather than a provider",

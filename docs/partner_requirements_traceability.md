@@ -38,7 +38,7 @@ Status: **Done** = implemented and exercised, **Partial** = implemented with a s
 | Events | Partial | Format, audience, date, place parsed; all dated events were past at retrieval, so only recurring formats are offered |
 | Knowledge and trends | Partial | Research (OpenAlex) and regional news (BSP, MTC); no industry news; no "what changed" narrative |
 | Personalised member monitoring | Done (prototype) | Matching, refinement, feedback, potential connections; scheduled monitoring with change events (`nexus/monitor.py`); "Read the sources live" on each profile shows what changed since the stored profile |
-| Presentation and interaction | Done | A personalised weekly paper (front page "This week"), the radar, and Ask NEXUS (conversational, answers built from records) |
+| Presentation and interaction | Done | A personalised paper per member (front page "Latest"), kept current automatically while the site runs, the radar, and Ask EchoRadar (conversational, answers built from records) |
 
 ## Boundaries
 
@@ -51,7 +51,7 @@ Status: **Done** = implemented and exercised, **Partial** = implemented with a s
 | No disclosure of other companies' non-public data | Done | `security/privacy.py` |
 | Distinguish information from advice, eligibility decisions, commitments | Done | Disclaimer on results; eligibility questions escalated |
 | Refer human decisions to staff | Done | Category `escalation` with the public contact route |
-| Finding support or contact routes within Blue Science Park | Done | Question router: contact, location, opening hours, staff and membership questions get the park's contact page; what NEXUS does not store is said, not guessed |
+| Finding support or contact routes within Blue Science Park | Done | Question router: contact, location, opening hours, staff and membership questions get the park's contact page; what EchoRadar does not store is said, not guessed |
 | Explain the boundaries and demonstrate that they work | Done | `docs/architecture.md` (how); Evaluation page, "Quality and boundary check": 60 labelled questions run through the real pipeline, 60 of 60 handled as labelled on 2026-11-14 (labels written by the team) |
 
 ## Deliverables

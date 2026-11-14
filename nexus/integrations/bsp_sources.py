@@ -32,6 +32,31 @@ _OCCASION = re.compile(
     r"Tid: (?P<time>\d{1,2}[:.]\d{2} ?[-–] ?\d{1,2}[:.]\d{2})(?: \([^)]*\))?(?: Plats: (?P<place>.+?)(?= Föreläsningen| Under | Hur | Vad | Många |$))?")
 
 
+# Sponsors and partners are recorded only when a page names them after one of these phrases.
+_SPONSOR = re.compile(r"(?i:huvudsponsor(?:er)?|sponsorer|sponsor|sponsras av|sponsrad av|sponsrat av|sponsored by|sponsors?)"
+                      r"\s*(?i::|är|is|are)?\s+(?P<names>[A-ZÅÄÖ][^.;!?]{1,140})")
+_PARTNER = re.compile(r"(?i:i samarbete med|in collaboration with|tillsammans med|together with|med stöd av|supported by|"
+                      r"arrangeras av [^.;!?]{2,80}? och)\s+(?P<names>[A-ZÅÄÖ][^.;!?]{1,140})")
+_NAME_STOP = re.compile(r"\s(?:som|där|för att|och bjuder|på |i |under |när |with |who |where |at )", re.I)
+
+
+def find_sponsors(text: str) -> list[dict]:
+    """Organisations a page names as sponsors or partners of an event: [{name, role, quote}].
+
+    Only proper names that follow an explicit phrase are kept ("sponsras av Saab och NKT"). Unnamed mentions
+    such as "tillsammans med lokala samarbetspartners" give nothing: no sponsor is ever guessed."""
+    out, seen = [], set()
+    for role, pat in (("sponsor", _SPONSOR), ("partner", _PARTNER)):
+        for m in pat.finditer(text or ""):
+            names = _NAME_STOP.split(m.group("names"))[0]
+            for name in re.split(r",\s*|\s+och\s+|\s+and\s+|\s+samt\s+", names):
+                name = name.strip(" .,:-")
+                if 2 <= len(name) <= 60 and name[0].isupper() and name.lower() not in seen:
+                    seen.add(name.lower())
+                    out.append({"name": name, "role": role, "quote": " ".join(m.group(0).split())[:200]})
+    return out
+
+
 def _flat_text(html: str) -> str:
     soup = BeautifulSoup(html, "html.parser")
     for t in soup(["script", "style", "noscript", "nav", "header", "footer", "form"]):
@@ -49,16 +74,23 @@ def parse_event_programme(html: str, url: str, retrieved_at: datetime) -> list[d
     headings = [h for h in headings if 6 <= len(h) <= 140 and not re.search(r"tillfällen|Talare|^När", h)]
     events, seen = [], set()
     matches = list(_OCCASION.finditer(text))
+
+    def title_before(m):
+        """The page heading that ends last before the date. A heading that is only the tail of a longer one
+        (an organisation name closing a title) loses to the longer heading."""
+        title, best, end = "", -1, -1
+        for h in headings:
+            pos = text.rfind(h, max(0, m.start() - 260), m.start())
+            if pos >= 0 and (pos + len(h), len(h)) > (end, len(title)):
+                title, best, end = h, pos, pos + len(h)
+        return title, best
+
+    titles = [title_before(m) for m in matches]
     for i, m in enumerate(matches):
         after = text[m.end(): matches[i + 1].start() if i + 1 < len(matches) else m.end() + 500]
         if "lorem ipsum" in after[:200].lower():
             continue  # template placeholder block left on the page, not a real event
-        # the title is the page heading that appears last before the date
-        title, best = "", -1
-        for h in headings:
-            pos = text.rfind(h, max(0, m.start() - 260), m.start())
-            if pos > best:
-                title, best = h, pos
+        title, best = titles[i]
         month = _SV_MONTHS.get(m.group("month")[:3].lower())
         if not title or len(title) < 6 or month is None:
             continue
@@ -69,6 +101,13 @@ def parse_event_programme(html: str, url: str, retrieved_at: datetime) -> list[d
         h, mi = re.split(r"[:.]", m.group("time").split("-")[0].split("–")[0].strip())[:2]
         starts = datetime(retrieved_at.year, month, int(m.group("day")), int(h), int(mi))
         desc = re.split(r" Till anmälan| Talare ", after.strip())[0].strip()
+        # The speaker line closes an occasion's block: "... Till anmälan Talare <name(s)> <organisation>", and the
+        # next occasion's title follows it (checked against the 4 November text, which names its own speaker).
+        speakers = None
+        block_end = titles[i + 1][1] if i + 1 < len(matches) and titles[i + 1][1] > m.end() else m.end() + 300
+        block = text[m.end(): block_end]
+        if " Talare " in block:
+            speakers = " ".join(block.split(" Talare ", 1)[1].split()).strip(" -")[:160] or None
         events.append({
             "key": f"bsp-onsdagslunch:{starts:%m-%d}:{title[:60].lower()}", "title": f"Onsdagslunch: {title}",
             "description": desc[:600] or None, "date_text": f"{m.group('date')}, {m.group('time')}", "starts_at": starts,
@@ -77,7 +116,8 @@ def parse_event_programme(html: str, url: str, retrieved_at: datetime) -> list[d
             "format": "in_person" if m.group("place") else "unknown",
             "audience": "Companies, public sector, academia and other actors in the Blue Science Park ecosystem "
                         "(as described on the programme page)",
-            "organiser": "Blue Science Park", "source_url": url, "retrieved_at": retrieved_at})
+            "organiser": "Blue Science Park", "speakers": speakers or None,
+            "sponsors": find_sponsors(f"{speakers or ''}. {desc}"), "source_url": url, "retrieved_at": retrieved_at})
     return events
 
 
@@ -94,7 +134,8 @@ def parse_event_overview(html: str, url: str, retrieved_at: datetime) -> list[di
             out.append({"key": f"bsp-format:{name.lower()}", "title": name, "description": m.group(1), "date_text": None,
                         "starts_at": None, "date_note": "Recurring format. No date is published on the source page.",
                         "time_text": None, "location": None, "format": "unknown", "audience": None,
-                        "organiser": organiser, "source_url": url, "retrieved_at": retrieved_at})
+                        "organiser": organiser, "speakers": None, "sponsors": find_sponsors(m.group(1)),
+                        "source_url": url, "retrieved_at": retrieved_at})
     return out
 
 

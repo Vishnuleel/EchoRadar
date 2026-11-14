@@ -1,4 +1,4 @@
-"""NEXUS Innovation Matching Engine (deterministic, no LLM).
+"""EchoRadar Innovation Matching Engine (deterministic, no LLM).
 
 Pipeline
 1. Capability normalisation   - free text -> taxonomy capabilities (keywords + embeddings)

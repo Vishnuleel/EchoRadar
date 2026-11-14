@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { SECTIONS, SHEETS, SPREADS, parseLocation, spreadLabel, spreadOf, spreadPages, spreadPath } from "../sections";
 import { useSession } from "../store";
+import DownloadPaper from "./DownloadPaper";
 
 /* Motion (see the motion-design guidance):
  *   page turn      - an on-screen object changing position: ease-in-out-cubic, illustrative length (rare action)
@@ -76,7 +77,7 @@ function RunningHead({ id }) {
   const s = SECTIONS[id];
   return (
     <div className="flex items-end justify-between border-b border-ink pb-1.5 font-sans text-[13px] text-ink2">
-      <span className="font-serif text-[17px] font-bold text-ink">NEXUS Weekly</span>
+      <span className="font-serif text-[17px] font-bold text-ink">EchoRadar</span>
       <span className="uppercase tracking-[0.14em]">{s.kicker}</span>
       <span>{longDate()}{s.page ? ` · Page ${s.page}` : ""}</span>
     </div>
@@ -395,8 +396,11 @@ export default function Paper() {
         <button type="button" onClick={() => go(spread - 1)} disabled={spread === 0} aria-label="Previous page"
                 className="btn !px-2 disabled:opacity-30"><ChevronLeft size={16} /></button>
         <Contents spread={spread} go={go} />
-        <button type="button" onClick={() => go(spread + 1)} disabled={spread === SPREADS - 1} aria-label="Next page"
+        <span className="flex items-center gap-2">
+          <DownloadPaper compact />
+          <button type="button" onClick={() => go(spread + 1)} disabled={spread === SPREADS - 1} aria-label="Next page"
                 className="btn !px-2 disabled:opacity-30"><ChevronRight size={16} /></button>
+        </span>
       </div>
     </div>
     {/* outside the desk, so gestures while reading never turn the pages underneath */}

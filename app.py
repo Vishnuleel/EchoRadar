@@ -1,4 +1,4 @@
-"""NEXUS - The Innovation Connection Engine. Entry point: `streamlit run app.py`."""
+"""EchoRadar - The Innovation Connection Engine. Entry point: `streamlit run app.py`."""
 import streamlit as st
 
 PAGES = [

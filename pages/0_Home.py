@@ -14,8 +14,8 @@ cid = acting or st.session_state["dna_company"]
 aud = "owner" if acting is not None and acting == cid else "public"
 
 st.markdown(f"""<div class="nx-hero"><div class="nx-eyebrow">Blue Science Park - Virtual Science Park</div>
-<h1>NEXUS - an AI radar for member companies</h1>
-<p>What should <b>{ui.esc(names[cid])}</b> know this week? NEXUS builds a profile from public sources, watches funding,
+<h1>EchoRadar - an AI radar for member companies</h1>
+<p>What should <b>{ui.esc(names[cid])}</b> know this week? EchoRadar builds a profile from public sources, watches funding,
 test environments, events and research, finds members whose capabilities <b>complement</b> yours, and shows the
 evidence and a next step for every finding.</p></div>""", unsafe_allow_html=True)
 if acting is None:

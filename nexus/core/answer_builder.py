@@ -1,7 +1,7 @@
-"""Ask NEXUS answers, one builder per kind of question (see nexus.core.question_router).
+"""Ask EchoRadar answers, one builder per kind of question (see nexus.core.question_router).
 
 Everything shown comes from stored records or from the fixed sentences in this file. Records keep
-their source links; counts are counted, not estimated; what NEXUS does not store is said plainly.
+their source links; counts are counted, not estimated; what EchoRadar does not store is said plainly.
 """
 from __future__ import annotations
 
@@ -31,11 +31,11 @@ HELP = {
                 "Ask about funding, test environments, events, research and news, about a member company, or about who could "
                 "work on something. You can name a period, such as next month, and compare two members. Answers are put "
                 "together from stored, sourced records."),
-    "front": ("This week", "/", "The front page: the findings of the week that fit the company you read as best, and the "
+    "front": ("Latest", "/", "The front page: the latest findings that fit the company you read as best, and the "
                                 "strongest partner proposals."),
     "radar": ("Opportunity Radar", "/radar", "Funding, test environments, events, research and regional news, ranked for one "
                                              "company. Each item says why it fits, where it comes from and what to do next."),
-    "dna": ("Company profile", "/dna", "What public sources say about a company, what NEXUS infers from that, and what the "
+    "dna": ("Company profile", "/dna", "What public sources say about a company, what EchoRadar infers from that, and what the "
                                        "company has added itself. Every fact links to the page it was copied from."),
     "blueprint": ("Innovation Blueprint", "/blueprint", "A proposed collaboration between two or three members: what each one "
                                                         "brings, the evidence, the score and what is still missing. A proposal, "
@@ -46,13 +46,13 @@ HELP = {
                                       "facilitating, and where profiles need attention."),
     "overview": ("Overview", "/overview", "Counts for the whole ecosystem, from stored records: capabilities, funding calls, "
                                           "research and the strongest proposals."),
-    "ask": ("Ask NEXUS", "/ask", "Questions in, sourced records out. A boundary check comes first, and no language model writes "
+    "ask": ("Ask EchoRadar", "/ask", "Questions in, sourced records out. A boundary check comes first, and no language model writes "
                                  "the answers."),
     "FACT": ("The FACT label", None, "A statement found in a public source. The quoted sentence is the evidence."),
-    "INFERENCE": ("The INFERENCE label", None, "Derived by NEXUS from evidenced facts, for example a likely interest. Never "
+    "INFERENCE": ("The INFERENCE label", None, "Derived by EchoRadar from evidenced facts, for example a likely interest. Never "
                                                "presented as a fact and never used as evidence in rankings."),
     "USER": ("The USER label", None, "Added by the company itself. Not independently verified."),
-    "HYPOTHESIS": ("The HYPOTHESIS label", None, "A collaboration NEXUS proposes from public information. No company has been "
+    "HYPOTHESIS": ("The HYPOTHESIS label", None, "A collaboration EchoRadar proposes from public information. No company has been "
                                                  "contacted and nothing has been agreed."),
 }
 
@@ -71,7 +71,7 @@ def _contact_rows() -> list[dict]:
             {"label": "Email", "value": CONTACT_EMAIL_PUBLIC, "url": f"mailto:{CONTACT_EMAIL_PUBLIC}"}]
 
 
-_CONTACT_NOTE = ("The email address was copied from the contact page when NEXUS was set up. NEXUS does not re-check it "
+_CONTACT_NOTE = ("The email address was copied from the contact page when EchoRadar was set up. EchoRadar does not re-check it "
                  "automatically, so the contact page is the place to confirm it.")
 
 
@@ -83,19 +83,19 @@ def park(s: Session, route: Route) -> dict:
                     "contact page.", rows=_contact_rows(), note=_CONTACT_NOTE)
     if topic == "about":
         n = len(repo.companies(s))
-        return card("park", "Blue Science Park", f"Blue Science Park is the science park whose public member directory NEXUS "
-                    f"reads. NEXUS tracks {n} organisations listed there, with their public capabilities, and the funding, "
+        return card("park", "Blue Science Park", f"Blue Science Park is the science park whose public member directory EchoRadar "
+                    f"reads. EchoRadar tracks {n} organisations listed there, with their public capabilities, and the funding, "
                     "test environments, events and research around them.",
                     rows=[{"label": "Website", "value": BSP.replace("https://", ""), "url": BSP + "/"}] + _contact_rows()[:1])
     if topic == "membership":
-        return card("park", "Membership", "Membership is decided by Blue Science Park, not by NEXUS. The park's staff can tell "
+        return card("park", "Membership", "Membership is decided by Blue Science Park, not by EchoRadar. The park's staff can tell "
                     "you how it works.", rows=_contact_rows(), note=_CONTACT_NOTE)
     what = {"location": "address", "hours": "opening hours", "staff": "staff list"}.get(topic, "details")
-    return card("park", f"Blue Science Park's {what}", f"NEXUS does not store Blue Science Park's {what}, so it will not "
+    return card("park", f"Blue Science Park's {what}", f"EchoRadar does not store Blue Science Park's {what}, so it will not "
                 "guess. The park's contact page is the place to ask.", rows=_contact_rows()[:1])
 
 
-# ---- help with NEXUS ----------------------------------------------------------------------------
+# ---- help with EchoRadar ----------------------------------------------------------------------------
 def help_card(route: Route) -> dict:
     title, href, text = HELP.get(route.help or "general", HELP["general"])
     c = card("help", title, text)
@@ -131,7 +131,7 @@ def company_card(s: Session, c: Company, asks_contact: bool = False) -> dict:
     out["note"] = (f"Checked against the official directory profile on {c.last_verified_at:%Y-%m-%d}."
                    if c.last_verified_at else "Not yet checked against the official directory profile.")
     if asks_contact:
-        out["notice"] = ("NEXUS stores no personal contact details. The company's website and its directory profile, linked "
+        out["notice"] = ("EchoRadar stores no personal contact details. The company's website and its directory profile, linked "
                          "here, are the way to reach it.")
     if not caps:
         out["notice"] = (out.get("notice", "") + " " if out.get("notice") else "") + \
@@ -355,18 +355,18 @@ def count_answer(s: Session, route: Route, query: str, embedder, acting: int | N
         items, _ = records(s, route, allowed, query, embedder, acting, now)
         undated = len([e for e in s.scalars(select(Event)) if e.starts_at is None]) if "event" in allowed and route.window else 0
         return (card("count", f"{n} {label}{_period_phrase(route)}",
-                     "Counted from the records NEXUS has stored: " + ", ".join(f"{v} {KIND_LABEL[k]}" for k, v in total.items())
+                     "Counted from the records EchoRadar has stored: " + ", ".join(f"{v} {KIND_LABEL[k]}" for k, v in total.items())
                      + "." + (f" {undated} more event{'s have' if undated != 1 else ' has'} no published date and cannot be "
                               "placed in a period." if undated else ""), number=n), [], items)
     n = len(repo.companies(s))
-    return (card("count", f"NEXUS tracks {n} organisations from the Blue Science Park member directory",
+    return (card("count", f"EchoRadar tracks {n} organisations from the Blue Science Park member directory",
                  "Name a technology to count the members with public evidence of it, for example: how many members work "
                  "with sonar?", number=n), [], [])
 
 
 def apply_card() -> dict:
     return card("apply", "Applying for funding", "Each funding call has its own application page with the criteria and the "
-                "deadline. NEXUS links to them but cannot check eligibility or apply for you. Blue Science Park staff can "
+                "deadline. EchoRadar links to them but cannot check eligibility or apply for you. Blue Science Park staff can "
                 "help you prepare an application.", rows=_contact_rows()[:1])
 
 

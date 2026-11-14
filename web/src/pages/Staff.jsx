@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../api";
 import { useSession } from "../store";
+import TeamGaps from "../components/TeamGaps";
 import { BadgeCheck, CircleDashed, GitCompareArrows } from "lucide-react";
 import { Badge, Bar, Empty, HypothesisCard, HypothesisNotice, Notice, PageHeader, QueryState, SectionTitle, SourceLink, Translated, day, stamp } from "../components/ui";
 
@@ -142,7 +143,7 @@ function DirectoryCoverage() {
   );
 }
 
-export default function Staff() {
+export default function Staff({ preview }) {
   const { setViewing } = useSession();
   const navigate = useNavigate();
   const query = useQuery({ queryKey: ["staff"], queryFn: api.staff });
@@ -155,6 +156,7 @@ export default function Staff() {
         <b className="text-inf">SIMULATED:</b> this page has no staff login in the prototype. It only shows public profile data
         and anonymous aggregates; no company's private questions, saved items or ratings are exposed.
       </Notice>
+      {!preview && <div className="mb-9"><TeamGaps /></div>}
       <DirectoryCoverage />
       <Monitoring />
       <QueryState query={query}>
