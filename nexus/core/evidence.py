@@ -129,10 +129,15 @@ def validate_quote(source_id: str | None, quote: str | None, sources: dict[str, 
 
 
 def validate_source_claim(source_id: str | None, quote: str | None, sources: dict[str, Source],
-                          term: str | None = None) -> QuoteCheck:
-    """Quote check plus the current-statement check, for claims presented as source-stated facts."""
+                          term: str | None = None, allow_third_party: bool = False) -> QuoteCheck:
+    """Quote check plus the current-statement check, for claims presented as source-stated facts.
+
+    `allow_third_party` is for claims that are ABOUT other parties by nature: a market names customers,
+    a collaboration names a partner. Negated, historical and navigation text is rejected regardless.
+    """
     check = validate_quote(source_id, quote, sources)
     if not check.ok:
         return check
     status = statement_status(quote, term)
-    return QuoteCheck(status == "current", "" if status == "current" else f"statement is {status.replace('_', ' ')}")
+    ok = status == "current" or (allow_third_party and status == "third_party")
+    return QuoteCheck(ok, "" if ok else f"statement is {status.replace('_', ' ')}")

@@ -49,8 +49,11 @@ def _drain(s: Session, client: HttpClient, source: str) -> None:
 
 def refresh_company(s: Session, client: HttpClient, member: company_sources.MemberRecord, deep: bool) -> dict:
     """Generate (or refresh) one baseline profile from public information."""
+    from nexus.integrations import gemini
+
     crawl = company_sources.crawl_company_site(client, member.website) if deep and member.website else None
-    draft = company_agent.build_profile(member, crawl)
+    llm = gemini.GeminiExtractor() if crawl and gemini.enabled() else None  # optional, behind quote validation
+    draft = company_agent.build_profile(member, crawl, llm=llm)
     company = company_agent.persist_profile(s, draft)
     _drain(s, client, "company_website" if deep else "member_directory")
     for q in draft.quarantined:

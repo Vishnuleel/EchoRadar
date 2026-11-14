@@ -94,7 +94,21 @@ class ProfileDraft(BaseModel):
     rejected: list[str] = []  # statements that matched a capability but are negated, historical or about others
 
 
-def build_profile(member: MemberRecord, crawl: CrawlResult | None = None) -> ProfileDraft:
+MODEL_STATUS = "model_extracted"  # a language model proposed it; the quote was checked against the page
+_MODEL_CATEGORY = {"market": "market", "geography": "geography", "collaboration": "collaboration",
+                   "priority": "development_activity"}
+
+
+def build_profile(member: MemberRecord, crawl: CrawlResult | None = None, llm=None) -> ProfileDraft:
+    """Public profile from the directory entry and (optionally) the company's website.
+
+    Website text is read by the rule-based extractor, or, when `llm` (a GeminiExtractor) is given,
+    by the model behind quote validation. If the model is unavailable the rules are used and the
+    profile says so.
+    """
+    from nexus.core.evidence import Source
+    from nexus.integrations.gemini import GeminiError
+
     claims: list[Claim] = []
     warnings: list[str] = list(crawl.errors) if crawl else []
     quarantined: list[str] = []
@@ -119,18 +133,41 @@ def build_profile(member: MemberRecord, crawl: CrawlResult | None = None) -> Pro
     if member.industry:
         sources.append((member.industry, member.directory_url, "member_directory", member.retrieved_at))
     website_sentences = 0
+    page_text: dict[str, Source] = {}
     for page in (crawl.pages if crawl else []):
         safe, bad = filter_untrusted(page.sentences)
         quarantined.extend(f"{page.url}: {b[:200]}" for b in bad)
         for sent in safe:
             sources.append((sent, page.url, "company_website", page.retrieved_at))
             website_sentences += 1
+        if safe:
+            sid = f"S{len(page_text) + 1}"
+            page_text[sid] = Source(sid, page.url, " ".join(safe), page.retrieved_at)
     if crawl and not website_sentences:
         warnings.append("Website could not be read; profile is based on the member directory only.")
 
+    rejected: list[str] = []
+    model = None
+    if llm is not None and page_text:
+        try:
+            model = llm.extract(member.name, page_text)
+            rejected += [f"model claim rejected: {r}" for r in model.rejected]
+            warnings.append(f"Website claims were extracted by {model.model} (model-assisted); every quote was checked "
+                            f"against the page; {len(model.rejected)} proposed claim(s) rejected.")
+            sources = [x for x in sources if x[2] != "company_website"]  # the model handled the website text
+        except GeminiError as exc:
+            warnings.append(f"Model-assisted extraction unavailable ({exc}); rule-based extraction used instead.")
+
     # --- capability claims: one per (capability, distinct source URL), at most 3 per capability
     by_cap: dict[str, list[tuple[str, str, str, datetime]]] = defaultdict(list)
-    rejected: list[str] = []
+    from_model: set[tuple[str, str]] = set()
+    for c in (model.claims if model else []):
+        if c["category"] in _MODEL_CATEGORY:
+            continue
+        for cap_id, _term in tx.detect_capabilities(mask_name(c["quote"], member.name)):  # the quote, not the summary
+            if all(u != c["url"] for _, u, _, _ in by_cap[cap_id]) and len(by_cap[cap_id]) < 3:
+                by_cap[cap_id].append((c["quote"], c["url"], "company_website", c["retrieved_at"]))
+                from_model.add((cap_id, c["url"]))
     for sent, url, stype, ts in sources:
         if stype == "company_website" and (_NON_SELF_URL.search(url) or not is_self_description(sent, member.name)):
             continue  # only self-descriptive statements on the company's own offer/about pages count
@@ -148,8 +185,15 @@ def build_profile(member: MemberRecord, crawl: CrawlResult | None = None) -> Pro
             claims.append(Claim(
                 claim_text=f"Public source describes activity in: {cap.name}", claim_category="capability",
                 classification="FACT", confidence=0.9 if corroborated else (0.75 if stype == "company_website" else 0.7),
-                verification_status="corroborated" if corroborated else "source_verified",
+                verification_status="corroborated" if corroborated else
+                (MODEL_STATUS if (cap_id, url) in from_model else "source_verified"),
                 evidence_url=url, evidence_text=sent, source_type=stype, retrieved_at=ts, capability_key=cap_id))
+    for c in (model.claims if model else []):  # markets, geography, collaborations, stated priorities
+        if c["category"] in _MODEL_CATEGORY:
+            claims.append(Claim(claim_text=c["statement"] or c["quote"], claim_category=_MODEL_CATEGORY[c["category"]],
+                                classification="FACT", confidence=0.7, verification_status=MODEL_STATUS,
+                                evidence_url=c["url"], evidence_text=c["quote"], source_type="company_website",
+                                retrieved_at=c["retrieved_at"]))
 
     # --- geographical focus: the listed location plus literally stated reach
     if member.location:
@@ -180,8 +224,11 @@ def build_profile(member: MemberRecord, crawl: CrawlResult | None = None) -> Pro
     for sent, url, stype, ts in sources:
         if stype != "company_website":
             continue
-        if sent.rstrip().endswith(("...", "…")) or statement_status(sent) != "current":
+        status = statement_status(sent)
+        if sent.rstrip().endswith(("...", "…")) or status not in ("current", "third_party"):
             continue
+        if status == "third_party" and not _MARKET_RE.search(sent):
+            continue  # a market statement names customers by nature; anything else must be first-party
         if n_market < 3 and _MARKET_RE.search(sent) and not _NON_SELF_URL.search(url):
             n_market += 1
             claims.append(Claim(claim_text=sent, claim_category="market", classification="FACT", confidence=0.7,
