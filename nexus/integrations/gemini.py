@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from dataclasses import dataclass, field
 
 import requests
@@ -76,22 +77,28 @@ def enabled() -> bool:
 
 
 class GeminiExtractor:
-    def __init__(self, api_key: str | None = None, model: str | None = None, session=None, timeout: float = 60):
+    def __init__(self, api_key: str | None = None, model: str | None = None, session=None, timeout: float = 60,
+                 retries: int = 2, backoff: float = 4.0):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY", "")
         self.model = model or os.getenv("GEMINI_MODEL") or DEFAULT_MODEL
         self.session = session or requests.Session()
         self.timeout = timeout
+        self.retries, self.backoff = retries, backoff
 
     def _call(self, prompt: str) -> dict:
         if not self.api_key:
             raise GeminiError("GEMINI_API_KEY is not set")
         body = {"contents": [{"parts": [{"text": prompt}]}],
                 "generationConfig": {"responseMimeType": "application/json", "responseJsonSchema": SCHEMA}}
-        try:
-            r = self.session.post(ENDPOINT.format(model=self.model), json=body, timeout=self.timeout,
-                                  headers={"x-goog-api-key": self.api_key, "Content-Type": "application/json"})
-        except requests.RequestException as exc:
-            raise GeminiError(f"request failed: {type(exc).__name__}") from exc
+        for attempt in range(self.retries + 1):  # 429 / 503 are temporary ("high demand"): wait and retry
+            try:
+                r = self.session.post(ENDPOINT.format(model=self.model), json=body, timeout=self.timeout,
+                                      headers={"x-goog-api-key": self.api_key, "Content-Type": "application/json"})
+            except requests.RequestException as exc:
+                raise GeminiError(f"request failed: {type(exc).__name__}") from exc
+            if r.status_code not in (429, 503) or attempt == self.retries:
+                break
+            time.sleep(self.backoff * (2 ** attempt))
         if r.status_code != 200:
             raise GeminiError(f"HTTP {r.status_code}: {r.text[:200]}")
         data = r.json()

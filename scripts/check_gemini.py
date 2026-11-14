@@ -36,6 +36,9 @@ if __name__ == "__main__":
         sys.exit(f"Gemini call failed: {type(exc).__name__}: {exc}")
     for w in model.warnings:
         print("  note:", w)
+    if not any("model-assisted" in w for w in model.warnings):
+        sys.exit("\nThe model did not answer, so nothing above came from Gemini (the app would have used the "
+                 "rule-based extractor). Try again later or set GEMINI_MODEL to another model.")
     web = lambda d: [c for c in d.claims if c.source_type == "company_website"]
     print(f"\nAccepted model claims ({len(web(model))}):")
     for c in web(model):

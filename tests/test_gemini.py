@@ -48,7 +48,7 @@ REPLY = {"missing": ["priority"], "claims": [
 
 
 def profile(session):
-    llm = gemini.GeminiExtractor(api_key="test-key", model="test-model", session=session)
+    llm = gemini.GeminiExtractor(api_key="test-key", model="test-model", session=session, backoff=0)
     crawl = CrawlResult("https://ex.se/", [PAGE])
     return company_agent.build_profile(member("ex", "Ex", "Ett teknikbolag.", "Teknik", "https://ex.se/"), crawl, llm=llm)
 

@@ -77,7 +77,8 @@ Copy `.env.example` to `.env`. Notable settings:
 - `OPENALEX_API_KEY` — OpenAlex allows anonymous calls on a small shared daily budget; a free key gives your own.
 - `NEXUS_LLM_EXTRACTION=gemini` + `GEMINI_API_KEY` (+ `GEMINI_MODEL`) — optional model-assisted extraction of
   website claims. Every proposed claim must cite a source and quote it exactly, or it is rejected; failures fall back
-  to the rule-based extractor and say so. **Not exercised against the live Gemini API** in this submission (no key).
+  to the rule-based extractor and say so. Checked live once on 2026-11-14 (`python scripts/check_gemini.py`); see
+  `docs/known_limitations.md` for the result. Off by default.
 - `NEXUS_AUTH_MODE=token` + `NEXUS_AUTH_TOKENS` — server-side company tokens instead of the demo selector.
 - `NEXUS_DATABASE_URL` — SQLite by default; any SQLAlchemy URL works.
 

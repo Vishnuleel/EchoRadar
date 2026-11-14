@@ -68,8 +68,11 @@
 
 **Product**
 
-- The optional Gemini extraction is implemented behind quote validation and tested with recorded responses only;
-  it has not been run against the live API.
+- The optional Gemini extraction (off by default) was run once against the live API on 2026-11-14 for Njord X
+  (`scripts/check_gemini.py`; the first attempt got HTTP 503 "high demand" and fell back to the rules as designed).
+  It proposed 21 website claims, all with valid quotes, against 14 from the rules, including markets, geography and
+  collaborations the rules miss. A manual read found 3 of 21 filed under the wrong category (a marketing claim as
+  geography, a supplier policy and a slogan as development priorities): the quote check cannot catch that.
 - No user study, time measurement or human relevance rating has been carried out. The feedback functions work,
   but the stored database contains no ratings.
 - Tested on Windows 11 with Python 3.13 and Node.js 22.
