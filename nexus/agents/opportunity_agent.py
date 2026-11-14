@@ -35,7 +35,7 @@ def current_status(f: FundingOpportunity, now: datetime | None = None) -> str:
 
 
 def collect_funding(s: Session, client: HttpClient) -> dict:
-    summary = {"new": 0, "updated": 0, "errors": []}
+    summary = {"new": 0, "updated": 0, "errors": [], "seen": []}
     try:
         calls = vinnova.fetch_calls(client)
     except vinnova.VinnovaError as exc:
@@ -45,6 +45,7 @@ def collect_funding(s: Session, client: HttpClient) -> dict:
     for call in calls:
         text = f"{call['title']} {call.get('description') or ''}"
         call["capability_keys"] = sorted({c for c, _ in tx.detect_capabilities(text)})
+        summary["seen"].append(call["external_id"])
         row = s.scalar(select(FundingOpportunity).where(FundingOpportunity.external_id == call["external_id"]))
         if row is None:
             s.add(FundingOpportunity(**call))
@@ -59,7 +60,7 @@ def collect_funding(s: Session, client: HttpClient) -> dict:
 
 
 def collect_testbeds(s: Session, client: HttpClient) -> dict:
-    summary = {"new": 0, "updated": 0, "errors": []}
+    summary = {"new": 0, "updated": 0, "errors": [], "seen": []}
     for url, source_name, kind in TESTBED_SOURCES:
         res = client.get(url, ttl_hours=72, check_robots=True)
         if not res.ok:
@@ -74,6 +75,7 @@ def collect_testbeds(s: Session, client: HttpClient) -> dict:
         name = re.sub(r"\s*[|\-–]\s*(Blue Science Park|Marine Technology Center.*|Hem)\s*$", "", title).strip() or source_name
         description = " ".join(hits)
         tags = sorted({c for c, _ in tx.detect_capabilities(description + " " + title)})
+        summary["seen"].append(url)
         row = s.scalar(select(Testbed).where(Testbed.source_url == url))
         if row is None:
             s.add(Testbed(name=f"{source_name}: {name}"[:300], description=description, kind=kind,

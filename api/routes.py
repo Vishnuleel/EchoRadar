@@ -222,6 +222,18 @@ def _verification(c: Company) -> dict:
             "profile_url": c.directory_url}
 
 
+@router.get("/monitoring")
+def monitoring(s: Session = Depends(get_db)):
+    """Schedule, last outcome of every check, and the latest detected changes (public sources only)."""
+    from nexus import monitor
+
+    out = monitor.status(s)
+    tbl = _tr(s)
+    for e in out["events"]:
+        e["title_en"] = translation.english(tbl, e["title"])
+    return out
+
+
 @router.get("/directory")
 def directory(s: Session = Depends(get_db)):
     """Latest directory audit: coverage, seed reconciliation, missing fields."""

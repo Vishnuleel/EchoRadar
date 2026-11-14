@@ -41,4 +41,5 @@ export const api = {
   evaluation: () => request("/evaluation"),
   staff: () => request("/staff"),
   directory: () => request("/directory"),
+  monitoring: () => request("/monitoring"),
 };

@@ -3,10 +3,86 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../api";
 import { useSession } from "../store";
 import { BadgeCheck, CircleDashed, GitCompareArrows } from "lucide-react";
-import { Bar, Empty, HypothesisCard, HypothesisNotice, Notice, PageHeader, QueryState, SectionTitle, SourceLink, Translated, day, stamp } from "../components/ui";
+import { Badge, Bar, Empty, HypothesisCard, HypothesisNotice, Notice, PageHeader, QueryState, SectionTitle, SourceLink, Translated, day, stamp } from "../components/ui";
 
 const FIELD_NAMES = { name: "name", description: "description", industry: "industry", employees: "employee band",
                       founded: "founding year", location: "location", website: "website" };
+
+const SOURCE_NAMES = { directory: "Member directory", vinnova: "Vinnova funding calls", events: "Events", news: "Regional news",
+                       testbeds: "Test environments", openalex: "Research (OpenAlex queries)" };
+const ago = (iso) => (iso ? stamp(iso).replace("T", " ") : "never");
+
+/** Scheduled checks per source and the latest detected changes. */
+function Monitoring() {
+  const q = useQuery({ queryKey: ["monitoring"], queryFn: api.monitoring, refetchInterval: 60000 });
+  if (!q.data) return null;
+  const { tasks, events, worker } = q.data;
+  if (!tasks.length) {
+    return (
+      <Notice tone="info" className="mb-8">
+        Scheduled monitoring has not run yet. Start it with <code>python -m nexus.monitor --loop 300</code> (or
+        <code> --once</code>); it runs without a browser and keeps its schedule in the database.
+      </Notice>
+    );
+  }
+  const groups = Object.entries(tasks.reduce((acc, t) => { (acc[t.source] ??= []).push(t); return acc; }, {}));
+  const latest = (ts, k) => ts.map((t) => t[k]).filter(Boolean).sort().at(-1);
+  const kindTone = { new: "open", updated: "upcoming", not_observed: "neutral" };
+  return (
+    <section className="card mb-9 p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Monitoring</h2>
+          <p className="meta mt-0.5">Scheduled checks of public sources. Attempted, successful and next checks are recorded separately.</p>
+        </div>
+        <span className="meta">{worker.running ? `Worker running (${worker.owner})` : "No worker running right now; schedules are kept"}</span>
+      </div>
+      <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <div className="table-wrap">
+          <table className="table">
+            <thead><tr><th>Source</th><th>Last attempt</th><th>Last success</th><th>Next check</th><th>Status</th></tr></thead>
+            <tbody>
+              {groups.map(([src, ts]) => {
+                const failing = ts.filter((t) => t.consecutive_failures > 0);
+                const never = ts.every((t) => !t.last_attempt_at);
+                return (
+                  <tr key={src}>
+                    <td className="text-ink">{SOURCE_NAMES[src] ?? src}{ts.length > 1 && <span className="meta"> · {ts.length} queries</span>}</td>
+                    <td className="whitespace-nowrap tabular-nums">{ago(latest(ts, "last_attempt_at"))}</td>
+                    <td className="whitespace-nowrap tabular-nums">{ago(latest(ts, "last_success_at"))}</td>
+                    <td className="whitespace-nowrap tabular-nums">{ago(ts.map((t) => t.next_due_at).sort()[0])}</td>
+                    <td>
+                      {never ? <span className="text-muted">not run yet</span>
+                        : failing.length ? <span className="text-pink" title={failing.map((t) => t.last_error).join("\n")}>{failing.length} failing: {failing[0].last_error?.slice(0, 60)}</span>
+                        : <span className="text-fact">ok</span>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <h3 className="mb-2 text-sm font-semibold text-ink2">Latest changes</h3>
+          {events.length ? (
+            <ul className="max-h-[300px] space-y-2 overflow-y-auto pr-1">
+              {events.slice(0, 12).map((e, i) => (
+                <li key={i} className="flex items-start gap-2 text-[13px] leading-snug">
+                  <Badge kind={kindTone[e.kind]}>{e.kind.replace("_", " ")}</Badge>
+                  <span className="min-w-0 text-ink2">
+                    {e.title ? <Translated original={e.title} en={e.title_en} max={90} /> : <span className="text-muted">{e.record_key}</span>}
+                    {e.url && <> <SourceLink url={e.url} /></>}
+                    <span className="meta block">{SOURCE_NAMES[e.source] ?? e.source} · {ago(e.detected_at)}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="meta">No changes detected since monitoring started. An unchanged scan creates no alerts.</p>}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 /** Audit summary of the latest member directory crawl (and the reconciled audited seed). */
 function DirectoryCoverage() {
@@ -80,6 +156,7 @@ export default function Staff() {
         and anonymous aggregates; no company's private questions, saved items or ratings are exposed.
       </Notice>
       <DirectoryCoverage />
+      <Monitoring />
       <QueryState query={query}>
         {(d) => {
           const max = Math.max(1, ...d.shared_interests.map((r) => r.members));

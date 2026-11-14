@@ -13,7 +13,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from nexus.utils.validators import utcnow
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 # Who may see a derived row (hypothesis, recommendation, radar item):
 #   "public"      computed from public evidence and explicitly shared refinements only
@@ -333,6 +333,55 @@ class DirectorySnapshot(Base):
     card_count: Mapped[int] = mapped_column(Integer, default=0)  # directory cards loaded across all pages
     unique_profiles: Mapped[int] = mapped_column(Integer, default=0)
     summary: Mapped[dict] = mapped_column(JSON, default=dict)  # full audit summary
+
+
+class MonitorTask(Base):
+    """One scheduled check: a source (and, for research, one query). Survives worker restarts."""
+    __tablename__ = "monitor_task"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source: Mapped[str] = mapped_column(String(30), index=True)  # directory | vinnova | testbeds | events | news | openalex
+    target: Mapped[str] = mapped_column(String(120), default="")  # e.g. the capability key of a research query
+    interval_hours: Mapped[float] = mapped_column(Float, default=24.0)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    next_due_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
+    last_attempt_at: Mapped[datetime | None] = mapped_column(DateTime)  # a check was started
+    last_success_at: Mapped[datetime | None] = mapped_column(DateTime)  # the source answered with records
+    last_error: Mapped[str | None] = mapped_column(Text)
+    consecutive_failures: Mapped[int] = mapped_column(Integer, default=0)
+    last_result: Mapped[dict] = mapped_column(JSON, default=dict)
+    __table_args__ = (UniqueConstraint("source", "target"),)
+
+
+class RecordState(Base):
+    """What a monitored record looked like when it was last observed (for change detection)."""
+    __tablename__ = "record_state"
+    source: Mapped[str] = mapped_column(String(30), primary_key=True)
+    record_key: Mapped[str] = mapped_column(String(500), primary_key=True)
+    content_hash: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(20), default="observed")  # observed | not_observed
+    first_seen_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    last_changed_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class ChangeEvent(Base):
+    """A meaningful difference between two successful scans: new, updated, or no longer observed."""
+    __tablename__ = "change_event"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source: Mapped[str] = mapped_column(String(30), index=True)
+    record_key: Mapped[str] = mapped_column(String(500))
+    kind: Mapped[str] = mapped_column(String(20))  # new | updated | not_observed
+    title: Mapped[str | None] = mapped_column(Text)
+    url: Mapped[str | None] = mapped_column(String(800))
+    detected_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
+
+
+class SchedulerLock(Base):
+    """Prevents overlapping scans. A crashed worker's lease simply expires."""
+    __tablename__ = "scheduler_lock"
+    name: Mapped[str] = mapped_column(String(40), primary_key=True)
+    owner: Mapped[str] = mapped_column(String(120))
+    until: Mapped[datetime] = mapped_column(DateTime)
 
 
 class Translation(Base):

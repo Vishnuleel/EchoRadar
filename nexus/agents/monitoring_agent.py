@@ -24,12 +24,13 @@ def _tags(text: str) -> list[str]:
 
 
 def collect_events(s: Session, client: HttpClient) -> dict:
-    summary = {"new": 0, "updated": 0, "errors": []}
+    summary = {"new": 0, "updated": 0, "errors": [], "seen": []}
     events, errors = bsp_sources.fetch_events(client)
     summary["errors"] = errors
     for ev in events:
         if scan_untrusted(f"{ev['title']} {ev.get('description') or ''}"):
             continue  # instruction-like text in external content is never stored as an event
+        summary["seen"].append(ev["key"])
         ev["capability_keys"] = _tags(f"{ev['title']} {ev.get('description') or ''}")
         row = s.scalar(select(Event).where(Event.key == ev["key"]))
         if row is None:
@@ -58,11 +59,12 @@ def mentioned_companies(text: str, companies: list) -> list[int]:
 
 
 def collect_news(s: Session, client: HttpClient) -> dict:
-    summary = {"new": 0, "updated": 0, "member_mentions": 0, "errors": []}
+    summary = {"new": 0, "updated": 0, "member_mentions": 0, "errors": [], "seen": []}
     items, errors = bsp_sources.fetch_news(client)
     summary["errors"] = errors
     companies = repo.companies(s)
     for item in items:
+        summary["seen"].append(item["source_url"])
         body = item.pop("body", "")
         text = f"{item['title']} {item.get('summary') or ''} {body}"
         if scan_untrusted(text):

@@ -32,7 +32,7 @@ def upsert_publication(s: Session, rec: dict, capability_key: str | None = None)
 
 def collect_research(s: Session, client: HttpClient, capability_keys: list[str], per_query: int = 8) -> dict:
     """Query OpenAlex once per capability that has a search phrase. Failures are reported, not hidden."""
-    summary = {"queries": 0, "new": 0, "duplicates": 0, "errors": []}
+    summary = {"queries": 0, "new": 0, "duplicates": 0, "errors": [], "seen": []}
     for key in capability_keys:
         cap = tx.CAPABILITIES.get(key)
         if not cap or not cap.openalex_query:
@@ -47,8 +47,9 @@ def collect_research(s: Session, client: HttpClient, capability_keys: list[str],
                 break  # quota/auth problems will not fix themselves on the next query
             continue
         for rec in works:
-            _, created = upsert_publication(s, rec, key)
+            row, created = upsert_publication(s, rec, key)
             summary["new" if created else "duplicates"] += 1
+            summary["seen"].append(row.external_id)
         repo.log_retrieval(s, "openalex", f"search: {cap.openalex_query}", "ok", 200, records=len(works))
     return summary
 
