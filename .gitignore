@@ -2,6 +2,10 @@
 __pycache__/
 *.pyc
 .env
+
+# Local Claude configuration and guidance
+/.claude/
+/CLAUDE.md
 data/models/
 data/nexus_test*.db
 .pytest_cache/
