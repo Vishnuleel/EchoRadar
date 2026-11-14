@@ -1,4 +1,5 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import clsx from "clsx";
 import { AlertTriangle, ArrowUpRight, Check, ChevronDown, ChevronsUpDown, Search } from "lucide-react";
 
@@ -249,14 +250,36 @@ export function CompanyPicker({ companies, value, onChange, allowNone, noneLabel
   const multi = Array.isArray(value);
   const selected = multi ? value : [value];
 
+  const panel = useRef(null);
+  const [pos, setPos] = useState(null);
+
   const close = (refocus = true) => { setOpen(false); setQ(""); if (refocus) trigger.current?.focus(); };
   useEffect(() => {
     if (!open) return undefined;
-    const outside = (e) => { if (!box.current?.contains(e.target)) close(false); };
+    const outside = (e) => { if (!box.current?.contains(e.target) && !panel.current?.contains(e.target)) close(false); };
     document.addEventListener("mousedown", outside);
     input.current?.focus();
     return () => document.removeEventListener("mousedown", outside);
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The list is drawn in a layer above the page (a portal), so a card that clips its content cannot cut it off.
+  // It sits under the field, or above it when there is not enough room below.
+  useLayoutEffect(() => {
+    if (!open) return undefined;
+    const place = () => {
+      const r = trigger.current?.getBoundingClientRect();
+      if (!r) return;
+      const below = window.innerHeight - r.bottom - 12, above = r.top - 12;
+      const up = below < 260 && above > below;
+      setPos({ left: Math.min(r.left, window.innerWidth - Math.max(r.width, 240) - 8), width: Math.max(r.width, 240),
+               top: up ? undefined : r.bottom + 6, bottom: up ? window.innerHeight - r.top + 6 : undefined,
+               maxList: Math.max(140, Math.min(320, (up ? above : below) - 90)) });
+    };
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => { window.removeEventListener("resize", place); window.removeEventListener("scroll", place, true); };
+  }, [open]);
 
   const list = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -297,8 +320,9 @@ export function CompanyPicker({ companies, value, onChange, allowNone, noneLabel
         <span className="truncate">{text}</span>
         <ChevronsUpDown size={15} className="shrink-0 text-muted" />
       </button>
-      {open && (
-        <div className="absolute left-0 right-0 z-40 mt-1.5 min-w-[240px] animate-rise overflow-hidden rounded-xl border border-line bg-surface shadow-2xl">
+      {open && pos && createPortal(
+        <div ref={panel} style={{ position: "fixed", left: pos.left, width: pos.width, top: pos.top, bottom: pos.bottom }}
+             className="z-[60] animate-rise overflow-hidden rounded-xl border border-line bg-surface shadow-2xl">
           <div className="flex items-center gap-2 border-b border-line px-3">
             <Search size={14} className="text-muted" />
             <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Type to search" onKeyDown={onKey}
@@ -306,7 +330,8 @@ export function CompanyPicker({ companies, value, onChange, allowNone, noneLabel
                    aria-activedescendant={ids.length ? `${uid}-opt-${active}` : undefined} aria-label="Search companies"
                    className="w-full bg-transparent py-2.5 text-sm text-ink placeholder:text-muted focus:outline-none" />
           </div>
-          <ul ref={listRef} id={`${uid}-list`} role="listbox" aria-multiselectable={multi || undefined} className="max-h-72 overflow-y-auto p-1">
+          <ul ref={listRef} id={`${uid}-list`} role="listbox" aria-multiselectable={multi || undefined}
+              style={{ maxHeight: pos.maxList }} className="overflow-y-auto p-1">
             {ids.map((id, i) => (
               <Option key={id ?? "none"} id={`${uid}-opt-${i}`} index={i} highlighted={i === active}
                       active={id === null ? value === null : selected.includes(id)}
@@ -317,7 +342,8 @@ export function CompanyPicker({ companies, value, onChange, allowNone, noneLabel
             {!ids.length && <li className="px-3 py-3 text-sm text-muted">No company matches.</li>}
           </ul>
           <p className="border-t border-line px-3 py-1.5 text-[11px] text-muted">↑ ↓ to move · Enter to choose · Esc to close</p>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
