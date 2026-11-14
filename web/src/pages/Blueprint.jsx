@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { CheckCircle2, Download, FileDown, FlaskConical, Star } from "lucide-react";
 import { api } from "../api";
 import { useSession } from "../store";
-import { Badge, Card, CompanyPicker, Empty, Notice, PageHeader, QueryState, Ring, ScoreBars, Segmented, SourceLink, day } from "../components/ui";
+import { Badge, Card, CompanyPicker, Empty, Notice, PageHeader, QueryState, Ring, ScoreBars, Segmented, SourceLink, Translated, day } from "../components/ui";
 
 function Section({ n, title, badge, children, className }) {
   return (
@@ -150,7 +150,7 @@ function Brief({ bp, note, params }) {
             {bp.funding.map((f) => (
               <div key={f.url} className="card p-3.5">
                 <div className="flex flex-wrap items-center gap-2"><Badge kind={["open", "upcoming"].includes(f.status) ? f.status : "neutral"}>{f.status}</Badge><span className="meta">deadline {f.deadline} · relevance {f.relevance.toFixed(0)}</span></div>
-                <p className="mt-1.5 text-[13px] leading-snug text-ink">{f.title.slice(0, 140)}</p>
+                <p className="mt-1.5 text-[13px] leading-snug text-ink"><Translated original={f.title} en={f.title_en} max={140} /></p>
                 {f.eligibility && <p className="mt-1 text-[12.5px] leading-relaxed text-ink2"><b className="text-ink">Who can apply (Vinnova):</b> {f.eligibility.slice(0, 260)}</p>}
                 <p className="meta mt-1">{f.note} <SourceLink url={f.url} /></p>
               </div>
@@ -163,7 +163,7 @@ function Brief({ bp, note, params }) {
             {bp.testbeds.map((t) => (
               <div key={t.url + t.name} className="card p-3.5">
                 <Badge>{t.kind}</Badge>
-                <p className="mt-1.5 text-[13px] leading-snug text-ink">{t.name.slice(0, 120)}</p>
+                <p className="mt-1.5 text-[13px] leading-snug text-ink"><Translated original={t.name} en={t.name_en} max={120} /></p>
                 <blockquote className="quote">“{t.description.slice(0, 240)}”</blockquote>
                 <p className="meta">{t.note} <SourceLink url={t.url} /></p>
               </div>

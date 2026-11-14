@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BookOpen, Building2, Banknote, FlaskConical, ShieldCheck, Sparkles } from "lucide-react";
 import { api } from "../api";
-import { Badge, Card, HypothesisCard, HypothesisNotice, Notice, PageHeader, QueryState, SectionTitle, SourceLink, Stat, day, stamp } from "../components/ui";
+import { Badge, Card, HypothesisCard, HypothesisNotice, Notice, PageHeader, QueryState, SectionTitle, SourceLink, Stat, Translated, day, stamp } from "../components/ui";
 
 function CapabilityBars({ rows }) {
   const [all, setAll] = useState(false);
@@ -77,7 +77,7 @@ export default function Overview() {
                           <Badge kind={["open", "upcoming"].includes(f.status) ? f.status : "neutral"}>{f.status}</Badge>
                           <span className="meta">opened {day(f.opens_at)}{f.deadline && ` · deadline ${day(f.deadline)}`}</span>
                         </div>
-                        <p className="mt-1.5 text-[13px] leading-snug text-ink">{f.title.slice(0, 110)}</p>
+                        <p className="mt-1.5 text-[13px] leading-snug text-ink"><Translated original={f.title} en={f.title_en} max={110} /></p>
                         <p className="mt-1 text-xs"><SourceLink url={f.url}>Vinnova open data</SourceLink></p>
                       </div>
                     ))}

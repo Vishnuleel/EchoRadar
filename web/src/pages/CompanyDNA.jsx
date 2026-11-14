@@ -7,7 +7,7 @@ import { AlertTriangle, ArrowRight, ArrowUpRight, BadgeCheck, Building2, CheckCi
 import { api } from "../api";
 import { useSession } from "../store";
 import { Badge, Card, Chip, CompanyPicker, Disclosure, Empty, HypothesisNotice, Notice, PageHeader, QueryState, Ring, ScoreBars,
-         SourceLink, Stat, Tabs, stamp } from "../components/ui";
+         SourceLink, Stat, Tabs, Translated, stamp } from "../components/ui";
 
 function ClaimCard({ claim: cl }) {
   const ev = cl.evidence;
@@ -402,7 +402,9 @@ export default function CompanyDNA() {
                       </div>
                     </div>
                     <p className="mt-4 text-[14.5px] leading-relaxed text-ink2">
-                      <Badge kind="FACT" className="mr-2 align-middle" />{c.description || "No public description found."}<FactSource f={vf.description} />
+                      <Badge kind="FACT" className="mr-2 align-middle" />
+                      {c.description ? <Translated original={c.description} en={c.description_en} /> : "No public description found."}
+                      <FactSource f={vf.description} />
                     </p>
                     {c.user_description && (
                       <div className="mt-4 rounded-xl border border-user/30 bg-user/[0.06] p-3.5">
@@ -413,7 +415,8 @@ export default function CompanyDNA() {
                     <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5 text-[13px] sm:grid-cols-4">
                       {[[Building2, "Industry", "industry"], [MapPin, "Location", "location"], [Users, "Employees", "employees"], [Pencil, "Founded", "founded"]].map(([Icon, k, f]) => (
                         <div key={k}><dt className="meta flex items-center gap-1"><Icon size={12} />{k}{c[f] && <FactSource f={vf[f]} />}</dt>
-                          <dd className="mt-0.5 text-ink">{c[f] || <span className="text-muted" title="Not published on the official profile">not published</span>}</dd></div>
+                          <dd className="mt-0.5 text-ink">{c[f] ? (f === "industry" ? <Translated original={c[f]} en={c.industry_en} /> : c[f])
+                            : <span className="text-muted" title="Not published on the official profile">not published</span>}</dd></div>
                       ))}
                     </dl>
                     {c.website && <p className="mt-3 flex items-center gap-1.5 text-[13px]"><Globe size={13} className="text-muted" /><SourceLink url={c.website}>{c.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</SourceLink><span className="meta">as linked on the official profile</span></p>}

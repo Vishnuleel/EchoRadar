@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bookmark, BookOpen, CalendarDays, Banknote, FlaskConical, HelpCircle, Lightbulb, Newspaper, ShieldCheck,
          ArrowRightCircle, ThumbsDown, ThumbsUp } from "lucide-react";
 import { api } from "../api";
-import { Badge, Ring, SourceLink, day } from "./ui";
+import { Badge, Ring, SourceLink, Translated, day } from "./ui";
 
 export const KIND = {
   funding: { icon: Banknote, color: "rgb(var(--inf))", label: "Funding" },
@@ -82,7 +82,9 @@ export default function ItemCard({ item: it, canMark, compact }) {
             {(it.flags ?? []).map((f) => <Badge key={f} kind="HYPOTHESIS">{f}</Badge>)}
             {it.priority_area && <Badge kind="USER">your priority</Badge>}
           </div>
-          <h3 className={clsx("mt-1.5 font-semibold leading-snug", compact ? "text-sm" : "text-base")}>{it.title?.slice(0, 150)}</h3>
+          <h3 className={clsx("mt-1.5 font-semibold leading-snug", compact ? "text-sm" : "text-base")}>
+            <Translated original={it.title} en={it.title_en} max={150} />
+          </h3>
           <div className="meta mt-1">{it.source} · {it.date_label}</div>
         </div>
         <Ring value={it.relevance} size={compact ? 42 : 52} stroke={compact ? 4 : 5} label="Relevance" />
@@ -98,9 +100,11 @@ export default function ItemCard({ item: it, canMark, compact }) {
           {it.apply_url && <> · <SourceLink url={it.apply_url}>application page</SourceLink></>}
           <span className="text-muted"> · retrieved {day(it.retrieved_at)}</span>
         </Row>
-        {!compact && it.excerpt && <blockquote className="quote ml-[26px]">“{it.excerpt}”</blockquote>}
-        {!compact && (it.terms ?? []).map(([k, v]) => (
-          <p key={k} className="ml-[26px] text-[13px] leading-relaxed text-ink2"><span className="font-semibold text-ink">{k}:</span> {v}</p>
+        {!compact && it.excerpt && <blockquote className="quote ml-[26px]"><Translated original={it.excerpt} en={it.excerpt_en} /></blockquote>}
+        {!compact && (it.terms ?? []).map(([k, v], i) => (
+          <p key={k} className="ml-[26px] text-[13px] leading-relaxed text-ink2">
+            <span className="font-semibold text-ink">{k}:</span> <Translated original={v} en={it.terms_en?.[i]} />
+          </p>
         ))}
         {!compact && (
           <div className="flex gap-2.5 rounded-xl bg-brand/[0.07] px-3 py-2 text-[13px] leading-relaxed">

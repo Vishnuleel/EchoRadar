@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../api";
 import { useSession } from "../store";
 import { BadgeCheck, CircleDashed, GitCompareArrows } from "lucide-react";
-import { Bar, Empty, HypothesisCard, HypothesisNotice, Notice, PageHeader, QueryState, SectionTitle, SourceLink, day, stamp } from "../components/ui";
+import { Bar, Empty, HypothesisCard, HypothesisNotice, Notice, PageHeader, QueryState, SectionTitle, SourceLink, Translated, day, stamp } from "../components/ui";
 
 const FIELD_NAMES = { name: "name", description: "description", industry: "industry", employees: "employee band",
                       founded: "founding year", location: "location", website: "website" };
@@ -145,8 +145,8 @@ export default function Staff() {
                     {d.news.map((n) => (
                       <div key={n.url} className="card p-3.5">
                         <span className="meta">{day(n.date)} · {n.source} · names {n.names.join(", ")}</span>
-                        <p className="mt-1 text-sm font-medium leading-snug text-ink">{n.title}</p>
-                        <p className="mt-1 text-[13px] leading-relaxed text-ink2">{n.summary}</p>
+                        <p className="mt-1 text-sm font-medium leading-snug text-ink"><Translated original={n.title} en={n.title_en} /></p>
+                        <p className="mt-1 text-[13px] leading-relaxed text-ink2"><Translated original={n.summary} en={n.summary_en} max={240} /></p>
                         <p className="mt-1 text-xs"><SourceLink url={n.url} /></p>
                       </div>
                     ))}

@@ -36,6 +36,8 @@ if __name__ == "__main__":
         trace = [{"agent": "Company Intelligence Agent (directory sync)", "seconds": 0,
                   "result": f"{summary['profiles_opened']} profiles, {totals['claims']} evidence-backed claims",
                   "warnings": totals["warnings"]}]
+        trace.append(pipeline.translate_new_texts(s))
+        print(f"  translation: {trace[-1]['result']} {trace[-1]['warnings'] or ''}")
         if not args.no_recompute:
             emb = get_embedder()
             trace += pipeline.recompute(s, emb)

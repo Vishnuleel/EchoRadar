@@ -586,6 +586,24 @@ def save_trace(trace: list[dict], backend: str) -> None:
         {"finished_at": utcnow().isoformat(timespec="seconds"), "embedding_backend": backend, "trace": trace}, indent=1))
 
 
+def translate_new_texts(s: Session) -> dict:
+    """English display text for new Swedish public texts. Never fails the run: without the local model the
+    interface shows the Swedish original and says no translation is stored."""
+    from nexus.core import translation
+
+    t = time.time()
+    try:
+        stats = translation.translate_missing(s, translation.public_source_texts(s))
+        s.commit()
+        return {"agent": "Translation (machine, sv to en)", "seconds": round(time.time() - t, 1),
+                "result": f"{stats['translated']} new, {stats['already']} already stored; "
+                          f"{stats['numbers_flagged']} flagged for changed numbers or dates", "warnings": []}
+    except Exception as exc:  # model missing, offline, out of memory: report, do not stop the refresh
+        s.rollback()
+        return {"agent": "Translation (machine, sv to en)", "seconds": round(time.time() - t, 1),
+                "result": "skipped", "warnings": [f"translation unavailable: {type(exc).__name__}: {str(exc)[:160]}"]}
+
+
 def save_directory_audit(summary: dict) -> None:
     """The latest directory audit summary as a readable file next to the database."""
     import json

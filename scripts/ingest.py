@@ -23,6 +23,8 @@ if __name__ == "__main__":
     args = ap.parse_args()
     with session_scope() as s:
         trace = [] if args.recompute else pipeline.ingest(s)
+        if not args.recompute:
+            trace.append(pipeline.translate_new_texts(s))
         emb = get_embedder()
         print(f"Embedding backend: {emb.backend}" + (f" (fallback: {emb.fallback_reason})" if emb.fallback_reason else ""))
         trace += pipeline.recompute(s, emb)

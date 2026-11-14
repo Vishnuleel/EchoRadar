@@ -36,6 +36,38 @@ export function SourceLink({ url, children = "source", className }) {
   );
 }
 
+/**
+ * Swedish source text shown in English. `en` comes from the API:
+ *   undefined/null  - the text is not Swedish: shown as is
+ *   {available}     - stored machine translation: English first, original one click away
+ *   {!available}    - Swedish, not translated yet: the original, with an honest note
+ * The original stays the evidence; the translation is only a reading aid.
+ */
+export function Translated({ original, en, className, max }) {
+  const [showOriginal, setShowOriginal] = useState(false);
+  const cut = (t) => (max && t && t.length > max ? `${t.slice(0, max)}...` : t);
+  if (!en) return <span className={className}>{cut(original)}</span>;
+  if (!en.available) {
+    return (
+      <span className={className}>
+        {cut(original)}{" "}
+        <span className="whitespace-nowrap text-[11px] font-normal not-italic text-muted" title="No English translation is stored for this text yet">(Swedish original; no translation yet)</span>
+      </span>
+    );
+  }
+  return (
+    <span className={className}>
+      {cut(showOriginal ? original : en.text)}{" "}
+      <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowOriginal(!showOriginal); }}
+              className="whitespace-nowrap align-baseline text-[11px] font-normal not-italic text-muted underline decoration-dotted underline-offset-2 hover:text-brand"
+              title={showOriginal ? "Show the English machine translation" : `Machine translation (${en.engine}). Click to read the Swedish original.`}>
+        {showOriginal ? "Original Swedish · show English" : "Machine-translated · show original"}
+      </button>
+      {!showOriginal && en.numbers_ok === false && <span className="ml-1 text-[11px] font-normal text-hyp">check numbers and dates in the original</span>}
+    </span>
+  );
+}
+
 /* ---- layout ---------------------------------------------------------------------------------- */
 export function PageHeader({ eyebrow, title, subtitle, children }) {
   return (

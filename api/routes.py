@@ -20,6 +20,7 @@ from nexus.core import evaluation as ev
 from nexus.core import graph_engine as ge
 from nexus.core import matching_engine as me
 from nexus.core import radar
+from nexus.core import translation
 from nexus.core import taxonomy as tx
 from nexus.core.embeddings import get_embedder
 from nexus.core.scoring import LABELS
@@ -79,8 +80,19 @@ def _audience(acting: int | None, company_id: int) -> str:
     return OWNER if acting is not None and acting == company_id else PUBLIC
 
 
+def _tr(s: Session) -> dict:
+    """Stored English display translations (machine translation, labelled in the UI)."""
+    return cache.get("translations", lambda: translation.lookup(s))
+
+
+def _en_items(s: Session, items: list[dict]) -> list[dict]:
+    tbl = _tr(s)
+    return [translation.with_english(i, tbl) for i in items]
+
+
 def _radar_items(s: Session, company_id: int, audience: str) -> list[dict]:
-    return cache.get(f"radar:{audience}@{company_id}", lambda: radar.company_items(s, company_id, audience=audience))
+    return cache.get(f"radar:{audience}@{company_id}",
+                     lambda: _en_items(s, radar.company_items(s, company_id, audience=audience)))
 
 
 # ---- meta ---------------------------------------------------------------------------------------
@@ -119,7 +131,9 @@ def home(company_id: int, s: Session = Depends(get_db), acting: int | None = Dep
         c = _company(s, company_id)
         names = _names(s)
         return {"company": {"id": c.id, "name": c.name, "needs": list(c.need_priorities or []) if aud == OWNER else []},
-                "audience": aud, "counts": repo.counts(s), "digest": radar.weekly_digest(s, company_id, audience=aud),
+                "audience": aud, "counts": repo.counts(s),
+                "digest": {k: _en_items(s, v) if isinstance(v, list) and v and isinstance(v[0], dict) else v
+                           for k, v in radar.weekly_digest(s, company_id, audience=aud).items()},
                 "recommendations": [_rec(r, names, company_id) for r in repo.recommendations(s, company_id, 2, aud)],
                 "trace": pipeline.load_trace()}
     return cache.get(f"home:{aud}@{company_id}", build)
@@ -139,7 +153,7 @@ def assistant(body: Ask, s: Session = Depends(get_db), acting: int | None = Depe
         for e in c["evidence"]:
             e["capability_name"] = tx.CAPABILITIES[e["capability"]].name
     return {"question": body.text, "category": d.category, "message": d.message, "query": res["query"],
-            "items": res["items"][:4], "companies": res["companies"][:3],
+            "items": _en_items(s, res["items"][:4]), "companies": res["companies"][:3],
             "hypotheses": [_hyp(h, names) for h in res["hypotheses"][:2]]}
 
 
@@ -162,7 +176,8 @@ def overview(s: Session = Depends(get_db)):
                               "role_label": tx.ROLES[tx.CAPABILITIES[k].role], "companies": v}
                              for k, v in per_cap.most_common()],
             "hypotheses": [_hyp(h, names) for h in hyps],
-            "recent_funding": [{"title": f.title, "status": current_status(f), "opens_at": f.opens_at,
+            "recent_funding": [{"title": f.title, "title_en": translation.english(_tr(s), f.title),
+                                "status": current_status(f), "opens_at": f.opens_at,
                                 "deadline": f.deadline, "url": f.source_url} for f in recent],
             "recent_research": [{"title": r.title, "date": r.publication_date, "url": r.source_url} for r in research],
             "logs": [{"when": l.retrieved_at, "source": l.source, "status": l.status, "records": l.records}
@@ -238,6 +253,8 @@ def dna(company_id: int, s: Session = Depends(get_db), acting: int | None = Depe
     visible = [x for x in claims if (x.active or owner) and (x.classification != "USER" or shared)]
     return {
         "company": {"id": c.id, "name": c.name, "description": c.description,
+                    "description_en": translation.english(_tr(s), c.description),
+                    "industry_en": translation.english(_tr(s), c.industry),
                     "user_description": c.user_description if shared else None,
                     "industry": c.industry, "location": c.location, "employees": c.employees, "founded": c.founded,
                     "website": c.website, "directory_url": c.directory_url, "profile_depth": c.profile_depth,
@@ -402,6 +419,11 @@ def blueprint(key: str | None = None, companies: str | None = None, format: str 
         if hyp is None:
             return {"blueprint": None, "note": note}
     bp = bg.build_blueprint(s, hyp)
+    tbl = _tr(s)
+    for f in bp["funding"]:
+        f["title_en"] = translation.english(tbl, f["title"])
+    for t in bp["testbeds"]:
+        t["name_en"] = translation.english(tbl, t["name"])
     if format == "md":
         return Response(bg.to_markdown(bp), media_type="text/markdown",
                         headers={"Content-Disposition": 'attachment; filename="nexus_blueprint.md"'})
@@ -482,6 +504,8 @@ def staff(s: Session = Depends(get_db)):
                                  for d, ids in sorted(by_domain.items(), key=lambda kv: -len(kv[1]))],
             "connections": connections, "profiles": profiles,
             "news": [{"date": n.published_at, "source": n.source_name, "title": n.title, "summary": (n.summary or "")[:240],
+                      "title_en": translation.english(_tr(s), n.title),
+                      "summary_en": translation.english(_tr(s), (n.summary or "No summary could be read.")[:360]),
                       "url": n.source_url, "names": [names[i] for i in n.mentioned_company_ids if i in names]}
                      for n in news[:6]],
             "feedback": privacy.aggregate_feedback(s)}

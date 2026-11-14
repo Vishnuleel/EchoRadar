@@ -13,7 +13,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from nexus.utils.validators import utcnow
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 # Who may see a derived row (hypothesis, recommendation, radar item):
 #   "public"      computed from public evidence and explicitly shared refinements only
@@ -333,6 +333,23 @@ class DirectorySnapshot(Base):
     card_count: Mapped[int] = mapped_column(Integer, default=0)  # directory cards loaded across all pages
     unique_profiles: Mapped[int] = mapped_column(Integer, default=0)
     summary: Mapped[dict] = mapped_column(JSON, default=dict)  # full audit summary
+
+
+class Translation(Base):
+    """A display translation, stored apart from the original evidence and keyed by the exact original text.
+
+    A changed source text has a different hash, so an outdated translation can never be reused for it.
+    Only public source text is translated; private refinements are never sent to a translator.
+    """
+    __tablename__ = "translation"
+    text_hash: Mapped[str] = mapped_column(String(64), primary_key=True)  # sha256 of the original text
+    target: Mapped[str] = mapped_column(String(8), primary_key=True, default="en")
+    source_lang: Mapped[str] = mapped_column(String(8), default="sv")
+    original: Mapped[str] = mapped_column(Text)
+    translated: Mapped[str] = mapped_column(Text)
+    engine: Mapped[str] = mapped_column(String(120))  # e.g. Helsinki-NLP/opus-mt-sv-en (machine translation)
+    numbers_ok: Mapped[bool] = mapped_column(Boolean, default=True)  # every number/date of the original survived
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
 
 class EmbeddingCache(Base):
