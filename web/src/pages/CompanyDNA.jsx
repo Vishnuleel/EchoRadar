@@ -162,16 +162,17 @@ function Refine({ data }) {
   const c = data.company;
   const editable = data.claims.filter((k) => ["capability", "interest"].includes(k.category));
   const initial = () => ({ description: c.user_description ?? "", needs: c.needs, domains: c.domains, new_interest: "", new_capability: "",
-                           claims: Object.fromEntries(editable.map((k) => [k.id, k.active])) });
+                           share_refinements: !!c.share_refinements, claims: Object.fromEntries(editable.map((k) => [k.id, k.active])) });
   const [form, setForm] = useState(initial);
   const [result, setResult] = useState(null);
   useEffect(() => { setForm(initial()); }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
-  const set = (patch) => setForm((f) => ({ ...f, ...patch }));
+  const set = (patch) => { setForm((f) => ({ ...f, ...patch })); if (result?.preview) setResult(null); };
   const flip = (key, v) => set({ [key]: form[key].includes(v) ? form[key].filter((x) => x !== v) : [...form[key], v] });
   const save = useMutation({
-    mutationFn: () => api.refine(c.id, form),
-    onSuccess: (res) => { setResult(res); if (res.changes.length) qc.invalidateQueries(); },
+    mutationFn: (preview) => api.refine(c.id, { ...form, preview }),
+    onSuccess: (res) => { setResult(res); if (res.changes.length && !res.preview) qc.invalidateQueries(); },
   });
+  const busy = save.isPending;
   const user = data.claims.filter((x) => x.active && x.classification === "USER");
 
   if (!data.can_edit) {
@@ -184,35 +185,43 @@ function Refine({ data }) {
   }
   return (
     <div className="space-y-5">
-      <p className="meta">Your changes are stored as refinements next to the public information. Nothing public is overwritten.</p>
-      <form className="card card-pad space-y-5" onSubmit={(e) => { e.preventDefault(); save.mutate(); }}>
+      <Notice tone="info" icon={Lock}>
+        <b className="text-ink">Private by default.</b> What you enter here is visible only to {c.name} and only changes your own
+        radar and recommendations. Other members, visitors and staff see it only if you choose to share it below. Public facts are
+        never overwritten.
+      </Notice>
+      <form className="card card-pad space-y-5" onSubmit={(e) => { e.preventDefault(); save.mutate(false); }}>
         <label className="block">
-          <span className="label">Company description (your wording)</span>
-          <textarea className="input min-h-[84px]" value={form.description} placeholder={c.description ?? ""} maxLength={4000}
-                    onChange={(e) => set({ description: e.target.value })} />
+          <span className="label">What would you like help with?</span>
+          <input className="input" value={form.new_interest} maxLength={300} placeholder="A short current goal, e.g. machine learning for sonar data"
+                 onChange={(e) => set({ new_interest: e.target.value })} />
+          <span className="meta mt-1 block">Saved as something you are looking for; it is matched against other members' evidenced capabilities.</span>
         </label>
         <div>
-          <span className="label">What do you need most right now? (re-ranks your radar)</span>
+          <span className="label">I'm looking for</span>
           <div className="flex flex-wrap gap-1.5">
+            <Chip active={!form.needs.length} onClick={() => set({ needs: [] })}>Anything relevant</Chip>
             {Object.entries(meta.need_areas).map(([k, label]) => <Chip key={k} active={form.needs.includes(k)} onClick={() => flip("needs", k)}>{label}</Chip>)}
           </div>
+          <span className="meta mt-1 block">Chosen areas move to the top of your radar. Nothing is hidden.</span>
         </div>
         <div>
-          <span className="label">Priority application areas (boosts partner matching in these areas)</span>
+          <span className="label">Subject areas - optional</span>
           <div className="flex flex-wrap gap-1.5">
             {Object.entries(meta.domains).map(([k, label]) => <Chip key={k} active={form.domains.includes(k)} onClick={() => flip("domains", k)}>{label}</Chip>)}
           </div>
+          <span className="meta mt-1 block">Partner suggestions in these subjects are ranked higher for you; other findings stay accessible.</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="label">Add an interest (something you are looking for)</span>
-            <input className="input" value={form.new_interest} maxLength={300} placeholder="e.g. machine learning for sonar data"
-                   onChange={(e) => set({ new_interest: e.target.value })} />
-          </label>
-          <label className="block">
-            <span className="label">Add a capability (something you can offer)</span>
+            <span className="label">Something you can offer - optional</span>
             <input className="input" value={form.new_capability} maxLength={300} placeholder="e.g. ROV inspection"
                    onChange={(e) => set({ new_capability: e.target.value })} />
+          </label>
+          <label className="block">
+            <span className="label">Describe the company in your own words - optional</span>
+            <textarea className="input min-h-[42px]" value={form.description} placeholder={c.description ?? ""} maxLength={4000}
+                      onChange={(e) => set({ description: e.target.value })} />
           </label>
         </div>
         {editable.length > 0 && (
@@ -232,25 +241,39 @@ function Refine({ data }) {
             </div>
           </fieldset>
         )}
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-bg/40 p-3.5">
+          <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[rgb(var(--brand))]" checked={form.share_refinements}
+                 onChange={(e) => set({ share_refinements: e.target.checked })} />
+          <span className="text-[13px] leading-relaxed text-ink2">
+            <b className="text-ink">Share my description and additions with other members</b><br />
+            When shared, they appear on your public profile labelled USER and are used to suggest partners for other companies.
+            Your "I'm looking for" and subject areas always stay private.
+          </span>
+        </label>
         <div className="flex flex-wrap items-center gap-3">
-          <button className="btn btn-primary !px-4 !py-2" disabled={save.isPending}>
-            {save.isPending ? "Recalculating..." : "Save profile and recalculate recommendations"}
+          <button type="button" className="btn !px-4 !py-2" disabled={busy} onClick={() => save.mutate(true)}>
+            {busy && save.variables === true ? "Calculating..." : "See changes before saving"}
           </button>
-          {save.isPending && <span className="meta">Combination, Ranking and Verification agents are recalculating...</span>}
+          <button className="btn btn-primary !px-4 !py-2" disabled={busy}>
+            {busy && save.variables === false ? "Saving..." : "Save and update my results"}
+          </button>
+          {busy && <span className="meta">The ranking is being recalculated with your changes...</span>}
         </div>
         {save.isError && <Notice tone="error">{save.error.message}</Notice>}
       </form>
 
-      {result && (result.changes.length === 0 ? <Notice tone="info">No changes to save.</Notice> : (
-        <Card className="space-y-3">
-          <Notice tone="ok" icon={CheckCircle2}><b className="text-ink">Saved:</b> {result.changes.join("; ")}</Notice>
+      {result && (result.changes.length === 0 ? <Notice tone="info">No changes to {result.preview ? "preview" : "save"}.</Notice> : (
+        <Card className={clsx("space-y-3", result.preview && "border-dashed border-brand/50")}>
+          {result.preview
+            ? <Notice tone="info" icon={GitCompareArrows}><b className="text-ink">Preview - nothing has been saved.</b> {result.changes.join("; ")}. Press "Save and update my results" to keep this.</Notice>
+            : <Notice tone="ok" icon={CheckCircle2}><b className="text-ink">Saved:</b> {result.changes.join("; ")}</Notice>}
           <p className="meta">
-            Partner recommendations, top 5: {result.new_recommendations} new entr{result.new_recommendations === 1 ? "y" : "ies"} after
-            recalculation{result.recommendations_changed ? "" : " (order and content unchanged)"}.
+            Partner suggestions, top 5: {result.new_recommendations} new entr{result.new_recommendations === 1 ? "y" : "ies"}
+            {result.recommendations_changed ? "" : " (order and content unchanged)"}.
           </p>
           {JSON.stringify(result.radar_before) !== JSON.stringify(result.radar_after) ? (
             <div className="grid gap-4 sm:grid-cols-2">
-              {[["Radar top 5 before", result.radar_before], ["Radar top 5 after", result.radar_after]].map(([title, rows]) => (
+              {[["Your radar top 5 now", result.radar_before], [result.preview ? "Your radar top 5 if you save" : "Your radar top 5 after saving", result.radar_after]].map(([title, rows]) => (
                 <div key={title}>
                   <h4 className="mb-1.5 text-sm font-semibold">{title}</h4>
                   <ol className="list-decimal space-y-1 pl-5 text-[13px] text-ink2">
@@ -259,12 +282,14 @@ function Refine({ data }) {
                 </div>
               ))}
             </div>
-          ) : <p className="meta">Radar top 5 unchanged by this edit.</p>}
+          ) : <p className="meta">Your radar top 5 is unchanged by this edit.</p>}
         </Card>
       ))}
       {user.length > 0 && (
         <div>
-          <h3 className="mb-2.5 text-sm font-semibold text-ink2">Current refinements</h3>
+          <h3 className="mb-2.5 text-sm font-semibold text-ink2">
+            Current refinements <span className="meta font-normal">({c.share_refinements ? "shared with other members" : "private to your company"})</span>
+          </h3>
           <div className="grid items-start gap-3 lg:grid-cols-2">{user.map((x) => <ClaimCard key={x.id} claim={x} />)}</div>
         </div>
       )}
@@ -314,7 +339,8 @@ function History({ data }) {
               <tbody>{data.revisions.map((r, i) => <tr key={i}><td className="whitespace-nowrap tabular-nums">{stamp(r.when)}</td><td>{r.author}</td><td>{r.summary}</td></tr>)}</tbody>
             </table>
           </div>
-        ) : <p className="meta">No refinements yet: the profile shows only what public sources state.</p>}
+        ) : data.can_edit ? <p className="meta">No refinements yet: the profile shows only what public sources state.</p>
+          : <p className="meta flex items-center gap-1.5"><Lock size={13} />The revision history is private to {c.name}.</p>}
       </div>
       <div>
         <h3 className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-ink2"><Lock size={14} />Private interactions</h3>

@@ -21,7 +21,7 @@ with ui.db() as s:
     funding = list(s.scalars(select(FundingOpportunity)))
     status = Counter(current_status(f) for f in funding)
     claims = [c for c in repo.all_claims(s) if c.claim_category == "capability" and c.capability]
-    hyps = list(s.scalars(select(CollaborationHypothesis).order_by(CollaborationHypothesis.score.desc()).limit(8)))
+    hyps = list(s.scalars(repo.public_hypotheses(s).order_by(CollaborationHypothesis.score.desc()).limit(8)))
     logs = repo.recent_logs(s, 12)
     newest_research = list(s.scalars(select(ResearchPublication).order_by(ResearchPublication.publication_date.desc()).limit(5)))
 

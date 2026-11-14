@@ -11,17 +11,33 @@ from nexus.core import taxonomy as tx
 from nexus.database import repository as repo
 
 
-def load_profiles(s: Session, embedder=None) -> list[me.CompanyProfile]:
-    """One CompanyProfile per company, using only ACTIVE claims."""
+def has_private_inputs(company, user_claims: bool, marked: bool) -> bool:
+    """True when the company's own view would differ from the public one."""
+    unshared = not company.share_refinements and (bool(company.user_description) or user_claims)
+    return unshared or bool(company.need_priorities) or bool(company.priority_domains) or marked
+
+
+def load_profiles(s: Session, embedder=None, private_for=()) -> list[me.CompanyProfile]:
+    """One CompanyProfile per company, using only ACTIVE claims.
+
+    Public profiles (the default) contain public evidence plus refinements the company chose to share.
+    For company ids in `private_for` (or every company when it is True) the company's own private
+    refinements and priority areas are included as well; such a profile may only feed that company's
+    own, owner-only results.
+    """
     profiles = []
     by_company: dict[int, list] = {}
     for claim in repo.all_claims(s):
         by_company.setdefault(claim.company_id, []).append(claim)
     for company in repo.companies(s):
+        private = private_for is True or company.id in (private_for or ())
+        shared = private or bool(company.share_refinements)
         p = me.CompanyProfile(id=company.id, name=company.name,
-                              priority_domains=list(company.priority_domains or []))
+                              priority_domains=list(company.priority_domains or []) if private else [])
         excerpts, free_text = [], []
         for cl in by_company.get(company.id, []):
+            if cl.classification == "USER" and not shared:
+                continue  # an unshared refinement never reaches another company's results
             key = cl.capability.key if cl.capability else None
             if cl.claim_category == "capability" and key in tx.CAPABILITIES:
                 cc = p.capabilities.get(key)
@@ -47,7 +63,8 @@ def load_profiles(s: Session, embedder=None) -> list[me.CompanyProfile]:
             elif cl.claim_category == "capability" and cl.classification == "USER":
                 free_text.append(cl.claim_text)
         names = ", ".join(tx.CAPABILITIES[k].name for k in p.capabilities)
-        p.text = " ".join(x for x in [company.user_description or company.description or "", names,
+        description = (company.user_description if shared else None) or company.description or ""
+        p.text = " ".join(x for x in [description, names,
                                       " ".join(excerpts), " ".join(free_text)] if x).strip() or company.name
         profiles.append(p)
     if embedder is not None and profiles:

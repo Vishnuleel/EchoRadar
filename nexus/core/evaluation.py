@@ -91,7 +91,7 @@ def evidence_coverage(s: Session) -> dict:
     claims = repo.all_claims(s)
     facts = [c for c in claims if c.classification == "FACT"]
     ok = [c for c in facts if c.evidence and is_valid_url(c.evidence.source_url) and c.evidence.evidence_text]
-    hyps = list(s.scalars(select(CollaborationHypothesis)))
+    hyps = list(s.scalars(select(CollaborationHypothesis).where(CollaborationHypothesis.visibility == "public")))
     full = [h for h in hyps if h.verification.get("checks", {}).get("claims_used")
             and h.verification["checks"]["claims_with_source"] == h.verification["checks"]["claims_used"]]
     with_r = [h for h in hyps if h.research_ids]
@@ -122,11 +122,12 @@ def freshness(s: Session, now: datetime | None = None) -> dict:
 def ranking_differentiation(s: Session, top_k: int = 5) -> dict:
     """How different are the personalised top-k lists? Lower overlap = more personalised."""
     lists: dict[int, set] = {}
-    for rec in s.scalars(select(Recommendation).where(Recommendation.rank <= top_k)):
+    public = Recommendation.audience == "public"
+    for rec in s.scalars(select(Recommendation).where(Recommendation.rank <= top_k, public)):
         lists.setdefault(rec.company_id, set()).add(rec.target_id)
     ids = list(lists)
     overlaps = [len(lists[a] & lists[b]) / len(lists[a] | lists[b]) for a, b in itertools.combinations(ids, 2)]
-    tops = {rec.company_id: rec.target_id for rec in s.scalars(select(Recommendation).where(Recommendation.rank == 1))}
+    tops = {rec.company_id: rec.target_id for rec in s.scalars(select(Recommendation).where(Recommendation.rank == 1, public))}
     return {"companies_with_recommendations": len(ids), "companies_total": s.query(Company).count(),
             "mean_jaccard_overlap_top_k": round(float(np.mean(overlaps)), 3) if overlaps else None,
             "identical_list_pairs": sum(1 for o in overlaps if o == 1.0), "pairs_compared": len(overlaps),

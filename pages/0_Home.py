@@ -11,6 +11,7 @@ from nexus.security.boundary_guard import DISCLAIMER, SCOPE_DESCRIPTION
 names = ui.setup("Home")
 acting = st.session_state.get("acting_company")
 cid = acting or st.session_state["dna_company"]
+aud = "owner" if acting is not None and acting == cid else "public"
 
 st.markdown(f"""<div class="nx-hero"><div class="nx-eyebrow">Blue Science Park - Virtual Science Park</div>
 <h1>NEXUS - an AI radar for member companies</h1>
@@ -29,7 +30,7 @@ with ui.db() as s:
               (n["research"] + n["news"], "Research and news items", "OpenAlex, regional news"),
               (n["hypotheses"], "Collaboration hypotheses", "not confirmed collaborations")])
     st.write("")
-    digest = radar.weekly_digest(s, cid)
+    digest = radar.weekly_digest(s, cid, audience=aud)
     company = s.get(Company, cid)
     left, right = st.columns([3, 2], gap="large")
     with left:
@@ -37,7 +38,7 @@ with ui.db() as s:
         if not digest["total"]:
             st.info("No radar items: no technology or expertise could be confirmed for this company from public text. "
                     "Add a capability or interest on the Company DNA page to get a personalised radar.")
-        needs = company.need_priorities or []
+        needs = (company.need_priorities or []) if aud == "owner" else []
         if needs:
             st.caption("Current priorities set by the company: " + ", ".join(n_.replace("_", " ") for n_ in needs) + ".")
         if digest["urgent"]:
@@ -54,7 +55,7 @@ with ui.db() as s:
                 st.markdown(f"**{title}**" + ("  - your current priority" if need in needs else ""))
                 for it in items:
                     ui.item_card(it, key, acting, s, actions=True)
-        recs = repo.recommendations(s, cid, 2)
+        recs = repo.recommendations(s, cid, 2, aud)
         if recs:
             st.markdown("**Potential connections with other members**")
             for r in recs:

@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from starlette.responses import Response
 
-from api.core import acting_company, cache, get_db, write_lock
+from api.core import acting_company, auth_mode, cache, get_db, write_lock
 from nexus import pipeline
 from nexus.agents import combination_agent, company_agent
 from nexus.agents.opportunity_agent import current_status
@@ -24,8 +24,8 @@ from nexus.core import taxonomy as tx
 from nexus.core.embeddings import get_embedder
 from nexus.core.scoring import LABELS
 from nexus.database import repository as repo
-from nexus.database.models import (CollaborationHypothesis, Company, Event, FundingOpportunity, NewsUpdate,
-                                   ResearchPublication)
+from nexus.database.models import (OWNER, PUBLIC, CollaborationHypothesis, Company, Event, FundingOpportunity,
+                                   NewsUpdate, ResearchPublication)
 from nexus.security import privacy
 from nexus.security.boundary_guard import DISCLAIMER, SCOPE_DESCRIPTION
 from nexus.utils.config import DATA_DIR
@@ -74,20 +74,21 @@ def _rec(r, names: dict, cid: int) -> dict:
             "breakdown": r.score_breakdown}
 
 
-def _strip_marks(items: list[dict], owner: bool) -> list[dict]:
-    """Saved / useful marks are private: only the owning company gets them."""
-    return items if owner else [{**i, "marks": []} for i in items]
+def _audience(acting: int | None, company_id: int) -> str:
+    """Owner-only results (private refinements, needs, feedback) go to the company itself, nobody else."""
+    return OWNER if acting is not None and acting == company_id else PUBLIC
 
 
-def _radar_items(s: Session, company_id: int) -> list[dict]:
-    return cache.get(f"radar@{company_id}", lambda: radar.company_items(s, company_id))
+def _radar_items(s: Session, company_id: int, audience: str) -> list[dict]:
+    return cache.get(f"radar:{audience}@{company_id}", lambda: radar.company_items(s, company_id, audience=audience))
 
 
 # ---- meta ---------------------------------------------------------------------------------------
 @router.get("/health")
 def health():
     emb = get_embedder()
-    return {"status": "ok", "embedding_backend": emb.backend, "semantic": emb.is_semantic}
+    return {"status": "ok", "embedding_backend": emb.backend, "semantic": emb.is_semantic,
+            "fallback_reason": emb.fallback_reason, "auth_mode": auth_mode()}
 
 
 @router.get("/meta")
@@ -112,18 +113,16 @@ def companies(s: Session = Depends(get_db)):
 # ---- home ---------------------------------------------------------------------------------------
 @router.get("/home")
 def home(company_id: int, s: Session = Depends(get_db), acting: int | None = Depends(acting_company)):
+    aud = _audience(acting, company_id)
+
     def build():
         c = _company(s, company_id)
         names = _names(s)
-        return {"company": {"id": c.id, "name": c.name, "needs": list(c.need_priorities or [])},
-                "counts": repo.counts(s), "digest": radar.weekly_digest(s, company_id),
-                "recommendations": [_rec(r, names, company_id) for r in repo.recommendations(s, company_id, 2)],
+        return {"company": {"id": c.id, "name": c.name, "needs": list(c.need_priorities or []) if aud == OWNER else []},
+                "audience": aud, "counts": repo.counts(s), "digest": radar.weekly_digest(s, company_id, audience=aud),
+                "recommendations": [_rec(r, names, company_id) for r in repo.recommendations(s, company_id, 2, aud)],
                 "trace": pipeline.load_trace()}
-    out = copy.copy(cache.get(f"home@{company_id}", build))
-    owner = acting == company_id
-    out["digest"] = {k: _strip_marks(v, owner) if isinstance(v, list) and v and isinstance(v[0], dict) else v
-                     for k, v in out["digest"].items()}
-    return out
+    return cache.get(f"home:{aud}@{company_id}", build)
 
 
 class Ask(BaseModel):
@@ -154,7 +153,7 @@ def overview(s: Session = Depends(get_db)):
         claims = [c for c in repo.all_claims(s) if c.claim_category == "capability" and c.capability]
         per_cap = Counter(k for _, k in {(c.company_id, c.capability.key) for c in claims
                                          if c.capability.key in tx.CAPABILITIES})
-        hyps = s.scalars(select(CollaborationHypothesis).order_by(CollaborationHypothesis.score.desc()).limit(6))
+        hyps = s.scalars(repo.public_hypotheses(s).order_by(CollaborationHypothesis.score.desc()).limit(6))
         recent = sorted([f for f in funding if f.opens_at and f.opens_at <= now], key=lambda f: f.opens_at, reverse=True)[:5]
         research = s.scalars(select(ResearchPublication).order_by(ResearchPublication.publication_date.desc()).limit(5))
         return {
@@ -233,18 +232,23 @@ def dna(company_id: int, s: Session = Depends(get_db), acting: int | None = Depe
         private = {"feedback_count": len(privacy.get_feedback(s, acting, company_id)),
                    "interactions": [{"when": r.created_at, "kind": r.kind, "text": r.text[:160], "outcome": r.outcome}
                                     for r in rows[:30]], "interaction_count": len(rows)}
+    # Public view: official facts, NEXUS inferences and refinements the company chose to share.
+    # Owner view adds unshared refinements, needs, priority areas, removed claims and the revision history.
+    shared = owner or bool(c.share_refinements)
+    visible = [x for x in claims if (x.active or owner) and (x.classification != "USER" or shared)]
     return {
-        "company": {"id": c.id, "name": c.name, "description": c.description, "user_description": c.user_description,
+        "company": {"id": c.id, "name": c.name, "description": c.description,
+                    "user_description": c.user_description if shared else None,
                     "industry": c.industry, "location": c.location, "employees": c.employees, "founded": c.founded,
                     "website": c.website, "directory_url": c.directory_url, "profile_depth": c.profile_depth,
-                    "updated_at": c.updated_at, "needs": list(c.need_priorities or []),
-                    "domains": list(c.priority_domains or [])},
-        # deactivated claims are only sent to the owner, who can restore them
-        "claims": [_claim(x) for x in claims if x.active or owner],
+                    "updated_at": c.updated_at, "share_refinements": bool(c.share_refinements),
+                    "needs": list(c.need_priorities or []) if owner else [],
+                    "domains": list(c.priority_domains or []) if owner else []},
+        "claims": [_claim(x) for x in visible],
         "gaps": company_agent.missing_information(c, claims),
-        "recommendations": [_rec(r, names, company_id) for r in repo.recommendations(s, company_id, 8)],
+        "recommendations": [_rec(r, names, company_id) for r in repo.recommendations(s, company_id, 8, _audience(acting, company_id))],
         "revisions": [{"when": r.created_at, "author": r.author, "summary": r.change_summary}
-                      for r in sorted(c.revisions, key=lambda r: r.created_at, reverse=True)],
+                      for r in sorted(c.revisions, key=lambda r: r.created_at, reverse=True)] if owner else [],
         "private": private, "can_edit": owner, "verification": _verification(c)}
 
 
@@ -255,20 +259,29 @@ class Refine(BaseModel):
     new_interest: str = Field(default="", max_length=300)
     new_capability: str = Field(default="", max_length=300)
     claims: dict[int, bool] = {}
+    share_refinements: bool | None = None  # explicit choice; None keeps the current setting
+    preview: bool = False  # compute the new order, show it, save nothing
 
 
 @router.post("/companies/{company_id}/refine")
 def refine(company_id: int, body: Refine, s: Session = Depends(get_db), acting: int | None = Depends(acting_company)):
+    """Save (or preview) a company's own refinements. Preview runs the same recalculation and rolls it back."""
     privacy.assert_owner(acting, company_id)
     c = _company(s, company_id)
     emb = get_embedder()
     needs = [n for n in body.needs if n in company_agent.NEED_AREAS]
     domains = [d for d in body.domains if d in tx.DOMAINS]
+    top = lambda: ([r.hypothesis.key for r in repo.recommendations(s, company_id, 5, OWNER)],
+                   [{"kind": i["kind"], "title": i["title"][:70], "relevance": i["relevance"]}
+                    for i in radar.company_items(s, company_id, audience=OWNER)[:5]])
     with write_lock:
         claims = repo.claims(s, company_id, active_only=False)
-        before = [r.hypothesis.key for r in repo.recommendations(s, company_id, 5)]
-        radar_before = [{"kind": i["kind"], "title": i["title"][:70]} for i in radar.company_items(s, company_id)[:5]]
+        before, radar_before = top()
         changes = []
+        if body.share_refinements is not None and body.share_refinements != bool(c.share_refinements):
+            c.share_refinements = body.share_refinements
+            changes.append("refinements now shared with other members" if body.share_refinements
+                           else "refinements now private to the company")
         desc = body.description.strip() or None
         if desc != c.user_description:
             c.user_description = desc
@@ -291,14 +304,19 @@ def refine(company_id: int, body: Refine, s: Session = Depends(get_db), acting: 
                 company_agent.set_claim_active(s, claim_id, keep)
                 changes.append(("restored: " if keep else "removed: ") + row.claim_text[:50])
         if not changes:
-            return {"changes": [], "message": "No changes to save."}
-        repo.add_revision(s, c, "; ".join(changes), author=c.name)
-        s.commit()
-        pipeline.save_trace(pipeline.recompute(s, emb), emb.backend)  # profile edits change matching: full recompute
-        cache.clear()
-        after = [r.hypothesis.key for r in repo.recommendations(s, company_id, 5)]
-        radar_after = [{"kind": i["kind"], "title": i["title"][:70]} for i in radar.company_items(s, company_id)[:5]]
-    return {"changes": changes, "new_recommendations": len(set(after) - set(before)),
+            s.rollback()
+            return {"changes": [], "message": "No changes to save.", "preview": body.preview}
+        if body.preview:
+            pipeline.recompute(s, emb, commit=False)
+            after, radar_after = top()
+            s.rollback()  # nothing saved: profile, rankings and history stay exactly as they were
+        else:
+            repo.add_revision(s, c, "; ".join(changes), author=c.name)
+            s.commit()
+            pipeline.save_trace(pipeline.recompute(s, emb), emb.backend)  # profile edits change matching: full recompute
+            cache.clear()
+            after, radar_after = top()
+    return {"changes": changes, "preview": body.preview, "new_recommendations": len(set(after) - set(before)),
             "recommendations_changed": before != after, "radar_before": radar_before, "radar_after": radar_after}
 
 
@@ -327,9 +345,10 @@ def radar_view(company_id: int, s: Session = Depends(get_db), acting: int | None
                 if e.starts_at and radar.describe("event", e)["status"] == "past"]
         return [{"date": e.starts_at, "title": e.title, "location": e.location, "url": e.source_url,
                  "note": e.date_note} for e in rows]
-    return {"company": {"id": c.id, "name": c.name, "needs": list(c.need_priorities or [])},
-            "items": _strip_marks(_radar_items(s, company_id), acting == company_id),
-            "past_events": cache.get("past_events", past_events), "can_mark": acting == company_id}
+    aud = _audience(acting, company_id)
+    return {"company": {"id": c.id, "name": c.name, "needs": list(c.need_priorities or []) if aud == OWNER else []},
+            "audience": aud, "items": _radar_items(s, company_id, aud),
+            "past_events": cache.get("past_events", past_events), "can_mark": aud == OWNER}
 
 
 class Mark(BaseModel):
@@ -359,17 +378,19 @@ def radar_mark(body: Mark, s: Session = Depends(get_db), acting: int | None = De
 
 # ---- innovation blueprint -----------------------------------------------------------------------
 @router.get("/blueprint/recommendations")
-def blueprint_recommendations(company_id: int, s: Session = Depends(get_db)):
+def blueprint_recommendations(company_id: int, s: Session = Depends(get_db), acting: int | None = Depends(acting_company)):
     names = _names(s)
-    return [_rec(r, names, company_id) for r in repo.recommendations(s, company_id, 12)]
+    return [_rec(r, names, company_id) for r in repo.recommendations(s, company_id, 12, _audience(acting, company_id))]
 
 
 @router.get("/blueprint")
 def blueprint(key: str | None = None, companies: str | None = None, format: str = Query("json", pattern="^(json|md|pdf)$"),
-              s: Session = Depends(get_db)):
+              s: Session = Depends(get_db), acting: int | None = Depends(acting_company)):
     note = ""
     if key:
         hyp = s.scalar(select(CollaborationHypothesis).where(CollaborationHypothesis.key == key))
+        if hyp is not None and hyp.visibility != PUBLIC and hyp.visibility != f"{OWNER}:{acting}":
+            hyp = None  # built from another company's private refinements: treated as not found
         if hyp is None:
             raise HTTPException(404, "This hypothesis no longer exists; the ranking has been recalculated.")
     else:
@@ -437,7 +458,7 @@ def staff(s: Session = Depends(get_db)):
                     and c.classification == "FACT" and tx.CAPABILITIES[c.capability.key].role != "ENABLER":
                 for d in tx.CAPABILITIES[c.capability.key].domains:
                     by_domain[d].add(c.company_id)
-        hyps = s.scalars(select(CollaborationHypothesis).order_by(CollaborationHypothesis.score.desc()).limit(60))
+        hyps = s.scalars(repo.public_hypotheses(s).order_by(CollaborationHypothesis.score.desc()).limit(60))
         seen, connections = set(), []
         for h in hyps:
             if h.concept_id in seen or len(connections) >= 5:
@@ -451,7 +472,8 @@ def staff(s: Session = Depends(get_db)):
                 "id": c.id, "company": c.name, "depth": c.profile_depth,
                 "capabilities": len({x.capability.key for x in mine if x.claim_category == "capability" and x.capability}),
                 "gaps": len(company_agent.missing_information(c, mine)),
-                "refined": bool(c.user_description) or any(x.classification == "USER" for x in mine),
+                # staff only learn about refinements a company chose to share
+                "refined": bool(c.share_refinements) and (bool(c.user_description) or any(x.classification == "USER" for x in mine)),
                 "updated_at": c.updated_at})
         profiles.sort(key=lambda r: (r["capabilities"], -r["gaps"]))
         news = [n for n in s.scalars(select(NewsUpdate).order_by(NewsUpdate.published_at.desc())) if n.mentioned_company_ids]

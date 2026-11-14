@@ -74,8 +74,8 @@ def test_end_to_end_company_discovery_workflow(seeded, embedder):
     company = repo.company_by_slug(s, "cablelay")
     facts = [c for c in repo.claims(s, company.id) if c.classification == "FACT"]
     assert facts and all(c.evidence.source_url and c.evidence.retrieved_at for c in facts)  # 2-4 review profile
-    before = [(r.hypothesis.key, r.score) for r in repo.recommendations(s, company.id, 10)]
-    radar_before = [(i["kind"], i["ref_id"], i["relevance"]) for i in radar.company_items(s, company.id)]
+    before = [(r.hypothesis.key, r.score) for r in repo.recommendations(s, company.id, 10, "owner")]
+    radar_before = [(i["kind"], i["ref_id"], i["relevance"]) for i in radar.company_items(s, company.id, audience="owner")]
 
     # 5-6: the user adds an interest and a current need
     company_agent.add_user_claim(s, company, "machine learning for cable fault prediction", "interest", embedder)
@@ -85,13 +85,16 @@ def test_end_to_end_company_discovery_workflow(seeded, embedder):
     trace = pipeline.recompute(s, embedder)  # 7-11
     assert [t["agent"] for t in trace][:3] == ["Innovation Combination Agent", "Ranking Agent", "Verification Agent"]
 
-    after = [(r.hypothesis.key, r.score) for r in repo.recommendations(s, company.id, 10)]
+    after = [(r.hypothesis.key, r.score) for r in repo.recommendations(s, company.id, 10, "owner")]
     assert after != before, "recommendations must respond to the profile edit"
     ai_ids = {repo.company_by_slug(s, x).id for x in ("mindworks", "codehaus")}
-    recs = repo.recommendations(s, company.id, 10)
+    recs = repo.recommendations(s, company.id, 10, "owner")
     assert any(ai_ids & set(r.hypothesis.participating_companies) and
                any(l["kind"] == "stated_interest" for l in r.hypothesis.evidence) for r in recs)
-    radar_after = radar.company_items(s, company.id)
+    # the unshared interest is private: the public list and every public hypothesis ignore it
+    assert all(r.hypothesis.visibility == "public" and not any(l["kind"] == "stated_interest" for l in r.hypothesis.evidence)
+               for r in repo.recommendations(s, company.id, 10, "public"))
+    radar_after = radar.company_items(s, company.id, audience="owner")
     before_by_ref = {(k, ref): rel for k, ref, rel in radar_before}
     funding_after = [i for i in radar_after if i["kind"] == "funding"]
     assert funding_after

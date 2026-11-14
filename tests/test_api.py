@@ -105,8 +105,90 @@ def test_dna_private_section_and_refine_need_the_owner(api):
     assert any("current needs" in c for c in done["changes"])
     own = client.get(f"/api/companies/{cid}/dna", headers=as_(cid)).json()
     assert own["can_edit"] and own["private"] is not None and own["company"]["needs"] == ["funding"] and own["revisions"]
-    items = client.get("/api/radar", params={"company_id": cid}).json()["items"]
-    assert items[0]["kind"] == "funding" and items[0]["priority_area"]
+    items = client.get("/api/radar", params={"company_id": cid}, headers=as_(cid)).json()["items"]
+    assert items[0]["kind"] == "funding" and items[0]["priority_area"]  # the owner's radar uses the need
+    public = client.get("/api/radar", params={"company_id": cid}).json()
+    assert public["company"]["needs"] == [] and not any(i["priority_area"] or i["adjustments"] for i in public["items"])
+
+
+def test_private_refinements_stay_private_until_shared(api):
+    """A visitor or another company sees none of a company's unshared refinements, directly or derived."""
+    client, ids, s = api
+    cid, other = ids["cablelay"], ids["robotix"]
+    body = {"description": "Secret pivot to AI-driven cable diagnostics", "new_interest": "machine learning for cable fault prediction",
+            "needs": ["funding"], "domains": ["offshore_energy"]}
+    assert client.post(f"/api/companies/{cid}/refine", json=body, headers=as_(cid)).status_code == 200
+    names = {v: k for k, v in ids.items()}
+
+    for headers in ({}, as_(other)):  # visitor, then another company
+        dna = client.get(f"/api/companies/{cid}/dna", headers=headers).json()
+        c = dna["company"]
+        assert c["user_description"] is None and c["needs"] == [] and c["domains"] == [] and dna["revisions"] == []
+        assert not any(x["classification"] == "USER" for x in dna["claims"]) and dna["private"] is None
+        home = client.get("/api/home", params={"company_id": cid}, headers=headers).json()
+        assert home["company"]["needs"] == [] and home["audience"] == "public"
+    # no shared view is built from the private interest
+    from nexus.database.models import CollaborationHypothesis
+    public_hyps = s.scalars(select(CollaborationHypothesis).where(CollaborationHypothesis.visibility == "public"))
+    assert not any(l["kind"] == "stated_interest" for h in public_hyps for l in h.evidence)
+    for path in ("/api/overview", "/api/staff", f"/api/graph?focus={cid}"):
+        assert "Secret pivot" not in client.get(path).text and "fault prediction" not in client.get(path).text
+    staff = client.get("/api/staff").json()
+    assert not next(p for p in staff["profiles"] if p["id"] == cid)["refined"]
+    other_recs = client.get(f"/api/companies/{other}/dna", headers=as_(other)).json()["recommendations"]
+    assert all("stated an interest" not in r["explanation"] for r in other_recs)
+
+    # the owner's own list does use it
+    mine = client.get(f"/api/companies/{cid}/dna", headers=as_(cid)).json()
+    assert mine["company"]["user_description"].startswith("Secret") and any(x["classification"] == "USER" for x in mine["claims"])
+    owner_keys = [r["key"] for r in mine["recommendations"]]
+    assert any("~owner" in k for k in owner_keys) or any("stated an interest" in r["explanation"] for r in mine["recommendations"])
+    private_key = next((k for k in owner_keys if "~owner" in k), None)
+    if private_key:  # an owner-only hypothesis is not readable by anyone else
+        assert client.get("/api/blueprint", params={"key": private_key}, headers=as_(other)).status_code == 404
+        assert client.get("/api/blueprint", params={"key": private_key}, headers=as_(cid)).status_code == 200
+
+    # sharing is an explicit choice, and then the refinement becomes public evidence labelled USER
+    client.post(f"/api/companies/{cid}/refine", json={**body, "new_interest": "", "share_refinements": True}, headers=as_(cid))
+    dna = client.get(f"/api/companies/{cid}/dna").json()
+    assert dna["company"]["user_description"].startswith("Secret") and any(x["classification"] == "USER" for x in dna["claims"])
+    assert dna["company"]["needs"] == []  # needs and priority areas stay private even when sharing
+    assert names[cid] == "cablelay"
+
+
+def test_preview_changes_nothing_and_saving_gives_the_previewed_result(api):
+    client, ids, s = api
+    cid = ids["cablelay"]
+    before = client.get(f"/api/companies/{cid}/dna", headers=as_(cid)).json()
+    radar_before = client.get("/api/radar", params={"company_id": cid}, headers=as_(cid)).json()["items"]
+    body = {"needs": ["funding"], "new_interest": "machine learning for cable fault prediction"}
+    preview = client.post(f"/api/companies/{cid}/refine", json={**body, "preview": True}, headers=as_(cid)).json()
+    assert preview["preview"] and preview["changes"]
+    after_preview = client.get(f"/api/companies/{cid}/dna", headers=as_(cid)).json()
+    assert after_preview["company"]["needs"] == before["company"]["needs"] and after_preview["revisions"] == before["revisions"]
+    assert len(after_preview["claims"]) == len(before["claims"])
+    assert client.get("/api/radar", params={"company_id": cid}, headers=as_(cid)).json()["items"] == radar_before
+    saved = client.post(f"/api/companies/{cid}/refine", json=body, headers=as_(cid)).json()
+    assert saved["radar_after"] == preview["radar_after"]
+
+
+def test_token_mode_ignores_the_client_supplied_company(api, tmp_path, monkeypatch):
+    import hashlib
+    import json
+
+    client, ids, _ = api
+    cid = ids["sensora"]
+    tokens = tmp_path / "tokens.json"
+    tokens.write_text(json.dumps({hashlib.sha256(b"s3cret-sensora").hexdigest(): "sensora"}))
+    monkeypatch.setenv("NEXUS_AUTH_MODE", "token")
+    monkeypatch.setenv("NEXUS_AUTH_TOKENS", str(tokens))
+    assert client.get("/api/health").json()["auth_mode"] == "token"
+    forged = client.get(f"/api/companies/{cid}/dna", headers=as_(cid)).json()  # header alone: ignored
+    assert not forged["can_edit"] and forged["private"] is None
+    wrong = client.get(f"/api/companies/{cid}/dna", headers={"Authorization": "Bearer guess"}).json()
+    assert not wrong["can_edit"]
+    real = client.get(f"/api/companies/{cid}/dna", headers={"Authorization": "Bearer s3cret-sensora"}).json()
+    assert real["can_edit"] and real["private"] is not None
 
 
 def test_every_displayed_profile_fact_links_to_its_exact_source(api):

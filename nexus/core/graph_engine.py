@@ -35,7 +35,8 @@ def build_graph(s: Session, profiles=None, similarity=None, focus_company: int |
     edge_types = set(edge_types or EDGE_TYPES)
     g = nx.Graph()
     companies = {c.id: c for c in repo.companies(s)}
-    hyps = list(s.scalars(select(CollaborationHypothesis).order_by(CollaborationHypothesis.score.desc())))
+    # the graph is a shared view: public hypotheses and public radar rows only
+    hyps = list(s.scalars(repo.public_hypotheses(s).order_by(CollaborationHypothesis.score.desc())))
     if focus_company:
         hyps = [h for h in hyps if focus_company in h.participating_companies][:max_hypotheses]
         scope = {focus_company} | {c for h in hyps for c in h.participating_companies}
@@ -100,7 +101,8 @@ def build_graph(s: Session, profiles=None, similarity=None, focus_company: int |
 
     if "RELEVANT_TO" in edge_types and focus_company:
         for kind, model in (("research", ResearchPublication), ("funding", FundingOpportunity), ("testbed", Testbed)):
-            ops = s.scalars(select(Opportunity).where(Opportunity.company_id == focus_company, Opportunity.kind == kind)
+            ops = s.scalars(select(Opportunity).where(Opportunity.company_id == focus_company, Opportunity.kind == kind,
+                                                      Opportunity.audience == "public")
                             .order_by(Opportunity.relevance.desc()).limit(max_radar))
             for o in ops:
                 row = s.get(model, o.ref_id)

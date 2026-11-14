@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from nexus.agents.opportunity_agent import current_status
 from nexus.core import taxonomy as tx
-from nexus.database.models import (Company, Event, FundingOpportunity, NewsUpdate, Opportunity, ResearchPublication, SavedItem,
+from nexus.database.models import (OWNER, PUBLIC, Company, Event, FundingOpportunity, NewsUpdate, Opportunity, ResearchPublication, SavedItem,
                                    Testbed)
 from nexus.utils.validators import utcnow
 
@@ -82,16 +82,31 @@ def describe(kind: str, row, now: datetime | None = None) -> dict | None:
     return d
 
 
+def resolve_audience(s: Session, company_id: int, audience: str) -> str:
+    """'owner' only when owner-only rows exist for this company; otherwise the public rows serve both."""
+    if audience == OWNER and s.scalar(select(Opportunity.id).where(Opportunity.company_id == company_id,
+                                                                    Opportunity.audience == OWNER).limit(1)):
+        return OWNER
+    return PUBLIC
+
+
 def company_items(s: Session, company_id: int, kinds: list[str] | None = None, min_relevance: float = 0.0,
-                  include_past_events: bool = False, now: datetime | None = None) -> list[dict]:
-    """Ranked radar items for one company, most relevant first."""
+                  include_past_events: bool = False, now: datetime | None = None, audience: str = PUBLIC) -> list[dict]:
+    """Ranked radar items for one company, most relevant first.
+
+    `audience="public"` (default) is what anyone may see: no private needs, feedback or marks.
+    `audience="owner"` is the company's own radar and may only be served to that company.
+    """
     now = now or utcnow()
-    q = select(Opportunity).where(Opportunity.company_id == company_id, Opportunity.relevance >= min_relevance)
+    aud = resolve_audience(s, company_id, audience)
+    q = select(Opportunity).where(Opportunity.company_id == company_id, Opportunity.relevance >= min_relevance,
+                                  Opportunity.audience == aud)
     if kinds:
         q = q.where(Opportunity.kind.in_(kinds))
     marks = {}
-    for m in s.scalars(select(SavedItem).where(SavedItem.company_id == company_id)):
-        marks.setdefault((m.kind, m.ref_id), set()).add(m.action)
+    if audience == OWNER:  # saved / useful / not useful are private to the company
+        for m in s.scalars(select(SavedItem).where(SavedItem.company_id == company_id)):
+            marks.setdefault((m.kind, m.ref_id), set()).add(m.action)
     out = []
     ops = list(s.scalars(q.order_by(Opportunity.relevance.desc())))
     # one query per monitoring area instead of one per item
@@ -109,18 +124,19 @@ def company_items(s: Session, company_id: int, kinds: list[str] | None = None, m
         d.update(relevance=o.relevance, base_relevance=o.base_relevance, adjustments=list(o.adjustments or []),
                  why=o.why, next_action=o.next_action, matched=caps, marks=sorted(marks.get((o.kind, o.ref_id), [])))
         out.append(d)
-    # areas the company marked as a current need come first; within a tier, most relevant first
+    # areas the company marked as a current need come first (owner view only: needs are private)
     company = s.get(Company, company_id)
-    first = {k for n in (company.need_priorities or []) for k in NEED_TO_KINDS.get(n, [])} if company else set()
+    first = {k for n in (company.need_priorities or []) for k in NEED_TO_KINDS.get(n, [])} \
+        if company and audience == OWNER else set()
     for d in out:
         d["priority_area"] = d["kind"] in first
     out.sort(key=lambda d: (not d["priority_area"], -d["relevance"]))
     return out
 
 
-def weekly_digest(s: Session, company_id: int, now: datetime | None = None) -> dict:
+def weekly_digest(s: Session, company_id: int, now: datetime | None = None, audience: str = PUBLIC) -> dict:
     """'What should this company know this week?' - the best few items per monitoring area."""
-    items = company_items(s, company_id, now=now)
+    items = company_items(s, company_id, now=now, audience=audience)
     by_kind = {}
     for it in items:
         by_kind.setdefault(it["kind"], []).append(it)

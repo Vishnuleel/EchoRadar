@@ -13,7 +13,12 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from nexus.utils.validators import utcnow
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
+
+# Who may see a derived row (hypothesis, recommendation, radar item):
+#   "public"      computed from public evidence and explicitly shared refinements only
+#   "owner"       computed with the company's private refinements, needs and feedback; owner only
+PUBLIC, OWNER = "public", "owner"
 
 
 class Base(DeclarativeBase):
@@ -42,6 +47,10 @@ class Company(Base):
     profile_depth: Mapped[str] = mapped_column(String(20), default="directory")  # directory | website
     priority_domains: Mapped[list] = mapped_column(JSON, default=list)  # user-set priorities
     need_priorities: Mapped[list] = mapped_column(JSON, default=list)  # user-set: funding|testing|events|knowledge|partners
+    # Refinements (user description, added capabilities and interests) stay private to the company unless it
+    # explicitly chooses to share them; only shared refinements are shown to others or used to match partners.
+    # Needs and priority areas are always private: they only re-rank the company's own lists.
+    share_refinements: Mapped[bool] = mapped_column(Boolean, default=False)
     is_demo: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
@@ -166,6 +175,7 @@ class Opportunity(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     company_id: Mapped[int] = mapped_column(ForeignKey("company.id"), index=True)
     kind: Mapped[str] = mapped_column(String(20), index=True)  # research | funding | testbed | event | news
+    audience: Mapped[str] = mapped_column(String(10), default=PUBLIC, index=True)  # public | owner
     base_relevance: Mapped[float] = mapped_column(Float, default=0.0)  # before priority / feedback adjustment
     adjustments: Mapped[list] = mapped_column(JSON, default=list)  # human-readable reasons for the adjustment
     ref_id: Mapped[int] = mapped_column(Integer)
@@ -183,6 +193,8 @@ class CollaborationHypothesis(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     key: Mapped[str] = mapped_column(String(200), unique=True, index=True)
     kind: Mapped[str] = mapped_column(String(10))  # pair | triad
+    # "public", or "owner:<company id>" when it was found using that company's private refinements
+    visibility: Mapped[str] = mapped_column(String(30), default=PUBLIC, index=True)
     title: Mapped[str] = mapped_column(Text)
     participating_companies: Mapped[list] = mapped_column(JSON)  # company ids
     required_capabilities: Mapped[list] = mapped_column(JSON, default=list)
@@ -208,6 +220,7 @@ class Recommendation(Base):
     company_id: Mapped[int] = mapped_column(ForeignKey("company.id"), index=True)
     target_id: Mapped[int] = mapped_column(ForeignKey("collaboration_hypothesis.id"))
     target_type: Mapped[str] = mapped_column(String(20), default="hypothesis")
+    audience: Mapped[str] = mapped_column(String(10), default=PUBLIC, index=True)  # public | owner
     rank: Mapped[int] = mapped_column(Integer)
     score: Mapped[float] = mapped_column(Float)
     score_breakdown: Mapped[dict] = mapped_column(JSON)

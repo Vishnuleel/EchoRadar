@@ -20,6 +20,7 @@ cid = st.selectbox("Company (type to search)", ids, index=ids.index(default) if 
 st.session_state["dna_company"] = cid
 acting = st.session_state.get("acting_company")
 can_edit = acting == cid
+aud = "owner" if can_edit else "public"
 
 
 def claim_card(cl, show_toggle=False):
@@ -43,7 +44,7 @@ with ui.db() as s:
     facts = [x for x in active if x.classification == "FACT"]
     caps = [x for x in facts if x.claim_category == "capability"]
     inferred = [x for x in active if x.classification == "INFERENCE"]
-    user = [x for x in active if x.classification == "USER"]
+    user = [x for x in active if x.classification == "USER" and (can_edit or c.share_refinements)]
 
     top = st.columns([3, 2], gap="large")
     with top[0]:
@@ -51,7 +52,7 @@ with ui.db() as s:
         st.markdown(f'{ui.badge("FACT")}<span class="nx-meta">from the Blue Science Park member directory - '
                     f'{ui.link(c.directory_url, "directory entry")}</span>', unsafe_allow_html=True)
         st.write(c.description or "No public description found.")
-        if c.user_description:
+        if c.user_description and (can_edit or c.share_refinements):
             st.markdown(f'{ui.badge("USER")}<span class="nx-meta">company refinement (not independently verified)</span>',
                         unsafe_allow_html=True)
             st.write(c.user_description)
@@ -111,8 +112,8 @@ with ui.db() as s:
                     "Public facts stay visible to everyone; refinements are attributed to the company.")
         else:
             st.caption("Your changes are stored as refinements next to the public information. Nothing public is overwritten.")
-            before = [r.hypothesis.key for r in repo.recommendations(s, cid, 5)]
-            radar_before = [(i["kind"], i["title"][:60]) for i in radar.company_items(s, cid)[:5]]
+            before = [r.hypothesis.key for r in repo.recommendations(s, cid, 5, aud)]
+            radar_before = [(i["kind"], i["title"][:60]) for i in radar.company_items(s, cid, audience=aud)[:5]]
             with st.form("refine"):
                 desc = st.text_area("Company description (your wording)", value=c.user_description or "", height=80,
                                     placeholder=c.description or "")
@@ -159,8 +160,8 @@ with ui.db() as s:
                     with st.spinner("Combination, Ranking and Verification agents are recalculating..."):
                         trace = pipeline.recompute(s, ui.embedder())
                         pipeline.save_trace(trace, ui.embedder().backend)
-                    after = [r.hypothesis.key for r in repo.recommendations(s, cid, 5)]
-                    radar_after = [(i["kind"], i["title"][:60]) for i in radar.company_items(s, cid)[:5]]
+                    after = [r.hypothesis.key for r in repo.recommendations(s, cid, 5, aud)]
+                    radar_after = [(i["kind"], i["title"][:60]) for i in radar.company_items(s, cid, audience=aud)[:5]]
                     st.session_state["dna_diff"] = {"company": cid, "changes": changes, "before": before, "after": after,
                                                     "radar_before": radar_before, "radar_after": radar_after}
                     st.rerun()
@@ -185,7 +186,7 @@ with ui.db() as s:
 
     with t_rec:
         ui.hypothesis_notice()
-        recs = repo.recommendations(s, cid, 8)
+        recs = repo.recommendations(s, cid, 8, aud)
         if not recs:
             st.info("No recommendation: this company has no evidence-backed capability with a known complementary relationship.")
         for r in recs:

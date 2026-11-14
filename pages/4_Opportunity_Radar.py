@@ -24,14 +24,14 @@ with ui.db() as s:
         with st.spinner("Updating the ranking with your feedback..."):
             pipeline.save_trace(pipeline.recompute(s, ui.embedder()), ui.embedder().backend)
     company = s.get(Company, cid)
-    items = radar.company_items(s, cid, kinds or None, min_rel)
+    items = radar.company_items(s, cid, kinds or None, min_rel, audience="owner" if acting == cid else "public")
     if view == "Saved by us":
         items = [i for i in items if "saved" in i["marks"]] if acting == cid else []
         if acting != cid:
             st.info("Saved items are private. Select this company under 'Acting as' to see its saved items.")
     elif view == "Funding: open only":
         items = [i for i in items if i["kind"] != "funding" or i["status"] == "open"]
-    if company.need_priorities:
+    if company.need_priorities and acting == cid:
         st.caption("Company priorities applied to the ranking: " + ", ".join(company.need_priorities)
                    + ". Change them on the Company DNA page.")
     cols = st.columns(2, gap="large")

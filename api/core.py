@@ -1,14 +1,18 @@
 """Shared plumbing: JSON encoding, database session, the simulated sign-in header and the result cache."""
 from __future__ import annotations
 
+import hashlib
 import json
 import math
+import os
 import threading
+from pathlib import Path
 from dataclasses import asdict, is_dataclass
 from datetime import date, datetime
 
 import numpy as np
 from fastapi import Header
+from sqlalchemy import select
 from starlette.responses import Response
 
 from nexus.database.database import get_sessionmaker
@@ -51,11 +55,45 @@ def get_db():
         s.close()
 
 
-def acting_company(x_acting_company: str | None = Header(default=None)) -> int | None:
-    """SIMULATED sign-in: the frontend sends the company chosen under 'Acting as'.
+def auth_mode() -> str:
+    """'demo' (default): the client says which company it acts as. NOT authentication.
+    'token': the server maps a bearer token to a company; the client-supplied company id is ignored."""
+    return "token" if os.getenv("NEXUS_AUTH_MODE", "demo").lower() == "token" else "demo"
 
-    The authorisation checks that use this value (nexus.security.privacy) are real.
+
+def _token_map() -> dict[str, str]:
+    """{sha256(token): company slug} from NEXUS_AUTH_TOKENS (a JSON file). Raw tokens are never stored."""
+    path = os.getenv("NEXUS_AUTH_TOKENS")
+    if not path or not Path(path).exists():
+        return {}
+    return {k.lower(): v for k, v in json.loads(Path(path).read_text(encoding="utf-8")).items()}
+
+
+def acting_company(x_acting_company: str | None = Header(default=None),
+                   authorization: str | None = Header(default=None)) -> int | None:
+    """Which company the request acts for.
+
+    demo mode  - SIMULATED sign-in: the frontend sends the company chosen under 'Acting as'. Anyone can
+                 send any id, so this is a demonstration selector, not security. Use only with public
+                 or synthetic data.
+    token mode - the company comes from a server-side token table; `X-Acting-Company` is ignored, so
+                 changing a client-supplied id cannot grant access.
+    The authorisation checks that use the result (nexus.security.privacy) are the same in both modes.
     """
+    if auth_mode() == "token":
+        if not authorization or not authorization.lower().startswith("bearer "):
+            return None
+        digest = hashlib.sha256(authorization[7:].strip().encode()).hexdigest()
+        slug = _token_map().get(digest)
+        if slug is None:
+            return None
+        from nexus.database.models import Company
+
+        s = get_sessionmaker()()
+        try:
+            return s.scalar(select(Company.id).where(Company.slug == slug))
+        finally:
+            s.close()
     try:
         return int(x_acting_company) if x_acting_company not in (None, "", "null") else None
     except ValueError:

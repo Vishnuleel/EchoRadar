@@ -21,7 +21,7 @@ with ui.db() as s:
         default = st.session_state.get("acting_company") or st.session_state.get("dna_company") or ids[0]
         a, b = st.columns([1, 2])
         cid = a.selectbox("Company", ids, index=ids.index(default) if default in ids else 0, format_func=lambda i: names[i])
-        recs = repo.recommendations(s, cid, 12)
+        recs = repo.recommendations(s, cid, 12, "owner" if st.session_state.get("acting_company") == cid else "public")
         if not recs:
             st.info("No recommendation exists for this company: it has no evidence-backed capability with a known "
                     "complementary relationship. Add a capability or interest on the Company DNA page.")
@@ -29,7 +29,7 @@ with ui.db() as s:
         keys = [r.hypothesis.key for r in recs]
         pre = st.session_state.get("bp_key")
         if pre and pre not in keys:
-            extra = s.scalar(select(CollaborationHypothesis).where(CollaborationHypothesis.key == pre))
+            extra = s.scalar(repo.public_hypotheses(s).where(CollaborationHypothesis.key == pre))
             if extra and cid in extra.participating_companies:
                 keys.append(pre)
         by_key = {r.hypothesis.key: r.hypothesis for r in recs}

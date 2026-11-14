@@ -5,7 +5,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from nexus.core.taxonomy import CAPABILITIES
-from nexus.database.models import (Capability, CollaborationHypothesis, Company, CompanyCapability, Event, NewsUpdate,
+from nexus.database.models import (OWNER, PUBLIC, Capability, CollaborationHypothesis, Company, CompanyCapability, Event, NewsUpdate,
                                    CompanyProfileRevision, Evidence, FundingOpportunity, Opportunity,
                                    Recommendation, ResearchPublication, RetrievalLog, Testbed, UserFeedback)
 from nexus.utils.validators import utcnow
@@ -99,12 +99,13 @@ def counts(s: Session) -> dict[str, int]:
             CompanyCapability.claim_category == "capability")),
         "inferences": n(select(func.count(CompanyCapability.id)).where(
             CompanyCapability.active.is_(True), CompanyCapability.classification == "INFERENCE")),
-        "user_claims": n(select(func.count(CompanyCapability.id)).where(
-            CompanyCapability.active.is_(True), CompanyCapability.classification == "USER")),
+        "user_claims": n(select(func.count(CompanyCapability.id)).join(Company).where(
+            CompanyCapability.active.is_(True), CompanyCapability.classification == "USER",
+            Company.share_refinements.is_(True))),  # shared refinements only
         "research": n(select(func.count(ResearchPublication.id))),
         "funding": n(select(func.count(FundingOpportunity.id))),
         "testbeds": n(select(func.count(Testbed.id))),
-        "hypotheses": n(select(func.count(CollaborationHypothesis.id))),
+        "hypotheses": n(select(func.count(CollaborationHypothesis.id)).where(CollaborationHypothesis.visibility == PUBLIC)),
         "events": n(select(func.count(Event.id))),
         "news": n(select(func.count(NewsUpdate.id))),
         "feedback": n(select(func.count(UserFeedback.id))),
@@ -115,10 +116,20 @@ def counts(s: Session) -> dict[str, int]:
     }
 
 
-def recommendations(s: Session, company_id: int, limit: int = 20) -> list[Recommendation]:
-    return list(s.scalars(select(Recommendation).where(Recommendation.company_id == company_id)
-                          .options(selectinload(Recommendation.hypothesis))
-                          .order_by(Recommendation.rank).limit(limit)))
+def recommendations(s: Session, company_id: int, limit: int = 20, audience: str = PUBLIC) -> list[Recommendation]:
+    """A company's ranked hypotheses. 'owner' (its own view, may use private inputs) falls back to the
+    public list when the company has no private inputs. Never serve 'owner' rows to anyone else."""
+    def q(aud):
+        return list(s.scalars(select(Recommendation).where(Recommendation.company_id == company_id,
+                                                           Recommendation.audience == aud)
+                              .options(selectinload(Recommendation.hypothesis))
+                              .order_by(Recommendation.rank).limit(limit)))
+    return (q(OWNER) if audience == OWNER else []) or q(PUBLIC)
+
+
+def public_hypotheses(s: Session):
+    """Hypotheses anyone may see: computed from public evidence and shared refinements only."""
+    return select(CollaborationHypothesis).where(CollaborationHypothesis.visibility == PUBLIC)
 
 
 def recent_logs(s: Session, limit: int = 30) -> list[RetrievalLog]:

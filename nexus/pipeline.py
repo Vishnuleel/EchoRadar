@@ -26,8 +26,8 @@ from nexus.core import taxonomy as tx
 from nexus.core.embeddings import get_embedder
 from nexus.database import repository as repo
 from nexus.core import radar
-from nexus.database.models import (CollaborationHypothesis, Company, Event, FundingOpportunity, NewsUpdate, Opportunity,
-                                   Recommendation, ResearchPublication, SavedItem, Testbed)
+from nexus.database.models import (OWNER, PUBLIC, CollaborationHypothesis, Company, Event, FundingOpportunity,
+                                   NewsUpdate, Opportunity, Recommendation, ResearchPublication, SavedItem, Testbed)
 from nexus.integrations import company_sources
 from nexus.integrations.http_cache import HttpClient
 from nexus.security import boundary_guard, privacy
@@ -206,8 +206,66 @@ def _uncertainty(scored: dict, verification: dict) -> list[str]:
     return out + verification["warnings"]
 
 
-def recompute(s: Session, embedder=None, now: datetime | None = None) -> list[dict]:
-    """Rebuild all hypotheses, personalised recommendations and radar items from stored data."""
+def _verified(scored: list[dict], by_id: dict, funding_rows: dict, now: datetime) -> tuple[list[dict], int]:
+    accepted, rejected = [], 0
+    for sc in scored:
+        title, application = hypothesis_title(sc["candidate"], by_id)
+        ver = verification_agent.verify(sc, by_id, title, funding_rows, now)
+        if ver["status"] == "rejected":
+            rejected += 1
+            continue
+        accepted.append({**sc, "title": title, "application": application, "verification": ver})
+    return accepted, rejected
+
+
+def _hypothesis_row(sc: dict, key: str, by_id: dict, visibility: str) -> CollaborationHypothesis:
+    cand = sc["candidate"]
+    links = []
+    for l in cand.links:
+        d = l.to_dict()
+        for side, cid, cap in (("a", l.company_a, l.cap_a), ("b", l.company_b, l.cap_b)):
+            claim = by_id[cid].capabilities.get(cap)
+            d[f"evidence_{side}"] = ({"excerpt": claim.excerpt[:400], "urls": sorted(set(claim.source_urls))[:3],
+                                      "classification": claim.classification} if claim else None)
+        links.append(d)
+    return CollaborationHypothesis(
+        key=key, kind=cand.kind, visibility=visibility, title=sc["title"], participating_companies=list(cand.company_ids),
+        required_capabilities=[{"slot": slot, **v} for slot, v in cand.slot_assignment.items()],
+        missing_capabilities=cand.missing_slots, proposed_application=sc["application"],
+        concept_id=cand.concept_id, evidence=links, uncertainty=_uncertainty(sc, sc["verification"]),
+        score=sc["breakdown"].final,
+        score_breakdown={**sc["breakdown"].to_dict(), "evidence_detail": sc["evidence"],
+                         "similarity": cand.similarity, "concept_coverage": cand.coverage, "domain": cand.domain},
+        research_ids=sc["research"], funding_ids=sc["funding"], testbed_ids=sc["testbeds"],
+        verification=sc["verification"], validation_status="hypothesis")
+
+
+def _same_result(a: dict, b: dict) -> bool:
+    """Same hypothesis content (links and score): the public row can serve the owner list too."""
+    sig = lambda sc: (round(sc["breakdown"].final, 1), [(l.company_a, l.cap_a, l.company_b, l.cap_b, l.kind)
+                                                          for l in sc["candidate"].links])
+    return sig(a) == sig(b)
+
+
+def private_company_ids(s: Session) -> set[int]:
+    """Companies whose own view differs from the public one (private refinements, needs, feedback)."""
+    from nexus.database.models import CompanyCapability
+
+    user_claims = set(s.scalars(select(CompanyCapability.company_id).where(
+        CompanyCapability.classification == "USER", CompanyCapability.active.is_(True))))
+    marked = set(s.scalars(select(SavedItem.company_id).where(SavedItem.action != "saved")))
+    return {c.id for c in s.scalars(select(Company))
+            if combination_agent.has_private_inputs(c, c.id in user_claims, c.id in marked)}
+
+
+def recompute(s: Session, embedder=None, now: datetime | None = None, commit: bool = True) -> list[dict]:
+    """Rebuild all hypotheses, personalised recommendations and radar items from stored data.
+
+    Public results (hypotheses everyone can see, each company's public recommendations and radar) use
+    public evidence and explicitly shared refinements only. A company with private inputs also gets
+    owner-only results computed with them; those are stored with audience "owner" and never feed
+    another company's view.
+    """
     embedder = embedder or get_embedder()
     now = now or utcnow()
     trace = []
@@ -216,9 +274,11 @@ def recompute(s: Session, embedder=None, now: datetime | None = None) -> list[di
     profiles = combination_agent.load_profiles(s, embedder)
     by_id = {p.id: p for p in profiles}
     pairs, triads, _sim = combination_agent.generate_candidates(profiles)
+    owners = private_company_ids(s)
     trace.append({"agent": "Innovation Combination Agent", "seconds": round(time.time() - t, 2),
                   "result": f"{len(pairs)} complementary pairs and {len(triads)} three-company combinations "
-                            f"from {len(profiles)} profiles", "warnings": []})
+                            f"from {len(profiles)} public profiles; {len(owners)} companies with private inputs",
+                  "warnings": []})
 
     t = time.time()
     ctx = build_context(s, embedder, now)
@@ -231,75 +291,90 @@ def recompute(s: Session, embedder=None, now: datetime | None = None) -> list[di
 
     t = time.time()
     funding_rows = {f.id: f for f in ctx.funding.rows}
-    accepted, rejected = [], 0
-    for sc in scored:
-        title, application = hypothesis_title(sc["candidate"], by_id)
-        ver = verification_agent.verify(sc, by_id, title, funding_rows, now)
-        if ver["status"] == "rejected":
-            rejected += 1
-            continue
-        sc.update(title=title, application=application, verification=ver)
-        accepted.append(sc)
+    accepted, rejected = _verified(scored, by_id, funding_rows, now)
     trace.append({"agent": "Verification Agent", "seconds": round(time.time() - t, 2),
                   "result": f"{len(accepted)} hypotheses passed, {rejected} rejected for unsupported claims",
                   "warnings": []})
 
-    # keep what is needed for personalised lists (bounded storage)
+    # public: every company's list from public hypotheses (bounded storage)
     keep: dict[str, dict] = {}
-    per_company: dict[int, list[dict]] = {}
+    public_lists: dict[int, list[dict]] = {}
     for p in profiles:
         mine = ranking_agent.rank_for_company(p.id, accepted, profile=p)
-        per_company[p.id] = mine
+        public_lists[p.id] = mine
         for sc in mine:
             keep[sc["candidate"].key] = sc
     for sc in sorted((a for a in accepted if a["candidate"].kind == "triad"),
                      key=lambda a: -a["breakdown"].final)[:40]:
         keep[sc["candidate"].key] = sc
 
+    # owner-only: the same engine with this one company's private profile, others stay public
+    t = time.time()
+    private_profiles = {p.id: p for p in combination_agent.load_profiles(s, embedder, private_for=owners)
+                        if p.id in owners}
+    owner_lists: dict[int, list[dict]] = {}
+    owner_by_id: dict[int, dict] = {}
+    for cid, priv in private_profiles.items():
+        view = [priv if p.id == cid else p for p in profiles]
+        view_by_id = {p.id: p for p in view}
+        o_pairs, o_triads, _ = combination_agent.generate_candidates(view)
+        o_scored = [ranking_agent.score_candidate(c, view_by_id, ctx) for c in o_pairs + o_triads if cid in c.company_ids]
+        o_accepted, _ = _verified(o_scored, view_by_id, funding_rows, now)
+        owner_lists[cid] = ranking_agent.rank_for_company(cid, o_accepted, profile=priv)
+        owner_by_id[cid] = view_by_id
+
     repo.clear_derived(s)
     s.flush()
     rows: dict[str, CollaborationHypothesis] = {}
     for key, sc in keep.items():
-        cand = sc["candidate"]
-        links = []
-        for l in cand.links:
-            d = l.to_dict()
-            for side, cid, cap in (("a", l.company_a, l.cap_a), ("b", l.company_b, l.cap_b)):
-                claim = by_id[cid].capabilities.get(cap)
-                d[f"evidence_{side}"] = ({"excerpt": claim.excerpt[:400], "urls": sorted(set(claim.source_urls))[:3],
-                                          "classification": claim.classification} if claim else None)
-            links.append(d)
-        row = CollaborationHypothesis(
-            key=key, kind=cand.kind, title=sc["title"], participating_companies=list(cand.company_ids),
-            required_capabilities=[{"slot": slot, **v} for slot, v in cand.slot_assignment.items()],
-            missing_capabilities=cand.missing_slots, proposed_application=sc["application"],
-            concept_id=cand.concept_id, evidence=links, uncertainty=_uncertainty(sc, sc["verification"]),
-            score=sc["breakdown"].final,
-            score_breakdown={**sc["breakdown"].to_dict(), "evidence_detail": sc["evidence"],
-                             "similarity": cand.similarity, "concept_coverage": cand.coverage,
-                             "domain": cand.domain},
-            research_ids=sc["research"], funding_ids=sc["funding"], testbed_ids=sc["testbeds"],
-            verification=sc["verification"], validation_status="hypothesis")
-        s.add(row)
-        rows[key] = row
+        rows[key] = _hypothesis_row(sc, key, by_id, PUBLIC)
+        s.add(rows[key])
     s.flush()
-    for cid, mine in per_company.items():
+
+    def add_recs(cid, mine, audience, row_for, ids):
         for rank, sc in enumerate(mine, 1):
-            s.add(Recommendation(company_id=cid, target_id=rows[sc["candidate"].key].id, rank=rank,
+            s.add(Recommendation(company_id=cid, target_id=row_for(sc).id, rank=rank, audience=audience,
                                  score=sc["personal_score"],
                                  score_breakdown={**sc["breakdown"].to_dict(), "personal_note": sc["personal_note"]},
-                                 explanation=ranking_agent.explain(sc, by_id, cid)
+                                 explanation=ranking_agent.explain(sc, ids, cid)
                                  + (" " + sc["personal_note"] if sc["personal_note"] else "")))
 
-    # Radar: company-specific relevance for every monitoring area, adjusted by stated needs and feedback
+    for cid, mine in public_lists.items():
+        add_recs(cid, mine, PUBLIC, lambda sc: rows[sc["candidate"].key], by_id)
+    n_private_hyp = 0
+    for cid, mine in owner_lists.items():
+        def row_for(sc, cid=cid):
+            key = sc["candidate"].key
+            if key in rows and _same_result(sc, keep[key]):
+                return rows[key]  # identical to the public hypothesis
+            pkey = f"{key}~owner{cid}"
+            if pkey not in rows:
+                rows[pkey] = _hypothesis_row(sc, pkey, owner_by_id[cid], f"{OWNER}:{cid}")
+                s.add(rows[pkey])
+                s.flush()
+            return rows[pkey]
+        before = len(rows)
+        add_recs(cid, mine, OWNER, row_for, owner_by_id[cid])
+        n_private_hyp += len(rows) - before
+    trace.append({"agent": "Ranking Agent (owner-only lists)", "seconds": round(time.time() - t, 2),
+                  "result": f"{len(owner_lists)} owner-only lists, {n_private_hyp} owner-only hypotheses",
+                  "warnings": []})
+
+    # Radar: public relevance for everyone; owner-only ranking adds private needs, refinements and feedback
     t = time.time()
     sets = _radar_sets(s, embedder, now, ctx.research, ctx.testbeds)
     companies_by_id = {c.id: c for c in s.scalars(select(Company))}
     marks = _radar_marks(s)
     n_radar = 0
     for p in profiles:
-        n_radar += _radar_for_profile(s, p, companies_by_id[p.id], sets, marks.get(p.id, {}), ctx.semantic, now)
-    s.commit()
+        n_radar += _radar_for_profile(s, p, [], sets, {}, ctx.semantic, now, PUBLIC)
+    for cid, priv in private_profiles.items():
+        n_radar += _radar_for_profile(s, priv, list(companies_by_id[cid].need_priorities or []), sets,
+                                      marks.get(cid, {}), ctx.semantic, now, OWNER)
+    if commit:
+        s.commit()
+    else:
+        s.flush()  # preview: the caller rolls back
     trace.append({"agent": "Opportunity bridge (radar)", "seconds": round(time.time() - t, 2),
                   "result": f"{n_radar} company-specific radar items; {len(rows)} hypotheses stored",
                   "warnings": []})
@@ -337,12 +412,15 @@ def _radar_marks(s: Session, company_id: int | None = None) -> dict[int, dict]:
     return marks
 
 
-def _radar_for_profile(s: Session, p, company: Company, sets: dict, mine: dict, semantic: bool, now: datetime) -> int:
-    """Add the Opportunity rows (radar items) of one company. Returns the number of rows added."""
+def _radar_for_profile(s: Session, p, needs: list[str], sets: dict, mine: dict, semantic: bool, now: datetime,
+                       audience: str = PUBLIC) -> int:
+    """Add the Opportunity rows (radar items) of one company. Returns the number of rows added.
+
+    Public rows get no needs and no feedback; owner rows get the company's private needs and marks.
+    """
     if p.vector is None or not p.capabilities:
         return 0
     caps = set(p.capabilities) | set(p.interests)
-    needs = list(company.need_priorities or [])
     boosted = {k for n in needs for k in radar.NEED_TO_KINDS.get(n, [])}
     liked_kinds = {k for k, _ in mine.get("useful", set())}
     n_radar = 0
@@ -390,7 +468,7 @@ def _radar_for_profile(s: Session, p, company: Company, sets: dict, mine: dict, 
                        (f"A regional development touching {names}." if names else
                         f"A regional development close to your profile (text similarity {d['cosine']:.2f})."))
                 action = "Read the article and consider whether the project or actor behind it is relevant to contact."
-            s.add(Opportunity(company_id=p.id, kind=kind, ref_id=row.id, relevance=round(d["final"], 1),
+            s.add(Opportunity(company_id=p.id, kind=kind, audience=audience, ref_id=row.id, relevance=round(d["final"], 1),
                               base_relevance=d["relevance"], adjustments=d["adjust"], semantic=d["cosine"],
                               matched_capabilities=d["shared_capabilities"], why=why, next_action=action))
             n_radar += 1
@@ -398,23 +476,24 @@ def _radar_for_profile(s: Session, p, company: Company, sets: dict, mine: dict, 
 
 
 def recompute_radar(s: Session, company_id: int, embedder=None, now: datetime | None = None) -> int:
-    """Rebuild the radar items of ONE company from stored data (after useful / not useful feedback).
+    """Rebuild the owner-only radar of ONE company (after useful / not useful feedback).
 
-    Marks only influence the owning company's radar, so this gives the same rows as a full
-    recompute() for that company without touching hypotheses or any other company.
+    Marks are private and only influence the owning company's own radar, so this gives the same rows
+    as a full recompute() for that company. The public radar, hypotheses and other companies are untouched.
     """
     from sqlalchemy import delete
 
     embedder = embedder or get_embedder()
     now = now or utcnow()
     company = s.get(Company, company_id)
-    profile = next((p for p in combination_agent.load_profiles(s, embedder) if p.id == company_id), None)
-    s.execute(delete(Opportunity).where(Opportunity.company_id == company_id))
+    profile = next((p for p in combination_agent.load_profiles(s, embedder, private_for={company_id})
+                    if p.id == company_id), None)
+    s.execute(delete(Opportunity).where(Opportunity.company_id == company_id, Opportunity.audience == OWNER))
     n = 0
     if company is not None and profile is not None:
         sets = _radar_sets(s, embedder, now)
-        n = _radar_for_profile(s, profile, company, sets, _radar_marks(s, company_id).get(company_id, {}),
-                               embedder.is_semantic, now)
+        n = _radar_for_profile(s, profile, list(company.need_priorities or []), sets,
+                               _radar_marks(s, company_id).get(company_id, {}), embedder.is_semantic, now, OWNER)
     s.commit()
     return n
 
@@ -476,7 +555,8 @@ def answer_request(s: Session, text: str, acting_company_id: int | None = None, 
                                                           for c in claims[:2]]})
         ids = {c["company_id"] for c in out["companies"][:3]}
         if ids and q_caps:
-            hyps = s.scalars(select(CollaborationHypothesis).order_by(CollaborationHypothesis.score.desc()))
+            hyps = s.scalars(select(CollaborationHypothesis).where(CollaborationHypothesis.visibility == PUBLIC)
+                             .order_by(CollaborationHypothesis.score.desc()))
             out["hypotheses"] = [h for h in hyps if ids & set(h.participating_companies)
                                  and q_caps & ({l["cap_a"] for l in h.evidence} | {l["cap_b"] for l in h.evidence})][:3]
     s.commit()
@@ -529,7 +609,8 @@ def adhoc_hypothesis(s: Session, company_ids: list[int], embedder=None, now: dat
     ids = sorted(set(company_ids))
     if len(ids) not in (2, 3):
         return None, "Select two or three different companies."
-    stored = [h for h in s.scalars(select(CollaborationHypothesis).order_by(CollaborationHypothesis.score.desc()))
+    stored = [h for h in s.scalars(select(CollaborationHypothesis).where(CollaborationHypothesis.visibility == PUBLIC)
+                                   .order_by(CollaborationHypothesis.score.desc()))
               if sorted(h.participating_companies) == ids]
     if stored:
         return stored[0], "Stored hypothesis from the last ranking run."

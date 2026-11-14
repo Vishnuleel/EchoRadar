@@ -50,6 +50,10 @@ MIGRATIONS = {
         "ALTER TABLE company ADD COLUMN membership_classification VARCHAR(60) "
         "DEFAULT 'member_or_partner_not_individually_disclosed'",
         "ALTER TABLE company ADD COLUMN aliases JSON DEFAULT '[]'"],
+    4: ["ALTER TABLE company ADD COLUMN share_refinements BOOLEAN DEFAULT 0",
+        "ALTER TABLE opportunity ADD COLUMN audience VARCHAR(10) DEFAULT 'public'",
+        "ALTER TABLE collaboration_hypothesis ADD COLUMN visibility VARCHAR(30) DEFAULT 'public'",
+        "ALTER TABLE recommendation ADD COLUMN audience VARCHAR(10) DEFAULT 'public'"],
 }
 
 

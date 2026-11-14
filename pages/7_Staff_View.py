@@ -40,7 +40,7 @@ with ui.db() as s:
     with b:
         st.subheader("Connections worth facilitating")
         ui.hypothesis_notice()
-        hyps = list(s.scalars(select(CollaborationHypothesis).order_by(CollaborationHypothesis.score.desc()).limit(60)))
+        hyps = list(s.scalars(repo.public_hypotheses(s).order_by(CollaborationHypothesis.score.desc()).limit(60)))
         seen, shown = set(), 0
         for h in hyps:
             key = (h.concept_id, frozenset(h.participating_companies))
@@ -63,7 +63,7 @@ with ui.db() as s:
             gaps = company_agent.missing_information(c, mine)
             n_caps = len({x.capability.key for x in mine if x.claim_category == "capability" and x.capability})
             rows.append({"Company": c.name, "Capabilities": n_caps, "Depth": c.profile_depth, "Open gaps": len(gaps),
-                         "Refined by company": "yes" if any(x.classification == "USER" for x in mine) or c.user_description else "no",
+                         "Refined by company": "yes" if c.share_refinements and (any(x.classification == "USER" for x in mine) or c.user_description) else "no",
                          "Last updated": c.updated_at.strftime("%Y-%m-%d")})
         df = pd.DataFrame(rows).sort_values(["Capabilities", "Open gaps"], ascending=[True, False])
         st.dataframe(df, hide_index=True, width="stretch", height=360)
