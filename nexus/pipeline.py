@@ -233,9 +233,14 @@ def _hypothesis_row(sc: dict, key: str, by_id: dict, visibility: str) -> Collabo
             d[f"evidence_{side}"] = ({"excerpt": claim.excerpt[:400], "urls": sorted(set(claim.source_urls))[:3],
                                       "classification": claim.classification} if claim else None)
         links.append(d)
+    def slot_evidence(v):  # every company's proposed contribution carries its own public quote and source
+        claim = by_id[v["company"]].capabilities.get(v["capability"])
+        return ({"excerpt": claim.excerpt[:400], "urls": sorted(set(claim.source_urls))[:3],
+                 "classification": claim.classification} if claim else None)
+
     return CollaborationHypothesis(
         key=key, kind=cand.kind, visibility=visibility, title=sc["title"], participating_companies=list(cand.company_ids),
-        required_capabilities=[{"slot": slot, **v} for slot, v in cand.slot_assignment.items()],
+        required_capabilities=[{"slot": slot, **v, "evidence": slot_evidence(v)} for slot, v in cand.slot_assignment.items()],
         missing_capabilities=cand.missing_slots, proposed_application=sc["application"],
         concept_id=cand.concept_id, evidence=links, uncertainty=_uncertainty(sc, sc["verification"]),
         score=sc["breakdown"].final,
@@ -469,10 +474,13 @@ def _radar_for_profile(s: Session, p, needs: list[str], sets: dict, mine: dict, 
                 action = ("Register through the source page; places are limited." if row.starts_at else
                           f"Ask {row.organiser} when the next occasion takes place.")
             else:
-                why = ("The article names your company." if p.id in (row.mentioned_company_ids or []) else
+                about_you = p.id in (row.mentioned_company_ids or [])
+                why = ("The article names your company." if about_you else
                        (f"A regional development touching {names}." if names else
                         f"A regional development close to your profile (text similarity {d['cosine']:.2f})."))
-                action = "Read the article and consider whether the project or actor behind it is relevant to contact."
+                action = ("Check that the article describes your company correctly, and use it when you present "
+                          "yourself to other members." if about_you else
+                          "Read the article and consider whether the project or actor behind it is relevant to contact.")
             s.add(Opportunity(company_id=p.id, kind=kind, audience=audience, ref_id=row.id, relevance=round(d["final"], 1),
                               base_relevance=d["relevance"], adjustments=d["adjust"], semantic=d["cosine"],
                               matched_capabilities=d["shared_capabilities"], why=why, next_action=action))

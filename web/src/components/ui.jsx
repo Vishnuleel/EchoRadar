@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import { AlertTriangle, ArrowUpRight, Check, ChevronDown, ChevronsUpDown, Search } from "lucide-react";
 
@@ -172,10 +172,21 @@ export function QueryState({ query, children }) {
 
 /* ---- controls -------------------------------------------------------------------------------- */
 export function Tabs({ tabs, value, onChange }) {
+  // one Tab stop for the whole tab list; arrow keys move between tabs (WAI-ARIA tabs pattern)
+  const onKey = (e) => {
+    const i = tabs.findIndex((t) => t.id === value);
+    const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+    if (next === undefined) return;
+    e.preventDefault();
+    const t = tabs[(next + tabs.length) % tabs.length];
+    e.currentTarget.querySelector(`[data-tab="${t.id}"]`)?.focus(); // every tab button is already rendered
+    onChange(t.id);
+  };
   return (
-    <div className="mb-5 flex gap-1 overflow-x-auto border-b border-line" role="tablist">
+    <div className="mb-5 flex gap-1 overflow-x-auto border-b border-line" role="tablist" onKeyDown={onKey}>
       {tabs.map((t) => (
-        <button type="button" key={t.id} role="tab" aria-selected={value === t.id} onClick={() => onChange(t.id)}
+        <button type="button" key={t.id} role="tab" data-tab={t.id} tabIndex={value === t.id ? 0 : -1}
+                aria-selected={value === t.id} onClick={() => onChange(t.id)}
                 className={clsx("-mb-px whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm font-medium transition",
                                 value === t.id ? "border-brand text-ink" : "border-transparent text-muted hover:text-ink2")}>
           {t.label}
@@ -231,30 +242,46 @@ export function CompanyPicker({ companies, value, onChange, allowNone, noneLabel
   const [q, setQ] = useState("");
   const box = useRef(null);
   const input = useRef(null);
+  const trigger = useRef(null);
+  const listRef = useRef(null);
+  const [active, setActive] = useState(0);
+  const uid = useId();
   const multi = Array.isArray(value);
   const selected = multi ? value : [value];
 
+  const close = (refocus = true) => { setOpen(false); setQ(""); if (refocus) trigger.current?.focus(); };
   useEffect(() => {
     if (!open) return undefined;
-    const close = (e) => { if (!box.current?.contains(e.target)) setOpen(false); };
-    const esc = (e) => { if (e.key === "Escape") setOpen(false); };
-    document.addEventListener("mousedown", close);
-    document.addEventListener("keydown", esc);
+    const outside = (e) => { if (!box.current?.contains(e.target)) close(false); };
+    document.addEventListener("mousedown", outside);
     input.current?.focus();
-    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", esc); };
-  }, [open]);
+    return () => document.removeEventListener("mousedown", outside);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const list = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return companies.filter((c) => !needle || c.name.toLowerCase().includes(needle));
   }, [companies, q]);
+  // the keyboard moves through exactly what is shown: the optional "none" entry, then the matches
+  const ids = useMemo(() => [...(allowNone && !q ? [null] : []), ...list.map((c) => c.id)], [allowNone, q, list]);
+  useEffect(() => { setActive(0); }, [q, open]);
+  useEffect(() => { listRef.current?.querySelector(`[data-index="${active}"]`)?.scrollIntoView({ block: "nearest" }); }, [active]);
 
   const pick = (id) => {
     if (multi) {
       const next = selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id];
       if (!max || next.length <= max) onChange(next);
-    } else { onChange(id); setOpen(false); }
-    setQ("");
+      setQ("");
+    } else { onChange(id); close(); }
+  };
+  const onKey = (e) => {
+    if (e.key === "ArrowDown") { e.preventDefault(); setActive((a) => Math.min(ids.length - 1, a + 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setActive((a) => Math.max(0, a - 1)); }
+    else if (e.key === "Home") { e.preventDefault(); setActive(0); }
+    else if (e.key === "End") { e.preventDefault(); setActive(ids.length - 1); }
+    else if (e.key === "Enter") { e.preventDefault(); if (ids.length) pick(ids[active]); }
+    else if (e.key === "Escape") { e.preventDefault(); close(); }
+    else if (e.key === "Tab") close(false);
   };
   const nameOf = (id) => companies.find((c) => c.id === id)?.name;
   const text = multi ? (selected.length ? selected.map(nameOf).join(" + ") : "Choose companies")
@@ -263,7 +290,9 @@ export function CompanyPicker({ companies, value, onChange, allowNone, noneLabel
   return (
     <div ref={box} className={clsx("relative", className)}>
       {label && <span className="label">{label}</span>}
-      <button type="button" onClick={() => setOpen(!open)} aria-haspopup="listbox" aria-expanded={open}
+      <button ref={trigger} type="button" onClick={() => (open ? close() : setOpen(true))} aria-haspopup="listbox" aria-expanded={open}
+              aria-label={label ? `${label}: ${text}` : text}
+              onKeyDown={(e) => { if (!open && (e.key === "ArrowDown" || e.key === "ArrowUp")) { e.preventDefault(); setOpen(true); } }}
               className="input flex items-center justify-between gap-2 text-left">
         <span className="truncate">{text}</span>
         <ChevronsUpDown size={15} className="shrink-0 text-muted" />
@@ -272,31 +301,35 @@ export function CompanyPicker({ companies, value, onChange, allowNone, noneLabel
         <div className="absolute left-0 right-0 z-40 mt-1.5 min-w-[240px] animate-rise overflow-hidden rounded-xl border border-line bg-surface shadow-2xl">
           <div className="flex items-center gap-2 border-b border-line px-3">
             <Search size={14} className="text-muted" />
-            <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Type to search"
-                   onKeyDown={(e) => { if (e.key === "Enter" && list[0]) pick(list[0].id); }}
+            <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Type to search" onKeyDown={onKey}
+                   role="combobox" aria-expanded="true" aria-controls={`${uid}-list`} aria-autocomplete="list"
+                   aria-activedescendant={ids.length ? `${uid}-opt-${active}` : undefined} aria-label="Search companies"
                    className="w-full bg-transparent py-2.5 text-sm text-ink placeholder:text-muted focus:outline-none" />
           </div>
-          <ul role="listbox" className="max-h-72 overflow-y-auto p-1">
-            {allowNone && !q && (
-              <Option active={value === null} onClick={() => pick(null)}>{noneLabel}</Option>
-            )}
-            {list.map((c) => (
-              <Option key={c.id} active={selected.includes(c.id)} onClick={() => pick(c.id)}>{c.name}</Option>
+          <ul ref={listRef} id={`${uid}-list`} role="listbox" aria-multiselectable={multi || undefined} className="max-h-72 overflow-y-auto p-1">
+            {ids.map((id, i) => (
+              <Option key={id ?? "none"} id={`${uid}-opt-${i}`} index={i} highlighted={i === active}
+                      active={id === null ? value === null : selected.includes(id)}
+                      onHover={() => setActive(i)} onClick={() => pick(id)}>
+                {id === null ? noneLabel : nameOf(id)}
+              </Option>
             ))}
-            {!list.length && <li className="px-3 py-3 text-sm text-muted">No company matches.</li>}
+            {!ids.length && <li className="px-3 py-3 text-sm text-muted">No company matches.</li>}
           </ul>
+          <p className="border-t border-line px-3 py-1.5 text-[11px] text-muted">↑ ↓ to move · Enter to choose · Esc to close</p>
         </div>
       )}
     </div>
   );
 }
 
-function Option({ active, onClick, children }) {
+function Option({ id, index, active, highlighted, onClick, onHover, children }) {
   return (
-    <li role="option" aria-selected={active}>
-      <button type="button" onClick={onClick}
+    <li id={id} role="option" aria-selected={active} data-index={index} onMouseMove={onHover}>
+      <button type="button" tabIndex={-1} onClick={onClick}
               className={clsx("flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition",
-                              active ? "bg-brand/15 text-ink" : "text-ink2 hover:bg-surface2 hover:text-ink")}>
+                              active ? "bg-brand/15 text-ink" : "text-ink2",
+                              highlighted && "outline outline-2 outline-brand/60 bg-surface2 text-ink")}>
         <span className="truncate">{children}</span>
         {active && <Check size={14} className="shrink-0 text-brand" />}
       </button>

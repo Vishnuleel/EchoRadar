@@ -65,9 +65,14 @@ def build_blueprint(s: Session, hyp: CollaborationHypothesis, now: datetime | No
         complementarity.append(item)
 
     for slot in hyp.required_capabilities:
+        ev = slot.get("evidence") or {}
+        sourced = ev.get("classification") == "FACT" and ev.get("urls")
         cap_areas.append({"slot": slot["slot"], "company": names[slot["company"]],
                           "capability": tx.CAPABILITIES[slot["capability"]].name,
-                          "confidence": slot["confidence"], "basis": "SOURCED"})
+                          "confidence": slot["confidence"], "basis": "SOURCED" if sourced else ("USER" if ev else "MISSING"),
+                          "excerpt": ev.get("excerpt"), "urls": ev.get("urls", [])})
+        for u in ev.get("urls", []):
+            add_source(u, f"{names[slot['company']]} - public profile evidence")
     if not cap_areas:  # open pair without a concept: list the capabilities in the relationships
         seen = set()
         for l in hyp.evidence:
@@ -77,14 +82,27 @@ def build_blueprint(s: Session, hyp: CollaborationHypothesis, now: datetime | No
                     cap_areas.append({"slot": tx.ROLES[tx.CAPABILITIES[cap].role], "company": names[cid],
                                       "capability": tx.CAPABILITIES[cap].name, "confidence": None, "basis": "SOURCED"})
 
+    # which capabilities each participant brings to this hypothesis (slots and relationships)
+    brings: dict[int, set] = {cid: set() for cid in hyp.participating_companies}
+    for slot in hyp.required_capabilities:
+        brings.setdefault(slot["company"], set()).add(slot["capability"])
+    for l in hyp.evidence:
+        brings.setdefault(l["company_a"], set()).add(l["cap_a"])
+        brings.setdefault(l["company_b"], set()).add(l["cap_b"])
+
     research = []
     for r in hyp.research_ids:
         row = s.get(ResearchPublication, r["id"])
         if row:
+            shared = set(r["shared_capabilities"])
+            supports = [names[cid] for cid in hyp.participating_companies if brings.get(cid, set()) & shared]
             research.append({"title": row.title, "authors": ", ".join(row.authors[:4]) + (" et al." if len(row.authors) > 4 else ""),
                              "date": _d(row.publication_date), "venue": row.venue, "url": row.source_url,
                              "relevance": r["relevance"], "basis": "SOURCED", "retrieved_at": row.retrieved_at,
-                             "why": ", ".join(tx.CAPABILITIES[c].name for c in r["shared_capabilities"][:3])})
+                             "why": ", ".join(tx.CAPABILITIES[c].name for c in r["shared_capabilities"][:3]),
+                             # a paper can support one side of a connection without supporting the connection itself
+                             "supports": supports,
+                             "not_covered": [names[cid] for cid in hyp.participating_companies if names[cid] not in supports]})
             add_source(row.source_url, f"OpenAlex: {row.title[:70]}", row.retrieved_at)
     funding = []
     for f in hyp.funding_ids:
@@ -171,7 +189,10 @@ def to_markdown(bp: dict) -> str:
     L += ["", "### 1. Proposed innovation `[HYPOTHESIS]`", bp["title"] + ". " + bp["proposed_application"]["text"], "",
           "### 2. Problem being addressed `[HYPOTHESIS]`", bp["problem"]["text"], "",
           "### 3. Participating capability areas"]
-    L += [f"- **{a['slot']}**: {a['capability']} - {a['company']} `[{a['basis']}]`" for a in bp["capability_areas"]]
+    for a in bp["capability_areas"]:
+        L.append(f"- **{a['slot']}**: {a['capability']} - {a['company']} `[{a['basis']}]`")
+        if a.get("excerpt"):
+            L.append(f"  - \"{a['excerpt'][:240]}\" " + (" ".join(f"[source]({u})" for u in a["urls"]) or "no public source"))
     L += ["", "### 4. Potential participating companies `[SOURCED]`"]
     L += [f"- **{c['name']}** - {c['description'] or ''} ([directory]({c['directory_url']})"
           + (f", [website]({c['website']})" if c["website"] else "") + ")" for c in bp["companies"]]
@@ -182,7 +203,9 @@ def to_markdown(bp: dict) -> str:
             urls = " ".join(f"[source]({u})" for u in e["urls"]) or "no public source"
             L.append(f"  - {e['company']} / {e['capability']}: \"{e['excerpt'][:240]}\" `[{e['basis']}]` {urls}")
     L += ["", "### 6. Relevant research `[SOURCED: OpenAlex]`"]
-    L += [f"- [{r['title']}]({r['url']}) - {r['authors']} ({r['date']}). Relevance {r['relevance']:.0f}/100."
+    L += [f"- [{r['title']}]({r['url']}) - {r['authors']} ({r['date']}). Relevance {r['relevance']:.0f}/100. "
+          f"Relates to the contribution of: {', '.join(r.get('supports') or []) or 'no participant directly'}"
+          + (f"; not to {', '.join(r['not_covered'])}" if r.get("not_covered") else "") + "."
           for r in bp["research"]] or ["- No clearly relevant research record was retrieved."]
     L += ["", "### 7. Potential funding opportunities `[SOURCED: Vinnova open data]`",
           "_Potentially relevant only. Eligibility has not been checked._"]

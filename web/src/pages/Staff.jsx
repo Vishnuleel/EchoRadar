@@ -202,7 +202,11 @@ export default function Staff() {
                       <tbody>
                         {d.profiles.map((r) => (
                           <tr key={r.id} className="cursor-pointer" onClick={() => open(r.id)}>
-                            <td className="font-medium text-ink">{r.company}</td>
+                            <td className="font-medium text-ink">
+                              <button type="button" className="text-left hover:text-brand hover:underline" onClick={(e) => { e.stopPropagation(); open(r.id); }}>
+                                {r.company}
+                              </button>
+                            </td>
                             <td className="text-right tabular-nums"><span className={r.capabilities === 0 ? "font-semibold text-hyp" : ""}>{r.capabilities}</span></td>
                             <td>{r.depth}</td><td className="text-right tabular-nums">{r.gaps}</td><td>{r.refined ? "yes" : "no"}</td>
                             <td className="whitespace-nowrap tabular-nums">{day(r.updated_at)}</td>

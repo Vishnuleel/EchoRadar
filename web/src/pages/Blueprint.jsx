@@ -96,8 +96,17 @@ function Brief({ bp, note, params }) {
           <div className="space-y-2.5">
             {bp.capability_areas.map((a, i) => (
               <div key={i} className="card flex items-start gap-3 p-3.5">
-                <Badge kind="FACT" className="mt-0.5" />
-                <div className="min-w-0"><div className="meta">{a.slot}</div><div className="text-sm font-semibold text-ink">{a.capability}</div><div className="text-[13px] text-ink2">{a.company}</div></div>
+                <Badge kind={a.basis === "SOURCED" ? "FACT" : a.basis === "USER" ? "USER" : "neutral"} className="mt-0.5">
+                  {a.basis === "SOURCED" ? "FACT" : a.basis === "USER" ? "USER" : "unknown"}
+                </Badge>
+                <div className="min-w-0">
+                  <div className="meta">{a.slot}</div>
+                  <div className="text-sm font-semibold text-ink">{a.capability}</div>
+                  <div className="text-[13px] text-ink2">{a.company}</div>
+                  {a.excerpt ? (
+                    <blockquote className="quote">“{a.excerpt.slice(0, 220)}” {a.urls?.slice(0, 1).map((u) => <SourceLink key={u} url={u} className="not-italic" />)}</blockquote>
+                  ) : <p className="meta mt-1">No public evidence stored for this contribution: it is unknown, not assumed.</p>}
+                </div>
               </div>
             ))}
             {bp.missing_capabilities.length > 0 && (
@@ -139,7 +148,12 @@ function Brief({ bp, note, params }) {
               <div key={r.url} className="card p-3.5">
                 <div className="flex flex-wrap items-center gap-2"><Badge>OpenAlex</Badge><span className="meta">{r.date} · relevance {r.relevance.toFixed(0)}</span></div>
                 <p className="mt-1.5 text-[13px] leading-snug text-ink">{r.title.slice(0, 140)}</p>
-                <p className="meta mt-1">{r.authors}</p><p className="mt-1 text-xs"><SourceLink url={r.url} /></p>
+                <p className="meta mt-1">{r.authors}</p>
+                <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink2">
+                  {r.supports?.length ? <>Relates to the contribution of <b className="text-ink">{r.supports.join(", ")}</b></> : "Relates to no participant's contribution directly"}
+                  {r.not_covered?.length > 0 && <span className="text-muted">; not to {r.not_covered.join(", ")}</span>}.
+                </p>
+                <p className="mt-1 text-xs"><SourceLink url={r.url} /></p>
               </div>
             ))}
             {!bp.research.length && <Empty>No clearly relevant research record was retrieved.</Empty>}

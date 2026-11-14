@@ -106,6 +106,10 @@ export default function Shell() {
 
   return (
     <div className="min-h-screen lg:pl-[272px]">
+      <a href="#main" onClick={(e) => { e.preventDefault(); document.getElementById("main")?.focus(); }}
+         className="fixed left-3 top-3 z-50 -translate-y-20 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white shadow-glow transition focus:translate-y-0">
+        Skip to content
+      </a>
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[272px] border-r border-line bg-surface/70 backdrop-blur-xl lg:block">
         <Sidebar />
       </aside>
@@ -125,7 +129,7 @@ export default function Shell() {
         </div>
       )}
 
-      <main className="mx-auto w-full max-w-[1320px] px-4 py-6 sm:px-8 sm:py-9">
+      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1320px] px-4 py-6 focus:outline-none sm:px-8 sm:py-9">
         {loading ? <PageSkeleton />
           : metaError ? (
             <Notice tone="error">

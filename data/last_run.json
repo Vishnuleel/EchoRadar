@@ -1,5 +1,5 @@
 {
- "finished_at": "2026-11-14T00:46:53",
+ "finished_at": "2026-11-14T00:54:19",
  "embedding_backend": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
  "trace": [
   {
@@ -10,7 +10,7 @@
   },
   {
    "agent": "Ranking Agent",
-   "seconds": 0.18,
+   "seconds": 0.19,
    "result": "349 candidates scored against 200 research records and 15 open/upcoming calls",
    "warnings": []
   },
@@ -22,14 +22,14 @@
   },
   {
    "agent": "Ranking Agent (owner-only lists)",
-   "seconds": 0.06,
+   "seconds": 0.11,
    "result": "0 owner-only lists, 0 owner-only hypotheses",
    "warnings": []
   },
   {
    "agent": "Opportunity bridge (radar)",
-   "seconds": 0.07,
-   "result": "710 company-specific radar items; 284 hypotheses stored",
+   "seconds": 0.08,
+   "result": "710 company-specific radar items; 251 hypotheses stored",
    "warnings": []
   }
  ]

@@ -106,7 +106,7 @@ def personal_boost(scored: dict, profile: me.CompanyProfile | None) -> tuple[flo
 
 
 def rank_for_company(company_id: int, scored: list[dict], limit: int = 12, max_triads: int = 5,
-                     max_per_partner: int = 3, max_per_concept: int = 2,
+                     max_per_partner: int = 3, max_per_concept: int = 1,
                      profile: me.CompanyProfile | None = None) -> list[dict]:
     """Personalised list: hypotheses that include the company, best first.
 

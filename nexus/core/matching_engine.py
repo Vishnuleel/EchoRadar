@@ -300,7 +300,10 @@ def discover_triads(profiles: list[CompanyProfile], top_m: int = 8, per_concept:
             mean_conf = float(np.mean([v["confidence"] for v in assign.values()]))
             score = 100.0 * (0.45 * coverage * mean_conf + 0.35 * (sum(pair_best) / 3.0)
                              + 0.20 * (1.0 - redundancy))
-            all_links.sort(key=lambda l: -l.strength)
+            # links between the capabilities that fill the concept's slots explain THIS concept: show them first
+            slot_caps = {(v["company"], v["capability"]) for v in assign.values()}
+            all_links.sort(key=lambda l: (not ((l.company_a, l.cap_a) in slot_caps and (l.company_b, l.cap_b) in slot_caps),
+                                          -l.strength))
             found.append(Candidate("triad", tuple(p.id for p in trio), round(score, 1), all_links[:8],
                                    concept.id, assign, missing, round(coverage, 2), concept.domain))
         found.sort(key=lambda c: -c.complementarity)
