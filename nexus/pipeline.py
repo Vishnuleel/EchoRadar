@@ -55,8 +55,10 @@ def refresh_company(s: Session, client: HttpClient, member: company_sources.Memb
     _drain(s, client, "company_website" if deep else "member_directory")
     for q in draft.quarantined:
         repo.log_retrieval(s, "boundary", q.split(": ")[0], "quarantined", detail=q)
+    for r in draft.rejected:  # kept for audit: negated, historical or third-party statements
+        repo.log_retrieval(s, "extraction", r.rsplit("[", 1)[-1].rstrip("]"), "rejected_statement", detail=r)
     return {"company": company, "claims": len(draft.claims), "depth": draft.profile_depth,
-            "warnings": draft.warnings, "quarantined": len(draft.quarantined)}
+            "warnings": draft.warnings, "quarantined": len(draft.quarantined), "rejected": len(draft.rejected)}
 
 
 def sync_directory(s: Session, client: HttpClient | None = None, deep_slugs: list[str] | None = None,

@@ -19,6 +19,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from nexus.core import taxonomy as tx
+from nexus.core.evidence import mask_name, statement_status
 from nexus.database import repository as repo
 from nexus.database.models import Company, CompanyCapability, Evidence
 from nexus.integrations.company_sources import CrawlResult, MemberRecord
@@ -90,6 +91,7 @@ class ProfileDraft(BaseModel):
     claims: list[Claim]
     quarantined: list[str] = []
     warnings: list[str] = []
+    rejected: list[str] = []  # statements that matched a capability but are negated, historical or about others
 
 
 def build_profile(member: MemberRecord, crawl: CrawlResult | None = None) -> ProfileDraft:
@@ -128,10 +130,15 @@ def build_profile(member: MemberRecord, crawl: CrawlResult | None = None) -> Pro
 
     # --- capability claims: one per (capability, distinct source URL), at most 3 per capability
     by_cap: dict[str, list[tuple[str, str, str, datetime]]] = defaultdict(list)
+    rejected: list[str] = []
     for sent, url, stype, ts in sources:
         if stype == "company_website" and (_NON_SELF_URL.search(url) or not is_self_description(sent, member.name)):
             continue  # only self-descriptive statements on the company's own offer/about pages count
-        for cap_id, _term in tx.detect_capabilities(sent):
+        for cap_id, term in tx.detect_capabilities(mask_name(sent, member.name)):
+            status = statement_status(sent, term)
+            if status != "current":  # "we no longer build X", "our customer builds X": not a current capability
+                rejected.append(f"{tx.CAPABILITIES[cap_id].name} ({status.replace('_', ' ')}): {sent[:160]} [{url}]")
+                continue
             if all(u != url for _, u, _, _ in by_cap[cap_id]) and len(by_cap[cap_id]) < 3:
                 by_cap[cap_id].append((sent, url, stype, ts))
     for cap_id, evs in by_cap.items():
@@ -154,6 +161,9 @@ def build_profile(member: MemberRecord, crawl: CrawlResult | None = None) -> Pro
     for sent, url, stype, ts in sources:
         if sent.rstrip().endswith(("...", "…")) or (stype == "company_website" and not is_self_description(sent, member.name)):
             continue
+        status = statement_status(sent)
+        if status != "current" and not (status == "third_party" and _COLLAB_RE.search(sent)):
+            continue  # a collaboration naturally names the partner; everything else must be first-party and current
         if n_geo < 2 and _GEO_RE.search(sent) and not (stype == "company_website" and _NON_SELF_URL.search(url)):
             n_geo += 1
             claims.append(Claim(claim_text=sent, claim_category="geography", classification="FACT", confidence=0.7,
@@ -170,7 +180,7 @@ def build_profile(member: MemberRecord, crawl: CrawlResult | None = None) -> Pro
     for sent, url, stype, ts in sources:
         if stype != "company_website":
             continue
-        if sent.rstrip().endswith(("...", "…")):
+        if sent.rstrip().endswith(("...", "…")) or statement_status(sent) != "current":
             continue
         if n_market < 3 and _MARKET_RE.search(sent) and not _NON_SELF_URL.search(url):
             n_market += 1
@@ -208,7 +218,7 @@ def build_profile(member: MemberRecord, crawl: CrawlResult | None = None) -> Pro
                         directory_url=member.directory_url, description=member.description,
                         industry=member.industry, location=member.location, employees=member.employees,
                         founded=member.founded, profile_depth="website" if website_sentences else "directory",
-                        claims=claims, quarantined=quarantined, warnings=warnings)
+                        claims=claims, quarantined=quarantined, warnings=warnings, rejected=rejected)
 
 
 def persist_profile(s: Session, draft: ProfileDraft, is_demo: bool = False) -> Company:
