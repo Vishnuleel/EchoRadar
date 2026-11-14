@@ -1,0 +1,415 @@
+{
+ "drawn": "40 of the stored capability FACT claims, drawn with random.Random(20261114) from the claims ordered by id, on 2026-11-14.",
+ "population": 106,
+ "labelled_by": "NEXUS development team (AI-assisted review of each quote against the capability name). NOT reviewed by the companies or by Blue Science Park.",
+ "scale": {
+  "supported": "the quote states this capability as a current activity of this company",
+  "partly": "related, but the quote is too broad or describes a user rather than a provider",
+  "not_supported": "the quote does not support the capability"
+ },
+ "also_found": [
+  "A live re-read of softhouse.se (2026-11-14) produced 'Marine navigation systems' from a mention of the survey firm 'Radar Group' and 'Financing & business advisory' from 'your investments'. Neither was stored. Both taxonomy terms were tightened the same day."
+ ],
+ "cases": [
+  {
+   "n": 1,
+   "company": "Atea",
+   "capability": "software_development",
+   "source_type": "member_directory",
+   "quote": "Erbjuder tjänster inom teknik, infrastruktur och systemintegration, inklusive rådgivning, implementering och underhåll av IT-lösningar.",
+   "url": "https://www.bluesciencepark.se/medlem/atea/",
+   "label": "partly",
+   "note": "The quote names system integration and IT solutions; that is systems work, but not clearly software development."
+  },
+  {
+   "n": 2,
+   "company": "EmbeddedArt",
+   "capability": "naval_defence_systems",
+   "source_type": "member_directory",
+   "quote": "Erbjuder produkter, tjänster och tekniska lösningar inom försvarsområdet, inklusive UV-sensorer och system för sjöövervakning, samt expertis inom IoT och undervattensteknik.",
+   "url": "https://www.bluesciencepark.se/medlem/embeddedart/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 3,
+   "company": "Midcon",
+   "capability": "cloud_infrastructure",
+   "source_type": "member_directory",
+   "quote": "Erbjuder produkter och tjänster inom dokumenthantering, IT-infrastruktur och mötesteknik, inklusive installation och support",
+   "url": "https://www.bluesciencepark.se/medlem/midcon/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 4,
+   "company": "Nicon",
+   "capability": "project_management",
+   "source_type": "member_directory",
+   "quote": "Erbjuder tjänster inom projektledning, processoptimering och teknisk rådgivning för industrisektorn",
+   "url": "https://www.bluesciencepark.se/medlem/nicon/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 5,
+   "company": "Lassen Construction",
+   "capability": "dredging_marine_civil",
+   "source_type": "member_directory",
+   "quote": "Lassen Construction AB är ett entreprenadföretag med spetskompetens inom marina entreprenader, vattenbyggnad, marin anläggningsproduktion och miljömuddring. Företaget arbetar i gränslandet mellan land och vatten och utför komplexa projekt som ställer höga krav på teknisk kompetens, säkerhet och inno",
+   "url": "https://www.bluesciencepark.se/medlem/lassen-construction/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 6,
+   "company": "Lassen Construction",
+   "capability": "commercial_diving",
+   "source_type": "member_directory",
+   "quote": "Anläggningsdykeri, Undervattensrelaterade arbeten",
+   "url": "https://www.bluesciencepark.se/medlem/lassen-construction/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 7,
+   "company": "Spirius",
+   "capability": "iot_telematics",
+   "source_type": "member_directory",
+   "quote": "Erbjuder meddelandetjänster och IoT-lösningar via smarta SIM-kort.",
+   "url": "https://www.bluesciencepark.se/medlem/spirius/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 8,
+   "company": "C Marine AB",
+   "capability": "project_management",
+   "source_type": "member_directory",
+   "quote": "Erbjuder tjänster inom konceptdesign, grundläggande design, projektledning, analys, kompositstrukturell design och produktionsstöd",
+   "url": "https://www.bluesciencepark.se/medlem/c-marine-ab/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 9,
+   "company": "Lassen Construction",
+   "capability": "dredging_marine_civil",
+   "source_type": "company_website",
+   "quote": "Vi utför avancerade vattenentreprenader i sjöar, hamnar och kustmiljöer.",
+   "url": "https://www.lcab.se/vattenentreprenader/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 10,
+   "company": "Affärsverken",
+   "capability": "energy_grid",
+   "source_type": "member_directory",
+   "quote": "Levererar el, värme och fiber, samlar in avfall och driver skärgårdstrafik i Karlskrona",
+   "url": "https://www.bluesciencepark.se/medlem/affarsverken/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 11,
+   "company": "Knowit",
+   "capability": "ai_ml",
+   "source_type": "member_directory",
+   "quote": "Erbjuder tjänster inom systemutveckling, programmering, IT-säkerhet och AI, med fokus på att stödja kunder inom offentlig sektor, industri och telekom",
+   "url": "https://www.bluesciencepark.se/medlem/knowit/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 12,
+   "company": "WIP",
+   "capability": "software_development",
+   "source_type": "member_directory",
+   "quote": "WIP erbjuder systemutvecklings- och rådgivningstjänster inom datakommunikation samt utvecklar och säljer produkter som möjliggör digitalisering och säker mobilitet för företag.",
+   "url": "https://www.bluesciencepark.se/medlem/wip/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 13,
+   "company": "Knowit",
+   "capability": "software_development",
+   "source_type": "member_directory",
+   "quote": "Erbjuder tjänster inom systemutveckling, programmering, IT-säkerhet och AI, med fokus på att stödja kunder inom offentlig sektor, industri och telekom",
+   "url": "https://www.bluesciencepark.se/medlem/knowit/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 14,
+   "company": "Cleura",
+   "capability": "cloud_infrastructure",
+   "source_type": "member_directory",
+   "quote": "Cleura erbjuder molnbaserad IT-infrastruktur som tjänst, inklusive Compliant Cloud, publikt moln och privat moln, med fokus på organisationer med höga regulatoriska krav.",
+   "url": "https://www.bluesciencepark.se/medlem/cleura/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 15,
+   "company": "Softhouse",
+   "capability": "ai_ml",
+   "source_type": "member_directory",
+   "quote": "Erbjuder tjänster inom mjukvaruutveckling, digital transformation, AI och maskininlärning, samt apputveckling",
+   "url": "https://www.bluesciencepark.se/medlem/softhouse/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 16,
+   "company": "Kingspan BAGA",
+   "capability": "water_treatment",
+   "source_type": "member_directory",
+   "quote": "Erbjuder produkter och tjänster för avloppsrening, inklusive minireningsverk, slamavskiljare, bioModuler, pumpstationer och fettavskiljare, anpassade för nordiskt klimat",
+   "url": "https://www.bluesciencepark.se/medlem/kingspan-baga/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 17,
+   "company": "Njord X",
+   "capability": "hydroacoustics",
+   "source_type": "company_website",
+   "quote": "NjordX är det enda företaget i Sverige som erbjuder ett komplett sortiment av hydroakustiska system.",
+   "url": "https://www.njordx.com/produkter/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 18,
+   "company": "Njord X",
+   "capability": "marine_communication",
+   "source_type": "company_website",
+   "quote": "Vi på NjordX arbetar nära våra kunder och tar fullt ansvar för våra leveranser av hydroakustiska system, navigation, kommunikation, IT och säkerhetslösningar.",
+   "url": "https://www.njordx.com/om-oss/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 19,
+   "company": "Malvacom",
+   "capability": "ai_ml",
+   "source_type": "member_directory",
+   "quote": "Malvacom AB är ett IT-konsultbolag i Karlskrona, grundat 2009, med kontor även i Karlshamn och Stockholm. Vi utvecklar mjukvara för svenska myndigheter och privata B2B-aktörer — från embedded firmware (C, FreeRTOS, hårdvaruintegration) till mobila plattformar (iOS/Android), webb, systemintegration, ",
+   "url": "https://www.bluesciencepark.se/medlem/malvacom/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 20,
+   "company": "HiQ",
+   "capability": "iot_telematics",
+   "source_type": "member_directory",
+   "quote": "Erbjuder skräddarsydda mjukvarulösningar inom system- och mjukvaruutveckling, DevOps och molntjänster, uppkopplade produkter och enheter, cybersäkerhet samt design och UX.",
+   "url": "https://www.bluesciencepark.se/medlem/hiq/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 21,
+   "company": "HiQ",
+   "capability": "cloud_infrastructure",
+   "source_type": "member_directory",
+   "quote": "Erbjuder skräddarsydda mjukvarulösningar inom system- och mjukvaruutveckling, DevOps och molntjänster, uppkopplade produkter och enheter, cybersäkerhet samt design och UX.",
+   "url": "https://www.bluesciencepark.se/medlem/hiq/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 22,
+   "company": "EmbeddedArt",
+   "capability": "embedded_systems",
+   "source_type": "company_website",
+   "quote": "Vi är experter på systemutveckling och inbyggda system – grunden till vårt namn och kärnan i vår verksamhet.",
+   "url": "https://www.embeddedart.se/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 23,
+   "company": "EmbeddedArt",
+   "capability": "underwater_technology",
+   "source_type": "member_directory",
+   "quote": "Erbjuder produkter, tjänster och tekniska lösningar inom försvarsområdet, inklusive UV-sensorer och system för sjöövervakning, samt expertis inom IoT och undervattensteknik.",
+   "url": "https://www.bluesciencepark.se/medlem/embeddedart/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 24,
+   "company": "SAAB",
+   "capability": "naval_architecture",
+   "source_type": "member_directory",
+   "quote": "Fartygskonstruktion",
+   "url": "https://www.bluesciencepark.se/medlem/saab/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 25,
+   "company": "Kustbevakningen",
+   "capability": "maritime_surveillance",
+   "source_type": "member_directory",
+   "quote": "Ansvarar för sjöövervakning, miljöräddningstjänst till sjöss och gränskontroll, med uppdrag att skydda liv och miljö i Sveriges maritima områden",
+   "url": "https://www.bluesciencepark.se/medlem/kustbevakningen/",
+   "label": "partly",
+   "note": "The agency is responsible for maritime surveillance: it uses such systems, it does not supply them."
+  },
+  {
+   "n": 26,
+   "company": "SAAB",
+   "capability": "underwater_vehicles",
+   "source_type": "member_directory",
+   "quote": "Utvecklar, konstruerar och underhåller örlogsmarina produkter och system, inklusive nästa generations ubåtar och Visbykorvetter.",
+   "url": "https://www.bluesciencepark.se/medlem/saab/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 27,
+   "company": "Lassen Construction",
+   "capability": "commercial_diving",
+   "source_type": "company_website",
+   "quote": "Sedan starten 2003 har Lassen Construction utfört dykeriarbeten inom bygg- och anläggningssektorn.",
+   "url": "https://www.lcab.se/dyk/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 28,
+   "company": "Nexer",
+   "capability": "ai_ml",
+   "source_type": "member_directory",
+   "quote": "Erbjuder tjänster inom strategi, teknik och kommunikation, inklusive AI, maskininlärning, molntjänster och IT-säkerhet.",
+   "url": "https://www.bluesciencepark.se/medlem/nexer/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 29,
+   "company": "EmbeddedArt",
+   "capability": "iot_telematics",
+   "source_type": "company_website",
+   "quote": "EmbeddedArt erbjuder expertkunskap inom IoT och har djup kunskap av att ta fram strömsnåla sensorplattformar samt effektiva kommunikationslösningar.",
+   "url": "https://www.embeddedart.se/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 30,
+   "company": "GE 99",
+   "capability": "sustainability_advisory",
+   "source_type": "member_directory",
+   "quote": "Erbjuder tjänster inom hållbarhetspolicy, väsentlighetsanalys och hållbarhetsrapportering enligt GRI-standarder, samt stöd för att följa EU:s CSRD-direktiv",
+   "url": "https://www.bluesciencepark.se/medlem/ge-99/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 31,
+   "company": "EmbeddedArt",
+   "capability": "underwater_sensors",
+   "source_type": "company_website",
+   "quote": "Vi har lång och bred erfarenhet inom produktutveckling, hydroakustik och sensorsystem.",
+   "url": "https://www.embeddedart.se/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 32,
+   "company": "Njord X",
+   "capability": "underwater_technology",
+   "source_type": "member_directory",
+   "quote": "Marinteknik",
+   "url": "https://www.bluesciencepark.se/medlem/njord-x/",
+   "label": "partly",
+   "note": "Rests only on the directory's industry label 'Marinteknik', which is broader than underwater technology."
+  },
+  {
+   "n": 33,
+   "company": "Techinova",
+   "capability": "embedded_systems",
+   "source_type": "member_directory",
+   "quote": "Techinova utvecklar och tillverkar produkter med elektronik och programvara för kommunikation (radionätverk) och automation, anpassade för energisektorns behov. De erbjuder även tjänster kopplade till utredning och driftsättning samt handel med materiel och utrustning såsom kablage, antenner och kop",
+   "url": "https://www.bluesciencepark.se/medlem/techinova/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 34,
+   "company": "EmbeddedArt",
+   "capability": "software_development",
+   "source_type": "company_website",
+   "quote": "Vi är experter på systemutveckling och inbyggda system – grunden till vårt namn och kärnan i vår verksamhet.",
+   "url": "https://www.embeddedart.se/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 35,
+   "company": "C Marine AB",
+   "capability": "composite_structures",
+   "source_type": "company_website",
+   "quote": "C Marine AB provides design services for construction of lightweight vessels and large composite structures.",
+   "url": "https://www.cmarine.se/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 36,
+   "company": "EmbeddedArt",
+   "capability": "underwater_sensors",
+   "source_type": "member_directory",
+   "quote": "Erbjuder produkter, tjänster och tekniska lösningar inom försvarsområdet, inklusive UV-sensorer och system för sjöövervakning, samt expertis inom IoT och undervattensteknik.",
+   "url": "https://www.bluesciencepark.se/medlem/embeddedart/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 37,
+   "company": "Försvarsmakten",
+   "capability": "maritime_surveillance",
+   "source_type": "member_directory",
+   "quote": "Ansvarar för sjöövervakning, logistik, teknisk tjänst och stöd till marina förband genom Marinbasen. Hemvärnet har även en enhet i området",
+   "url": "https://www.bluesciencepark.se/medlem/forsvarsmakten/",
+   "label": "partly",
+   "note": "The armed forces are responsible for maritime surveillance: a user of such systems, not a supplier."
+  },
+  {
+   "n": 38,
+   "company": "DXC Technology",
+   "capability": "project_management",
+   "source_type": "member_directory",
+   "quote": "Tillhandahåller tjänster för systemintegration, systemutveckling, drift och underhåll, projektledning och strategisk konsultation för stora och medelstora företag i Europa",
+   "url": "https://www.bluesciencepark.se/medlem/dxc-technology/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 39,
+   "company": "Njord X",
+   "capability": "marine_navigation",
+   "source_type": "company_website",
+   "quote": "NjordX levererar navigationsutrustning med den senaste tekniken från de främsta leverantörerna för fartyg och fasta installationer.",
+   "url": "https://www.njordx.com/produkter/",
+   "label": "supported",
+   "note": ""
+  },
+  {
+   "n": 40,
+   "company": "Ocean Harvesting",
+   "capability": "wave_energy",
+   "source_type": "member_directory",
+   "quote": "Utvecklar och tillverkar kraftverk för produktion av elenergi från havsvågor, inklusive drift, underhåll, försäljning och licensiering av dessa system",
+   "url": "https://www.bluesciencepark.se/medlem/ocean-harvesting/",
+   "label": "supported",
+   "note": ""
+  }
+ ]
+}

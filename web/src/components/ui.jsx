@@ -1,27 +1,27 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import clsx from "clsx";
-import { AlertTriangle, ArrowUpRight, Check, ChevronDown, ChevronsUpDown, Search } from "lucide-react";
+import { ArrowUpRight, Check, ChevronDown, ChevronsUpDown, Search } from "lucide-react";
 
 export const day = (iso) => (iso ? String(iso).slice(0, 10) : "");
 export const stamp = (iso) => (iso ? String(iso).slice(0, 16).replace("T", " ") : "");
 
 /* ---- labels ---------------------------------------------------------------------------------- */
 const TONES = {
-  FACT: "border-fact/35 bg-fact/10 text-fact",
-  INFERENCE: "border-inf/35 bg-inf/10 text-inf",
-  USER: "border-user/35 bg-user/10 text-user",
-  HYPOTHESIS: "border-hyp/40 bg-hyp/10 text-hyp",
-  SOURCED: "border-brand/35 bg-brand/10 text-brand",
-  open: "border-fact/35 bg-fact/10 text-fact",
-  upcoming: "border-brand/35 bg-brand/10 text-brand",
-  recurring: "border-cyan/35 bg-cyan/10 text-cyan",
-  neutral: "border-line bg-surface2 text-ink2",
+  FACT: "border-fact/40 bg-fact/[0.08] text-fact",
+  INFERENCE: "border-inf/40 bg-inf/[0.08] text-inf",
+  USER: "border-user/40 bg-user/[0.08] text-user",
+  HYPOTHESIS: "border-hyp/40 bg-hyp/[0.08] text-hyp",
+  SOURCED: "border-brand/30 bg-brand/[0.06] text-brand",
+  open: "border-fact/40 bg-fact/[0.08] text-fact",
+  upcoming: "border-brand/30 bg-brand/[0.06] text-brand",
+  recurring: "border-sea/40 bg-sea/[0.08] text-sea",
+  neutral: "border-line bg-surface2/70 text-ink2",
 };
 
 export function Badge({ kind = "SOURCED", children, className }) {
   return (
-    <span className={clsx("inline-flex items-center whitespace-nowrap rounded-full border px-2 py-px text-[10.5px] font-semibold uppercase tracking-wider",
+    <span className={clsx("inline-flex items-center whitespace-nowrap rounded-full border px-2 py-px font-sans text-[10.5px] font-semibold uppercase tracking-[0.08em]",
                           TONES[kind] ?? TONES.neutral, className)}>
       {children ?? kind}
     </span>
@@ -52,7 +52,7 @@ export function Translated({ original, en, className, max }) {
     return (
       <span className={className}>
         {cut(original)}{" "}
-        <span className="whitespace-nowrap text-[11px] font-normal not-italic text-muted" title="No English translation is stored for this text yet">(Swedish original; no translation yet)</span>
+        <span className="whitespace-nowrap font-sans text-[11.5px] font-normal not-italic text-muted" title="No English translation is stored for this text yet">(Swedish original; no translation yet)</span>
       </span>
     );
   }
@@ -60,25 +60,28 @@ export function Translated({ original, en, className, max }) {
     <span className={className}>
       {cut(showOriginal ? original : en.text)}{" "}
       <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowOriginal(!showOriginal); }}
-              className="whitespace-nowrap align-baseline text-[11px] font-normal not-italic text-muted underline decoration-dotted underline-offset-2 hover:text-brand"
+              className="whitespace-nowrap align-baseline font-sans text-[11.5px] font-normal not-italic tracking-normal text-muted underline decoration-dotted underline-offset-2 hover:text-brand"
               title={showOriginal ? "Show the English machine translation" : `Machine translation (${en.engine}). Click to read the Swedish original.`}>
-        {showOriginal ? "Original Swedish · show English" : "Machine-translated · show original"}
+        {showOriginal ? "Swedish original · English" : "translated · original"}
       </button>
-      {!showOriginal && en.numbers_ok === false && <span className="ml-1 text-[11px] font-normal text-hyp">check numbers and dates in the original</span>}
+      {!showOriginal && en.numbers_ok === false && <span className="ml-1 font-sans text-[11.5px] font-normal text-hyp">check numbers in the original</span>}
     </span>
   );
 }
 
 /* ---- layout ---------------------------------------------------------------------------------- */
+/** A newspaper section head: kicker, serif title, a heavy rule; the dek (subtitle) underneath. */
 export function PageHeader({ eyebrow, title, subtitle, children }) {
   return (
-    <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-      <div className="min-w-0">
-        <div className="eyebrow">{eyebrow}</div>
-        <h1 className="mt-1 text-[28px] font-semibold leading-tight sm:text-[32px]">{title}</h1>
-        {subtitle && <p className="mt-1.5 max-w-3xl text-sm text-ink2">{subtitle}</p>}
+    <header className="mb-7">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-ink pb-3">
+        <div className="min-w-0">
+          <div className="kicker">{eyebrow}</div>
+          <h1 className="mt-1 text-[34px] font-semibold leading-[1.05] sm:text-[42px]">{title}</h1>
+        </div>
+        {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
       </div>
-      {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
+      {subtitle && <p className="mt-2.5 max-w-3xl font-serif text-[17px] italic leading-snug text-ink2">{subtitle}</p>}
     </header>
   );
 }
@@ -89,9 +92,9 @@ export function Card({ className, children, ...rest }) {
 
 export function SectionTitle({ children, hint, right }) {
   return (
-    <div className="mb-3 flex items-end justify-between gap-3">
+    <div className="mb-3 flex items-end justify-between gap-3 border-b border-ink/70 pb-1.5">
       <div>
-        <h2 className="text-lg font-semibold">{children}</h2>
+        <h2 className="text-[22px] font-semibold leading-tight">{children}</h2>
         {hint && <p className="meta mt-0.5">{hint}</p>}
       </div>
       {right}
@@ -99,45 +102,42 @@ export function SectionTitle({ children, hint, right }) {
   );
 }
 
-export function Stat({ value, label, sub, icon: Icon, tone = "brand" }) {
-  const tint = { brand: "text-brand bg-brand/10", cyan: "text-cyan bg-cyan/10", fact: "text-fact bg-fact/10",
-                 inf: "text-inf bg-inf/10", hyp: "text-hyp bg-hyp/10", user: "text-user bg-user/10", pink: "text-pink bg-pink/10" }[tone];
+/** A figure in the margin style: big serif number, small label. No icon tiles. */
+export function Stat({ value, label, sub }) {
   return (
-    <div className="card relative overflow-hidden p-4">
-      <div className="flex items-start justify-between gap-2">
-        <div className="font-display text-[30px] font-semibold leading-none tabular-nums">{value ?? "n/a"}</div>
-        {Icon && <span className={clsx("grid h-8 w-8 shrink-0 place-items-center rounded-lg", tint)}><Icon size={16} /></span>}
-      </div>
-      <div className="mt-2 text-[13px] font-medium text-ink2">{label}</div>
-      {sub && <div className="meta mt-0.5">{sub}</div>}
+    <div className="border-l border-line pl-4 first:border-l-0 first:pl-0">
+      <div className="font-serif text-[34px] font-semibold leading-none tabular-nums">{value ?? "n/a"}</div>
+      <div className="mt-1.5 font-sans text-[13.5px] font-semibold text-ink2">{label}</div>
+      {sub && <div className="meta mt-0.5 leading-snug">{sub}</div>}
     </div>
   );
 }
 
-export function Notice({ tone = "hyp", icon: Icon = AlertTriangle, children, className }) {
-  const tones = { hyp: "border-hyp/40 bg-hyp/[0.07] text-ink2", sim: "border-dashed border-inf/45 bg-inf/[0.06] text-ink2",
-                  info: "border-brand/30 bg-brand/[0.06] text-ink2", error: "border-pink/40 bg-pink/[0.08] text-ink2",
-                  ok: "border-fact/35 bg-fact/[0.07] text-ink2" };
-  const ink = { hyp: "text-hyp", sim: "text-inf", info: "text-brand", error: "text-pink", ok: "text-fact" }[tone];
+/** A row of figures separated by hairlines. */
+export function Stats({ children, className }) {
+  return <div className={clsx("grid grid-cols-2 gap-y-5 border-y border-line py-4 sm:flex sm:gap-0 [&>*]:sm:flex-1", className)}>{children}</div>;
+}
+
+/** An editor's note: a coloured rule in the margin, no box, no icon. */
+export function Notice({ tone = "hyp", children, className }) {
+  const rule = { hyp: "border-hyp", sim: "border-inf", info: "border-brand/60", error: "border-pink", ok: "border-sea" }[tone];
   return (
-    <div className={clsx("flex gap-2.5 rounded-xl border px-3.5 py-2.5 text-[13px] leading-relaxed", tones[tone], className)}>
-      <Icon size={16} className={clsx("mt-0.5 shrink-0", ink)} />
-      <div className="min-w-0">{children}</div>
+    <div className={clsx("border-l-[3px] bg-surface2/40 py-2 pl-3.5 pr-3 font-sans text-[14px] leading-relaxed text-ink2", rule, className)}>
+      {children}
     </div>
   );
 }
 
 export const HypothesisNotice = () => (
   <Notice>
-    <b className="text-ink">Hypotheses, not confirmed collaborations.</b> Combinations are generated by NEXUS from public
-    information. No company has been contacted. Funding programmes are potentially relevant only: eligibility has not been checked.
+    <b className="text-ink">Hypotheses, not agreements.</b> NEXUS generated these from public information; no company has
+    been contacted, and funding eligibility has not been checked.
   </Notice>
 );
 
-export function Empty({ children, icon: Icon }) {
+export function Empty({ children }) {
   return (
-    <div className="rounded-2xl border border-dashed border-line px-5 py-8 text-center text-sm text-ink2">
-      {Icon && <Icon size={22} className="mx-auto mb-2 text-muted" />}
+    <div className="border-y border-line py-8 text-center font-serif text-[16px] italic text-ink2">
       {children}
     </div>
   );
@@ -188,10 +188,10 @@ export function Tabs({ tabs, value, onChange }) {
       {tabs.map((t) => (
         <button type="button" key={t.id} role="tab" data-tab={t.id} tabIndex={value === t.id ? 0 : -1}
                 aria-selected={value === t.id} onClick={() => onChange(t.id)}
-                className={clsx("-mb-px whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm font-medium transition",
-                                value === t.id ? "border-brand text-ink" : "border-transparent text-muted hover:text-ink2")}>
+                className={clsx("-mb-px whitespace-nowrap border-b-2 px-3.5 py-2.5 font-sans text-[14.5px] font-semibold transition-colors",
+                                value === t.id ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink2")}>
           {t.label}
-          {t.count !== undefined && <span className="ml-1.5 rounded-full bg-surface2 px-1.5 py-px text-[11px] tabular-nums text-ink2">{t.count}</span>}
+          {t.count !== undefined && <span className="ml-1.5 tabular-nums text-muted">{t.count}</span>}
         </button>
       ))}
     </div>
@@ -200,11 +200,11 @@ export function Tabs({ tabs, value, onChange }) {
 
 export function Segmented({ options, value, onChange }) {
   return (
-    <div className="inline-flex rounded-lg border border-line bg-surface p-0.5">
+    <div className="inline-flex rounded-md border border-line bg-surface p-0.5">
       {options.map((o) => (
         <button type="button" key={o.value} onClick={() => onChange(o.value)} aria-pressed={value === o.value}
-                className={clsx("rounded-md px-3 py-1.5 text-[13px] font-medium transition",
-                                value === o.value ? "bg-brand text-white shadow" : "text-ink2 hover:text-ink")}>
+                className={clsx("rounded px-3 py-1.5 font-sans text-[14px] font-medium transition-colors",
+                                value === o.value ? "bg-brand text-surface" : "text-ink2 hover:text-ink")}>
           {o.label}
         </button>
       ))}
@@ -215,8 +215,8 @@ export function Segmented({ options, value, onChange }) {
 export function Chip({ active, onClick, children, color }) {
   return (
     <button type="button" onClick={onClick} aria-pressed={active}
-            className={clsx("inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[13px] font-medium transition",
-                            active ? "border-brand/60 bg-brand/15 text-ink" : "border-line bg-surface text-muted hover:text-ink2")}>
+            className={clsx("inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-sans text-[14px] font-medium transition-colors",
+                            active ? "border-ink/60 bg-surface2 text-ink" : "border-line bg-transparent text-muted hover:border-ink/40 hover:text-ink2")}>
       {color && <span className="h-2 w-2 rounded-full" style={{ background: color, opacity: active ? 1 : 0.4 }} />}
       {children}
     </button>
@@ -226,13 +226,13 @@ export function Chip({ active, onClick, children, color }) {
 export function Disclosure({ title, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="rounded-xl border border-line bg-surface">
+    <div className="border-y border-line">
       <button type="button" onClick={() => setOpen(!open)} aria-expanded={open}
-              className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm font-medium text-ink2 hover:text-ink">
+              className="flex w-full items-center justify-between gap-3 py-2.5 text-left font-sans text-[14.5px] font-semibold text-ink2 hover:text-ink">
         <span>{title}</span>
         <ChevronDown size={16} className={clsx("shrink-0 transition", open && "rotate-180")} />
       </button>
-      {open && <div className="border-t border-line px-4 py-3">{children}</div>}
+      {open && <div className="pb-4 pt-1">{children}</div>}
     </div>
   );
 }
@@ -364,30 +364,23 @@ function Option({ id, index, active, highlighted, onClick, onHover, children }) 
 }
 
 /* ---- scores ---------------------------------------------------------------------------------- */
-/** Circular 0-100 gauge. */
-export function Ring({ value, size = 52, stroke = 5, label }) {
+/** A 0-100 score as a plain figure with a small label (no gauge). The name is kept for existing call sites. */
+export function Ring({ value, size = 52, label = "fit" }) {
   const v = Math.max(0, Math.min(100, value ?? 0));
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const color = v >= 70 ? "rgb(var(--fact))" : v >= 45 ? "rgb(var(--brand))" : "rgb(var(--muted))";
+  const big = size >= 60;
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }} title={label ? `${label} ${v.toFixed(0)} of 100` : undefined}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgb(var(--line))" strokeWidth={stroke} />
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
-                strokeDasharray={c} strokeDashoffset={c * (1 - v / 100)} style={{ transition: "stroke-dashoffset .6s ease" }} />
-      </svg>
-      <div className="absolute inset-0 grid place-items-center font-display font-semibold tabular-nums" style={{ fontSize: size * 0.3 }}>
-        {v.toFixed(0)}
-      </div>
+    <div className="shrink-0 text-right" title={`${label} ${v.toFixed(0)} of 100`}>
+      <div className={clsx("font-serif font-semibold leading-none tabular-nums", big ? "text-[40px]" : "text-[26px]",
+                           v >= 70 ? "text-sea" : "text-ink")}>{v.toFixed(0)}</div>
+      <div className="mt-0.5 font-sans text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted">{label}</div>
     </div>
   );
 }
 
 export function Bar({ value, color = "rgb(var(--brand))", className }) {
   return (
-    <div className={clsx("h-2 overflow-hidden rounded-full bg-line/70", className)}>
-      <div className="h-full rounded-full" style={{ width: `${Math.max(0, Math.min(100, value ?? 0))}%`, background: color, transition: "width .5s ease" }} />
+    <div className={clsx("h-1.5 overflow-hidden bg-line/70", className)}>
+      <div className="h-full" style={{ width: `${Math.max(0, Math.min(100, value ?? 0))}%`, background: color }} />
     </div>
   );
 }
@@ -400,7 +393,7 @@ export function ScoreBars({ breakdown, labels }) {
         const v = breakdown?.[key];
         const w = breakdown?.weights?.[key] ?? 0;
         return (
-          <div key={key} className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 text-[12.5px]">
+          <div key={key} className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 font-sans text-[13.5px]">
             <span className="text-ink2">{label} <span className="text-muted">x{w.toFixed(2)}</span></span>
             <span className="tabular-nums text-ink">{v === null || v === undefined ? "n/a" : v.toFixed(0)}</span>
             <Bar value={v} className="col-span-2" />
@@ -411,22 +404,25 @@ export function ScoreBars({ breakdown, labels }) {
   );
 }
 
+/** A proposed connection, set like a short news item: label, serif headline, who, score in the margin. */
 export function HypothesisCard({ h, children, compact }) {
   return (
-    <div className={clsx("card animate-rise", compact ? "p-3.5" : "p-4")}>
-      <div className="flex items-start justify-between gap-3">
+    <article className={clsx("border-b border-line", compact ? "py-3" : "py-4")}>
+      <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <Badge kind="HYPOTHESIS" />
-            <span className="meta">{h.kind === "triad" ? "three companies" : "pair"}</span>
+            <span className="meta">{h.kind === "triad" ? "three companies" : "two companies"}</span>
           </div>
-          <h4 className="mt-1.5 text-[15px] font-semibold leading-snug">{h.title}</h4>
-          <p className="mt-1 text-[13px] text-ink2">{(h.partners?.length && h.partners.length < h.companies.length ? ["with", h.partners.join(" + ")] : [h.companies.join(" + ")]).join(" ")}</p>
+          <h4 className={clsx("mt-1.5 font-semibold leading-snug", compact ? "text-[18px]" : "text-[20px]")}>{h.title}</h4>
+          <p className="mt-0.5 font-sans text-[14px] text-ink2">
+            {h.partners?.length && h.partners.length < h.companies.length ? `with ${h.partners.join(" and ")}` : h.companies.join(", ")}
+          </p>
         </div>
-        <Ring value={h.score} size={46} stroke={4} label="Score" />
+        <Ring value={h.score} label="score" />
       </div>
       {children}
-    </div>
+    </article>
   );
 }
 
@@ -447,5 +443,5 @@ export function Markdown({ text }) {
     else if (line.trim()) blocks.push(<p key={i}>{inline(line, i)}</p>);
   });
   if (list) blocks.push(<ul key="l-end" className="ml-5 list-disc space-y-1">{list}</ul>);
-  return <div className="space-y-2 text-[13.5px] leading-relaxed text-ink2">{blocks}</div>;
+  return <div className="space-y-2 font-serif text-[16px] leading-relaxed text-ink2">{blocks}</div>;
 }

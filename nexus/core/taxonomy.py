@@ -82,7 +82,7 @@ _CAPS = [
        "maritime surveillance vessel detection tracking"),
     _c("marine_navigation", "Marine navigation systems", "SENSING",
        "Navigation, positioning and bridge systems for vessels.",
-       [r"navigation", r"radar", r"gyro", r"ecdis", r"\bais\b"],
+       [r"navigation", r"radar(?![- ]?(?:group|gruppen))", r"gyro", r"ecdis", r"\bais\b"],  # "Radar Group" is a survey firm
        ["vessel_operations", "autonomous_maritime", "maritime_surveillance"],
        "autonomous vessel navigation maritime positioning"),
     _c("seabed_survey", "Seabed survey & inspection", "SENSING",
@@ -248,7 +248,7 @@ _CAPS = [
        ["marine_environment"], ""),
     _c("funding_advisory", "Financing & business advisory", "ENABLER",
        "Loans, venture capital, incubation and business development advice.",
-       [r"riskkapital", r"\blån\b", r"inkubator", r"investeringar", r"företagsutveckling"],
+       [r"riskkapital", r"\blån\b", r"inkubator", r"investeringar i (?:bolag|företag|startups?)",r"företagsutveckling"],
        ["digital_services"], ""),
     _c("research_education", "Research & higher education", "ENABLER",
        "Academic research and education.",

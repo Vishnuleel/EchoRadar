@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { AlertTriangle, ArrowRight, ArrowUpRight, BadgeCheck, Building2, CheckCircle2, CircleDashed, GitCompareArrows, Globe,
-         Lightbulb, Lock, MapPin, Pencil, ShieldCheck, Users } from "lucide-react";
+import { AlertTriangle, ArrowRight, ArrowUpRight, BadgeCheck, CheckCircle2, CircleDashed, GitCompareArrows,
+         Lightbulb, Lock, ShieldCheck } from "lucide-react";
 import { api } from "../api";
 import { useSession } from "../store";
-import { Badge, Card, Chip, CompanyPicker, Disclosure, Empty, HypothesisNotice, Notice, PageHeader, QueryState, Ring, ScoreBars,
+import ProfileRun from "../components/ProfileRun";
+import { Badge, Card, Chip, CompanyPicker, Disclosure, Empty, HypothesisNotice, Notice, PageHeader, QueryState, Ring, ScoreBars, Stats,
          SourceLink, Stat, Tabs, Translated, stamp } from "../components/ui";
 
 function ClaimCard({ claim: cl }) {
@@ -364,7 +365,7 @@ function History({ data }) {
   );
 }
 
-export default function CompanyDNA() {
+export default function CompanyDNA({ preview }) {
   const { companies, companyId, setViewing, acting } = useSession();
   const [tab, setTab] = useState("facts");
   const query = useQuery({ queryKey: ["dna", companyId, acting], queryFn: () => api.dna(companyId), enabled: companyId !== null });
@@ -385,49 +386,38 @@ export default function CompanyDNA() {
           const vf = Object.fromEntries(data.verification.fields.map((f) => [f.field, f]));
           return (
             <>
-              <div className="mb-6 grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-                <Card className="relative overflow-hidden">
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand/10 to-transparent" />
-                  <div className="relative">
-                    <div className="flex items-start gap-3.5">
-                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-brand/15 font-display text-lg font-semibold text-brand">
-                        {c.name.slice(0, 2).toUpperCase()}
-                      </span>
-                      <div className="min-w-0">
-                        <h2 className="text-2xl font-semibold leading-tight">{c.name}</h2>
-                        <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                          <button type="button" onClick={() => setTab("directory")} className="rounded-full transition hover:brightness-110"><VerificationBadge v={data.verification} /></button>
-                          <SourceLink url={c.directory_url} className="text-xs">official profile</SourceLink>
-                        </div>
-                      </div>
+              <div className="mb-8 grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+                <article>
+                  <h2 className="text-[40px] font-semibold leading-[1.05] sm:text-[48px]">{c.name}</h2>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <button type="button" onClick={() => setTab("directory")} className="rounded-full"><VerificationBadge v={data.verification} /></button>
+                    <SourceLink url={c.directory_url} className="font-sans text-[13px]">official profile</SourceLink>
+                  </div>
+                  <p className="mt-4 font-serif text-[20px] leading-snug text-ink">
+                    {c.description ? <Translated original={c.description} en={c.description_en} /> : "No public description found."}
+                    <FactSource f={vf.description} />
+                  </p>
+                  {c.user_description && (
+                    <div className="mt-4 border-l-[3px] border-user pl-3.5">
+                      <div className="flex flex-wrap items-center gap-2"><Badge kind="USER" /><span className="meta">the company's own words (not independently verified)</span></div>
+                      <p className="mt-1 font-serif text-[17px] leading-snug text-ink2">{c.user_description}</p>
                     </div>
-                    <p className="mt-4 text-[14.5px] leading-relaxed text-ink2">
-                      <Badge kind="FACT" className="mr-2 align-middle" />
-                      {c.description ? <Translated original={c.description} en={c.description_en} /> : "No public description found."}
-                      <FactSource f={vf.description} />
-                    </p>
-                    {c.user_description && (
-                      <div className="mt-4 rounded-xl border border-user/30 bg-user/[0.06] p-3.5">
-                        <div className="flex flex-wrap items-center gap-2"><Badge kind="USER" /><span className="meta">company refinement (not independently verified)</span></div>
-                        <p className="mt-1.5 text-sm leading-relaxed text-ink2">{c.user_description}</p>
-                      </div>
-                    )}
-                    <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5 text-[13px] sm:grid-cols-4">
-                      {[[Building2, "Industry", "industry"], [MapPin, "Location", "location"], [Users, "Employees", "employees"], [Pencil, "Founded", "founded"]].map(([Icon, k, f]) => (
-                        <div key={k}><dt className="meta flex items-center gap-1"><Icon size={12} />{k}{c[f] && <FactSource f={vf[f]} />}</dt>
-                          <dd className="mt-0.5 text-ink">{c[f] ? (f === "industry" ? <Translated original={c[f]} en={c.industry_en} /> : c[f])
-                            : <span className="text-muted" title="Not published on the official profile">not published</span>}</dd></div>
-                      ))}
-                    </dl>
-                    {c.website && <p className="mt-3 flex items-center gap-1.5 text-[13px]"><Globe size={13} className="text-muted" /><SourceLink url={c.website}>{c.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</SourceLink><span className="meta">as linked on the official profile</span></p>}
-                  </div>
-                </Card>
-                <div className="space-y-3">
-                  <div className="grid grid-cols-3 gap-3">
-                    <Stat value={capCount} label="Capabilities" sub="with public source" tone="fact" />
-                    <Stat value={inferred.length} label="Inferred interests" sub="derived, not stated" tone="inf" />
-                    <Stat value={user.length} label="User refinements" sub="unverified" tone="user" />
-                  </div>
+                  )}
+                  <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 border-y border-line py-3 sm:grid-cols-4">
+                    {[["Industry", "industry"], ["Location", "location"], ["Employees", "employees"], ["Founded", "founded"]].map(([k, f]) => (
+                      <div key={k}><dt className="kicker flex items-center gap-1">{k}{c[f] && <FactSource f={vf[f]} />}</dt>
+                        <dd className="mt-1 font-sans text-[15px] text-ink">{c[f] ? (f === "industry" ? <Translated original={c[f]} en={c.industry_en} /> : c[f])
+                          : <span className="text-muted" title="Not published on the official profile">not published</span>}</dd></div>
+                    ))}
+                  </dl>
+                  {c.website && <p className="mt-2 font-sans text-[14px]"><SourceLink url={c.website}>{c.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</SourceLink><span className="meta"> as linked on the official profile</span></p>}
+                </article>
+                <div className="space-y-4 lg:border-l lg:border-line lg:pl-8">
+                  <Stats>
+                    <Stat value={capCount} label="Capabilities" sub="with a public source" />
+                    <Stat value={inferred.length} label="Inferred interests" sub="derived, not stated" />
+                    <Stat value={user.length} label="Company additions" sub="unverified" />
+                  </Stats>
                   {data.gaps.length > 0 && (
                     <Disclosure title={`Missing or uncertain information (${data.gaps.length})`} defaultOpen>
                       <ul className="ml-4 list-disc space-y-1 text-[13px] leading-relaxed text-ink2">{data.gaps.map((g) => <li key={g}>{g}</li>)}</ul>
@@ -440,6 +430,8 @@ export default function CompanyDNA() {
                   </p>
                 </div>
               </div>
+
+              {!preview && <div className="mb-8"><ProfileRun companyId={c.id} name={c.name} /></div>}
 
               <Tabs value={tab} onChange={setTab} tabs={[
                 { id: "facts", label: "Verified facts", count: facts.length },

@@ -1,4 +1,4 @@
-/** Theme tokens. Colours are CSS variables (see src/index.css) so dark and light share one set of classes. */
+/** Design tokens. Colours are CSS variables (src/index.css) so the day and night editions share one set of classes. */
 const token = (name) => `rgb(var(--${name}) / <alpha-value>)`;
 
 export default {
@@ -6,41 +6,39 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: token("bg"),
-        surface: token("surface"),
-        surface2: token("surface2"),
-        line: token("line"),
-        ink: token("ink"),
+        bg: token("bg"), // newsprint
+        surface: token("surface"), // paper
+        surface2: token("surface2"), // sand
+        line: token("line"), // hairline rules
+        ink: token("ink"), // navy ink
         ink2: token("ink2"),
         muted: token("muted"),
-        brand: token("brand"),
-        cyan: token("cyan"),
-        // label colours used everywhere: FACT / INFERENCE / USER / HYPOTHESIS
+        brand: token("brand"), // deep navy
+        cyan: token("sea"), // sea green (kept as "cyan" so existing classes follow the palette)
+        sea: token("sea"),
         fact: token("fact"),
         inf: token("inf"),
         user: token("user"),
         hyp: token("hyp"),
-        pink: token("pink"),
+        pink: token("alert"),
       },
       fontFamily: {
-        sans: ['"Inter Variable"', "Inter", "system-ui", "Segoe UI", "sans-serif"],
-        display: ['"Space Grotesk Variable"', '"Inter Variable"', "system-ui", "sans-serif"],
+        sans: ['"Source Sans 3 Variable"', '"Source Sans 3"', "system-ui", "Segoe UI", "sans-serif"],
+        serif: ['"Newsreader Variable"', "Newsreader", "Georgia", "serif"],
+        display: ['"Newsreader Variable"', "Newsreader", "Georgia", "serif"],
       },
-      borderRadius: { xl: "0.875rem", "2xl": "1.125rem" },
+      borderRadius: { xl: "0.375rem", "2xl": "0.5rem" },
       boxShadow: {
-        card: "0 1px 0 rgb(255 255 255 / 0.03) inset, 0 10px 30px -18px rgb(0 0 0 / 0.55)",
-        glow: "0 0 0 1px rgb(var(--brand) / 0.35), 0 8px 30px -8px rgb(var(--brand) / 0.45)",
+        card: "none",
+        glow: "none",
+        lift: "0 1px 2px rgb(15 31 56 / 0.06), 0 8px 24px -12px rgb(15 31 56 / 0.18)",
       },
       keyframes: {
-        sweep: { to: { transform: "rotate(360deg)" } },
-        ping2: { "0%": { transform: "scale(.6)", opacity: ".9" }, "100%": { transform: "scale(2.6)", opacity: "0" } },
-        rise: { from: { opacity: "0", transform: "translateY(8px)" }, to: { opacity: "1", transform: "none" } },
+        rise: { from: { opacity: "0" }, to: { opacity: "1" } },
         shimmer: { to: { backgroundPosition: "-200% 0" } },
       },
       animation: {
-        sweep: "sweep 7s linear infinite",
-        ping2: "ping2 2.6s ease-out infinite",
-        rise: "rise .35s ease-out both",
+        rise: "rise .15s ease-out both",
         shimmer: "shimmer 1.6s linear infinite",
       },
     },

@@ -37,8 +37,8 @@ Status: **Done** = implemented and exercised, **Partial** = implemented with a s
 | Testing opportunities | Done | BSP and MTC environments, match explanation and next step; access terms not published |
 | Events | Partial | Format, audience, date, place parsed; all dated events were past at retrieval, so only recurring formats are offered |
 | Knowledge and trends | Partial | Research (OpenAlex) and regional news (BSP, MTC); no industry news; no "what changed" narrative |
-| Personalised member monitoring | Partial | Matching, refinement, feedback, potential connections done; change detection between runs not done |
-| Presentation and interaction | Done | Dashboard, digest, assistant |
+| Personalised member monitoring | Done (prototype) | Matching, refinement, feedback, potential connections; scheduled monitoring with change events (`nexus/monitor.py`); "Read the sources live" on each profile shows what changed since the stored profile |
+| Presentation and interaction | Done | A personalised weekly paper (front page "This week"), the radar, and Ask NEXUS (conversational, answers built from records) |
 
 ## Boundaries
 
@@ -46,17 +46,19 @@ Status: **Done** = implemented and exercised, **Partial** = implemented with a s
 |---|---|---|
 | Out-of-scope: explain remit and redirect | Done | `boundary_guard.classify_request` |
 | Unclear connection: ask a focused clarification question | Done | Category `needs_clarification` |
-| External content never treated as instructions | Done | `filter_untrusted`; no LLM reads web text |
+| External content never treated as instructions | Done | `filter_untrusted` sets instruction-like sentences aside before extraction (shown live as the "Boundary filter" step of the profile check); by default no language model reads web text |
 | Role persistence across follow-ups and role requests | Done | Per-turn classification; role requests blocked |
 | No disclosure of other companies' non-public data | Done | `security/privacy.py` |
 | Distinguish information from advice, eligibility decisions, commitments | Done | Disclaimer on results; eligibility questions escalated |
 | Refer human decisions to staff | Done | Category `escalation` with the public contact route |
+| Finding support or contact routes within Blue Science Park | Done | Question router: contact, location, opening hours, staff and membership questions get the park's contact page; what NEXUS does not store is said, not guessed |
+| Explain the boundaries and demonstrate that they work | Done | `docs/architecture.md` (how); Evaluation page, "Quality and boundary check": 60 labelled questions run through the real pipeline, 60 of 60 handled as labelled on 2026-11-14 (labels written by the team) |
 
 ## Deliverables
 
 | Deliverable | Where |
 |---|---|
-| Working demo | `streamlit run app.py`; `docs/demo_script.md` |
+| Working demo | `python -m api` then http://localhost:8000 (fallback: `streamlit run app.py`); `docs/demo_script.md` |
 | Solution explanation | `README.md`, `docs/architecture.md`, `docs/innovation_methodology.md` |
-| Quality and boundary check | Evaluation page; `docs/technical_validation.md` |
+| Quality and boundary check | Evaluation page, first tab: interaction limits (60 questions), profile accuracy (40 sampled facts checked against their quotes: 36 supported, 4 partly, 0 wrong), source traceability (all 292 facts with URL and excerpt), recommendation relevance (baseline comparison, with its caveat); `docs/technical_validation.md` |
 | Handover package | Code, setup instructions, `docs/known_limitations.md`, `docs/feasibility.md` |

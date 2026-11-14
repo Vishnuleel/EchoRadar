@@ -17,7 +17,9 @@ export function SessionProvider({ children }) {
   const meta = useQuery({ queryKey: ["meta"], queryFn: api.meta, staleTime: Infinity });
   const [acting, setActingState] = useState(() => read("nexus.acting", null));
   const [viewing, setViewingState] = useState(() => read("nexus.viewing", null));
-  const [theme, setThemeState] = useState(() => document.documentElement.dataset.theme || "dark");
+  const [theme, setThemeState] = useState(() => document.documentElement.dataset.theme || "light");
+  const [navOpen, setNavOpenState] = useState(() => read("nexus.nav", true));
+  const setNavOpen = useCallback((v) => { setNavOpenState(v); write("nexus.nav", v); }, []);
 
   const companies = meta.data?.companies ?? [];
   const names = useMemo(() => Object.fromEntries(companies.map((c) => [c.id, c.name])), [companies]);
@@ -41,14 +43,14 @@ export function SessionProvider({ children }) {
   const setTheme = useCallback((t) => {
     document.documentElement.dataset.theme = t;
     setThemeState(t);
-    try { localStorage.setItem("nexus.theme", t); } catch { /* ignore */ }
+    try { localStorage.setItem("nexus.edition", t); } catch { /* ignore */ }
   }, []);
 
   // The company whose radar and profile are shown by default.
   const companyId = acting ?? (known(viewing) ? viewing : meta.data?.default_company ?? null);
 
   const value = { meta: meta.data, metaError: meta.error, loading: meta.isLoading, companies, names, acting, setActing,
-                  companyId, setViewing, theme, setTheme };
+                  companyId, setViewing, theme, setTheme, navOpen, setNavOpen };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

@@ -168,7 +168,7 @@ export default function Staff() {
                   <SectionTitle hint="Application areas where several members have evidenced capabilities: candidates for a theme meeting.">Shared interest areas</SectionTitle>
                   <div className="space-y-2.5">
                     {d.shared_interests.map((r) => (
-                      <div key={r.area} className="card p-3.5">
+                      <div key={r.area} className="border-b border-line py-3">
                         <div className="flex items-baseline justify-between gap-3">
                           <h3 className="text-sm font-semibold">{r.area}</h3>
                           <span className="font-display text-lg font-semibold tabular-nums">{r.members}<span className="meta ml-1 font-sans font-normal">members</span></span>
@@ -224,7 +224,7 @@ export default function Staff() {
                   <SectionTitle>Member developments in the news</SectionTitle>
                   <div className="space-y-2.5">
                     {d.news.map((n) => (
-                      <div key={n.url} className="card p-3.5">
+                      <div key={n.url} className="border-b border-line py-3">
                         <span className="meta">{day(n.date)} · {n.source} · names {n.names.join(", ")}</span>
                         <p className="mt-1 text-sm font-medium leading-snug text-ink"><Translated original={n.title} en={n.title_en} /></p>
                         <p className="mt-1 text-[13px] leading-relaxed text-ink2"><Translated original={n.summary} en={n.summary_en} max={240} /></p>

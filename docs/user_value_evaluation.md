@@ -24,6 +24,26 @@ for our product?" (counted from the sources NEXUS reads, not timed with users):
    with reason, source, uncertainty and next step.
 2. Open one recommendation as a Blueprint to see the partner evidence, research and calls together.
 
+## Worked comparison for one member: Njord X (counted on 2026-11-14, not timed with users)
+
+| | Without NEXUS | With NEXUS (front page and radar for Njord X) |
+|---|---|---|
+| Places to look | 9 sources: Vinnova open data, 4 test-environment pages, the Blue Science Park event programme, Blue Science Park and MTC news, OpenAlex, the member directory | One page |
+| Records to read | About 385: 92 funding calls, 4 test environments, 11 events, 22 news items, 200 research records, 56 member entries | 20 ranked findings and 5 proposed partnerships |
+| Records that cannot be acted on | Must be spotted by the reader: 75 of 92 calls already closed, 9 of 11 events already past | Removed before ranking; a closed call or a past event is never offered |
+| Funding | Read 15 open calls and their eligibility text to judge fit | 1 open call matched ("The Baltic Marine Watchdog Challenge", fit 54, closes in 18 days) with Vinnova's own "who can apply" text and "eligibility not checked" |
+| Why it fits, source, date, next step | Work out for each item | Shown on every item |
+| Partners | Read 56 directory entries and guess | 5 proposals with the quoted evidence for each capability, labelled HYPOTHESIS |
+
+**Drawbacks and limits of this comparison, stated plainly:**
+
+- It counts what a reader would have to go through; it does not measure time, and nobody has done the task.
+- Whether the 20 findings are the right 20 is unknown until Njord X looks at them. Half are research papers,
+  which are less directly actionable than a call or a test environment.
+- Recall is unknown: a relevant call that NEXUS ranked below its threshold is invisible to the member, while a
+  manual reader could still have found it.
+- The profile NEXUS ranks against has not been confirmed by Njord X.
+
 ## What can be said without a study
 
 - NEXUS reduces the number of sources to open from several sites to one page. Whether that saves meaningful

@@ -1,5 +1,30 @@
 # Feasibility
 
+## In one paragraph
+
+**Next step:** a four-week pilot with Blue Science Park: one staff member and five member companies. Read all 56
+members' websites (today 5), let the five members review their profiles and mark their top 10 radar findings,
+and let staff rate 20 proposed connections. Proposed success thresholds, to be agreed with Blue Science Park:
+most profile facts confirmed by the company, and at least half of each member's top 5 findings marked useful.
+**Biggest remaining risk:** profile accuracy at scale. If the extracted profiles are wrong, every ranking built on
+them is wrong and members stop trusting the service. It is managed, not solved: every fact shows its quote, a
+member can remove a fact (the removal survives re-reading), a random sample is audited (36 of 40 supported, none
+wrong), and the profile check shows a re-read before anything changes. The pilot measures it with the people who
+know the answer.
+
+## Critical assumptions and how they were tested
+
+| Assumption | Tested? | Result |
+|---|---|---|
+| Public information gives a usable starting profile without a questionnaire | Yes, on all 56 public members | 45 of 56 (80%) get at least one evidenced capability; 11 do not and need the company's own input |
+| The extracted facts are correct | Partly: team review of a random sample | 36 of 40 supported, 4 partly, 0 wrong. Not yet confirmed by the companies |
+| The sources can be read and kept current automatically | Yes | Live tests against OpenAlex, Vinnova and the member directory pass; the monitor ran against live sources; failures are logged and fall back to the last copy |
+| Different companies get different results | Yes, on stored data | Mean top-5 overlap between companies 0.006; no two of 38 companies share a top-5 list |
+| The service stays inside its remit | Yes, with a caveat | 60 of 60 labelled questions handled as labelled; the labels were written by the team that wrote the rules |
+| It runs without paid services or special hardware | Yes | One laptop; re-ranking about one second; no key required except an optional free OpenAlex key |
+| Members find the results useful and act on them | **No** | Not tested; the pilot's main question |
+| Staff trust generated partner proposals enough to make an introduction | **No** | Not tested; staff rating in the pilot |
+
 ## What exists now
 
 A working application that runs on one laptop with Python and no paid services. Data retrieval for all 56
@@ -36,18 +61,19 @@ bluesciencepark.se, mtcos.se, member websites and (once) huggingface.co for the 
 | Phase | Content |
 |---|---|
 | 1. Pilot (weeks 1–4) | Read all members' websites; staff review of taxonomy; 5 members review their profiles; collect ratings |
-| 2. Hardening (weeks 5–8) | Real sign-in (for example Microsoft Entra ID), nightly `ingest` via cron or a scheduler, "what changed" report, e-mail digest |
+| 2. Hardening (weeks 5–8) | Real sign-in (for example Microsoft Entra ID; token mode exists), register `python -m nexus.monitor --loop` as a service, show change events per member ("what changed this week"), e-mail digest |
 | 3. Breadth (weeks 9–12) | More funders (EU Funding & Tenders, Energimyndigheten), more event sources, member news feeds |
-| 4. Scale | PostgreSQL + pgvector, FastAPI service around `nexus/core`, React front end if Streamlit becomes limiting |
+| 4. Scale | PostgreSQL + pgvector behind the existing FastAPI layer; hosted deployment of the React interface |
 
 ## Migration notes
 
 - **PostgreSQL:** set `NEXUS_DATABASE_URL`; models use portable SQLAlchemy types. Move `EmbeddingCache.vector`
   to a pgvector column to search items in the database instead of in memory.
-- **FastAPI / React:** `nexus/core` and `nexus/agents` have no Streamlit imports; expose `pipeline.recompute`,
-  `radar.company_items`, `pipeline.answer_request` and `blueprint_generator.build_blueprint` as endpoints.
+- **FastAPI / React:** done during the hackathon: `api/` exposes the engine, `web/` is the React interface. The
+  Streamlit pages remain as a fallback.
 - **Neo4j:** not justified at this size; the graph is rebuilt from SQL in milliseconds.
-- **Background jobs:** `scripts/ingest.py` is idempotent and cache-aware, so it can run from cron as is.
+- **Background jobs:** `python -m nexus.monitor --once` (or `--loop N`) runs due checks with a lease lock;
+  `scripts/ingest.py` is idempotent and cache-aware, so either can run from cron or Windows Task Scheduler as is.
 
 ## Risks and mitigation
 

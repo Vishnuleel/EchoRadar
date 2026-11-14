@@ -1,8 +1,8 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, Building2, Banknote, FlaskConical, ShieldCheck, Sparkles } from "lucide-react";
 import { api } from "../api";
-import { Badge, Card, HypothesisCard, HypothesisNotice, Notice, PageHeader, QueryState, SectionTitle, SourceLink, Stat, Translated, day, stamp } from "../components/ui";
+import { Badge, Card, HypothesisCard, HypothesisNotice, Notice, PageHeader, QueryState, SectionTitle, SourceLink, Stat, Stats, Translated, day, stamp } from "../components/ui";
 
 function CapabilityBars({ rows }) {
   const [all, setAll] = useState(false);
@@ -14,11 +14,10 @@ function CapabilityBars({ rows }) {
         {shown.map((r) => (
           <li key={r.key} className="group grid grid-cols-[minmax(120px,38%)_1fr_28px] items-center gap-3 text-[13px]" title={r.role_label}>
             <span className="truncate text-right text-ink2 group-hover:text-ink">{r.name}</span>
-            <span className="h-5 overflow-hidden rounded-md bg-line/40">
-              <span className="block h-full rounded-md bg-gradient-to-r from-brand/70 to-brand transition-all group-hover:from-cyan/70 group-hover:to-cyan"
-                    style={{ width: `${(r.companies / max) * 100}%` }} />
+            <span className="h-3.5 overflow-hidden bg-line/40">
+              <span className="block h-full bg-brand transition-colors group-hover:bg-sea" style={{ width: `${(r.companies / max) * 100}%` }} />
             </span>
-            <span className="font-display font-semibold tabular-nums">{r.companies}</span>
+            <span className="font-serif text-[16px] font-semibold tabular-nums">{r.companies}</span>
           </li>
         ))}
       </ul>
@@ -39,15 +38,14 @@ export default function Overview() {
           const n = d.counts, st = d.funding_status;
           return (
             <>
-              <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-                <Stat value={n.companies} label="Profiled companies" sub={`${n.companies_website} with website evidence`} icon={Building2} />
-                <Stat value={n.verified_capabilities} label="Verified capability claims" sub={`${n.inferences} inferred interests kept separate`} icon={ShieldCheck} tone="fact" />
-                <Stat value={n.research} label="Research records discovered" sub="OpenAlex" icon={BookOpen} tone="cyan" />
-                <Stat value={(st.open ?? 0) + (st.upcoming ?? 0)} label="Open or upcoming funding calls"
-                      sub={`${st.closed ?? 0} closed, ${st.unknown ?? 0} unknown of ${n.funding}`} icon={Banknote} tone="inf" />
-                <Stat value={n.testbeds + n.events + n.news} label="Test environments, events, news" sub={`${n.testbeds} / ${n.events} / ${n.news}`} icon={FlaskConical} tone="pink" />
-                <Stat value={n.hypotheses} label="Collaboration hypotheses" sub="generated, not confirmed" icon={Sparkles} tone="hyp" />
-              </div>
+              <Stats className="mb-4 md:grid-cols-3">
+                <Stat value={n.companies} label="Profiled companies" sub={`${n.companies_website} with website evidence`} />
+                <Stat value={n.verified_capabilities} label="Verified capability claims" sub={`${n.inferences} inferences kept apart`} />
+                <Stat value={n.research} label="Research records" sub="OpenAlex" />
+                <Stat value={(st.open ?? 0) + (st.upcoming ?? 0)} label="Open or upcoming calls" sub={`of ${n.funding}; ${st.closed ?? 0} closed`} />
+                <Stat value={n.testbeds + n.events + n.news} label="Test sites, events, news" sub={`${n.testbeds} / ${n.events} / ${n.news}`} />
+                <Stat value={n.hypotheses} label="Proposed connections" sub="generated, not confirmed" />
+              </Stats>
               {n.demo_records
                 ? <Notice tone="sim" className="mb-6">{n.demo_records} stored records are DEMO data and are labelled as such.</Notice>
                 : <p className="meta mb-6">No demo or simulated records are stored: all companies, research, calls and test environments were retrieved from public sources.</p>}
@@ -72,7 +70,7 @@ export default function Overview() {
                   <h3 className="mb-2.5 text-sm font-semibold text-ink2">Latest funding calls opened</h3>
                   <div className="space-y-2.5">
                     {d.recent_funding.map((f) => (
-                      <div key={f.url} className="card p-3.5">
+                      <div key={f.url} className="border-b border-line py-3">
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge kind={["open", "upcoming"].includes(f.status) ? f.status : "neutral"}>{f.status}</Badge>
                           <span className="meta">opened {day(f.opens_at)}{f.deadline && ` · deadline ${day(f.deadline)}`}</span>
@@ -87,7 +85,7 @@ export default function Overview() {
                   <h3 className="mb-2.5 text-sm font-semibold text-ink2">Most recent research retrieved</h3>
                   <div className="space-y-2.5">
                     {d.recent_research.map((r) => (
-                      <div key={r.url} className="card p-3.5">
+                      <div key={r.url} className="border-b border-line py-3">
                         <span className="meta">published {day(r.date)}</span>
                         <p className="mt-1 text-[13px] leading-snug text-ink">{r.title.slice(0, 120)}</p>
                         <p className="mt-1 text-xs"><SourceLink url={r.url}>OpenAlex record source</SourceLink></p>
@@ -114,6 +112,18 @@ export default function Overview() {
                   <p className="meta mt-2">Every external retrieval is logged with its status, including failures.</p>
                 </div>
               </div>
+
+              {/* the colophon: how this paper is made */}
+              <footer className="mt-12 border-t-[3px] border-double border-ink pt-4">
+                <div className="kicker mb-2">About this paper</div>
+                <p className="max-w-4xl font-serif text-[16px] leading-relaxed text-ink2">
+                  NEXUS Weekly is compiled by NEXUS for Blue Science Park members from public sources: the member directory,
+                  company websites, Vinnova open data, OpenAlex, and the pages of Blue Science Park and Marine Technology Center
+                  of Sweden. Every finding carries its source and retrieval date. Swedish texts are shown in machine translation
+                  with the original one click away. Connections between members are generated proposals, not agreements.{" "}
+                  <Link to="/evaluation" className="link not-italic">Method, data quality and test results</Link>.
+                </p>
+              </footer>
             </>
           );
         }}

@@ -237,10 +237,14 @@ def html_to_sentences(html: str) -> tuple[str, list[str], str | None]:
     return title, sentences, lang
 
 
-def crawl_company_site(client: HttpClient, website: str, max_pages: int = 8) -> CrawlResult:
-    """Read the start page plus a few informative same-host pages."""
+# country and language copies of the same site ("/en/", "/br/", "/de-at/") repeat the start page
+_LOCALE_PATH = re.compile(r"^/[a-z]{2}(?:[-_][a-z]{2})?(?:/|$)", re.I)
+
+
+def crawl_company_site(client: HttpClient, website: str, max_pages: int = 8, ttl_hours: float = 24 * 3) -> CrawlResult:
+    """Read the start page plus a few informative same-host pages. `ttl_hours=0` reads them live."""
     result = CrawlResult(website=website)
-    start = client.get(website, ttl_hours=24 * 3, check_robots=True)
+    start = client.get(website, ttl_hours=ttl_hours, check_robots=True)
     if not start.ok:
         result.errors.append(f"{website}: {start.error}")
         return result
@@ -250,12 +254,12 @@ def crawl_company_site(client: HttpClient, website: str, max_pages: int = 8) -> 
     for a in soup.find_all("a", href=True):
         u = urljoin(start.final_url or website, a["href"]).split("#")[0]
         if urlparse(u).netloc == host and u.rstrip("/") != (start.final_url or website).rstrip("/") \
-                and not _SKIP_PATH.search(u) and u not in links and "/en/" not in u:
+                and not _SKIP_PATH.search(u) and u not in links and not _LOCALE_PATH.match(urlparse(u).path):
             links.append(u)
     links.sort(key=lambda u: (0 if _PRIORITY_PATH.search(urlparse(u).path) else 1, urlparse(u).path.count("/"), len(u)))
     seen_sentences: set[str] = set()
     for url, res in [(website, start)] + [(u, None) for u in links[: max_pages - 1]]:
-        res = res or client.get(url, ttl_hours=24 * 3, check_robots=True)
+        res = res or client.get(url, ttl_hours=ttl_hours, check_robots=True)
         if not res.ok:
             result.errors.append(f"{url}: {res.error}")
             continue

@@ -72,14 +72,16 @@ _SCOPE = [
     r"vessel", r"fartyg", r"autonom", r"övervak", r"\biot\b", r"profile", r"profil", r"opportunit", r"möjlighet",
     r"blue science park", r"cable", r"kabel", r"prototype", r"pilot", r"supplier", r"leverantör", r"publication",
     r"dredg", r"diving", r"defen[cs]e", r"försvar", r"navigation", r"telematic", r"conference", r"konferens",
-    r"workshop", r"webinar", r"seminar", r"networking", r"nätverk", r"trend", r"regional", r"blekinge", r"karlskrona",
+    r"workshop", r"webinar", r"seminar", r"networking", r"nätverk", r"trend", r"evenemang", r"bidrag",
     r"business development", r"affärsutveckl", r"contact", r"kontakt", r"what should .{0,30} know", r"this week",
     r"recommend", r"why (?:is|was|did) (?:this|that|it)", r"hypothes", r"blueprint",
 ]
-# words that could belong to the remit but are too general to act on alone
+# words that could belong to the remit but are too general to act on alone. Place names are here, not in
+# _SCOPE: "the weather in Karlskrona" mentions the region but is not about innovation or collaboration.
 _AMBIGUOUS = [r"\bai\b", r"software", r"mjukvar", r"energy", r"energi", r"market", r"marknad", r"compan", r"företag",
               r"industry", r"bransch", r"project", r"projekt", r"sustainab", r"hållbar", r"monitoring", r"experiment",
-              r"help", r"hjälp", r"\bnews\b", r"nyheter", r"paper", r"growth", r"tillväxt", r"strategy", r"customer", r"kund"]
+              r"help", r"hjälp", r"\bnews\b", r"nyheter", r"paper", r"growth", r"tillväxt", r"strategy", r"customer", r"kund",
+              r"regional", r"blekinge", r"karlskrona", r"blue science park"]
 _FOLLOW_UP = re.compile(r"^(?:and |och |what about|how about|tell me more|more|show more|why\??$|explain|which one|"
                         r"the (?:first|second|third|last)|any (?:others?|more)|next step|och sen)", re.I)
 
@@ -146,11 +148,20 @@ def classify_request(text: str, previous_in_scope: str | None = None) -> Boundar
             "needs_clarification", False,
             "I'm not sure how this connects to innovation or collaboration in the science park. Are you looking for "
             "funding, a test environment, an event, research, or a potential partner related to it?", m.group(0))
-    return BoundaryDecision(
-        "out_of_scope", False,
-        "That is outside what this service is for. " + SCOPE_DESCRIPTION +
-        " Try for example: 'Find potential collaborators for a marine environmental monitoring project.' "
-        "For anything else, " + STAFF_CONTACT[0].lower() + STAFF_CONTACT[1:])
+    return out_of_scope()
+
+
+OUT_OF_SCOPE_MESSAGE = ("That is outside what this service is for. " + SCOPE_DESCRIPTION +
+                        " Try for example: 'Find potential collaborators for a marine environmental monitoring project.' "
+                        "For anything else, " + STAFF_CONTACT[0].lower() + STAFF_CONTACT[1:])
+
+
+def out_of_scope(matched: str | None = None) -> BoundaryDecision:
+    return BoundaryDecision("out_of_scope", False, OUT_OF_SCOPE_MESSAGE, matched)
+
+
+def is_follow_up(text: str) -> bool:
+    return bool(_FOLLOW_UP.search(" ".join((text or "").split())))
 
 
 _UNTRUSTED_RE = re.compile("|".join([p for p in _INJECTION if "act as" not in p and "stop being" not in p and "role-?play" not in p] + [

@@ -1,16 +1,16 @@
 import clsx from "clsx";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bookmark, BookOpen, CalendarDays, Banknote, FlaskConical, HelpCircle, Lightbulb, Newspaper, ShieldCheck,
-         ArrowRightCircle, ThumbsDown, ThumbsUp } from "lucide-react";
+import { useState } from "react";
+import { Bookmark, ChevronDown, ThumbsDown, ThumbsUp } from "lucide-react";
 import { api } from "../api";
 import { Badge, Ring, SourceLink, Translated, day } from "./ui";
 
 export const KIND = {
-  funding: { icon: Banknote, color: "rgb(var(--inf))", label: "Funding" },
-  testbed: { icon: FlaskConical, color: "rgb(var(--pink))", label: "Testing" },
-  event: { icon: CalendarDays, color: "rgb(var(--user))", label: "Events" },
-  research: { icon: BookOpen, color: "rgb(var(--brand))", label: "Research" },
-  news: { icon: Newspaper, color: "rgb(var(--cyan))", label: "News" },
+  funding: { color: "rgb(var(--inf))", label: "Funding" },
+  testbed: { color: "rgb(var(--hyp))", label: "Testing" },
+  event: { color: "rgb(var(--user))", label: "Event" },
+  research: { color: "rgb(var(--brand))", label: "Research" },
+  news: { color: "rgb(var(--sea))", label: "News" },
 };
 
 const same = (a, b) => a.kind === b.kind && a.ref_id === b.ref_id;
@@ -52,88 +52,101 @@ export function useMark() {
   });
 }
 
-function Row({ icon: Icon, label, children, tone = "text-brand" }) {
-  return (
-    <div className="flex gap-2.5 text-[13px] leading-relaxed">
-      <Icon size={15} className={clsx("mt-[3px] shrink-0", tone)} />
-      <div className="min-w-0 text-ink2"><span className="font-semibold text-ink">{label}</span> {children}</div>
-    </div>
-  );
-}
-
-/** One radar item: why it fits / what supports it / what to do next, with its uncertainty. */
-export default function ItemCard({ item: it, canMark, compact }) {
+/** One finding, set as a short brief. Headline, one line of reason and the source line are always shown;
+ * "Read more" opens the evidence, the terms, the next step, what is uncertain and the actions. */
+export default function ItemCard({ item: it, canMark, compact, lead }) {
+  const [open, setOpen] = useState(false);
   const mark = useMark();
-  const kind = KIND[it.kind] ?? KIND.news;
-  const Icon = kind.icon;
   const marks = new Set(it.marks ?? []);
   const toggle = (action) => mark.mutate({ kind: it.kind, ref_id: it.ref_id, action, on: !marks.has(action) });
+  const flag = (it.flags ?? [])[0];
 
   return (
-    <article className={clsx("card group animate-rise transition hover:border-brand/40", compact ? "p-3.5" : "p-5")}>
-      <div className="flex items-start gap-3">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style={{ background: `color-mix(in srgb, ${kind.color} 14%, transparent)`, color: kind.color }}>
-          <Icon size={17} />
-        </span>
+    <article className={clsx("border-b border-line", lead ? "pb-5" : compact ? "py-3" : "py-4")}>
+      <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
-            <Badge kind="neutral">{it.area}</Badge>
-            {it.status && <Badge kind={["open", "upcoming", "recurring"].includes(it.status) ? it.status : "neutral"}>{it.status}</Badge>}
-            {(it.flags ?? []).map((f) => <Badge key={f} kind="HYPOTHESIS">{f}</Badge>)}
+            <Badge kind="neutral">{KIND[it.kind]?.label ?? it.area}</Badge>
+            {it.status && ["open", "upcoming", "recurring"].includes(it.status) && <Badge kind={it.status}>{it.status}</Badge>}
+            {flag && <Badge kind="HYPOTHESIS">{flag}</Badge>}
             {it.priority_area && <Badge kind="USER">your priority</Badge>}
+            {marks.has("saved") && <Badge kind="SOURCED">saved</Badge>}
           </div>
-          <h3 className={clsx("mt-1.5 font-semibold leading-snug", compact ? "text-sm" : "text-base")}>
-            <Translated original={it.title} en={it.title_en} max={150} />
+          <h3 className={clsx("mt-1.5 font-semibold leading-[1.15]",
+                              lead ? "text-[30px] sm:text-[34px]" : compact ? "text-[17px]" : "text-[21px]")}>
+            <Translated original={it.title} en={it.title_en} max={lead ? 180 : 140} />
           </h3>
-          <div className="meta mt-1">{it.source} · {it.date_label}</div>
-        </div>
-        <Ring value={it.relevance} size={compact ? 42 : 52} stroke={compact ? 4 : 5} label="Relevance" />
-      </div>
-
-      <div className="mt-3.5 space-y-2">
-        <Row icon={Lightbulb} label="Why it fits:" tone="text-inf">
-          {it.why}{" "}
-          {(it.matched ?? []).map((c) => <Badge key={c} kind="SOURCED" className="ml-1 normal-case tracking-normal">{c}</Badge>)}
-        </Row>
-        <Row icon={ShieldCheck} label="What supports it:" tone="text-fact">
-          <SourceLink url={it.url}>source record</SourceLink>
-          {it.apply_url && <> · <SourceLink url={it.apply_url}>application page</SourceLink></>}
-          <span className="text-muted"> · retrieved {day(it.retrieved_at)}</span>
-        </Row>
-        {!compact && it.excerpt && <blockquote className="quote ml-[26px]"><Translated original={it.excerpt} en={it.excerpt_en} /></blockquote>}
-        {!compact && (it.terms ?? []).map(([k, v], i) => (
-          <p key={k} className="ml-[26px] text-[13px] leading-relaxed text-ink2">
-            <span className="font-semibold text-ink">{k}:</span> <Translated original={v} en={it.terms_en?.[i]} />
-          </p>
-        ))}
-        {!compact && (
-          <div className="flex gap-2.5 rounded-xl bg-brand/[0.07] px-3 py-2 text-[13px] leading-relaxed">
-            <ArrowRightCircle size={15} className="mt-[3px] shrink-0 text-brand" />
-            <div className="text-ink2"><span className="font-semibold text-ink">What to do next:</span> {it.next_action || "Open the source and check the details."}</div>
-          </div>
-        )}
-        {it.uncertainty && (
-          <Row icon={HelpCircle} label="Uncertain:" tone="text-muted"><span className="text-muted">{it.uncertainty}</span></Row>
-        )}
-        {(it.adjustments ?? []).map((a) => <p key={a} className="meta ml-[26px]">Ranking note: {a}</p>)}
-      </div>
-
-      {canMark !== undefined && !compact && (
-        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line/70 pt-3.5">
-          {canMark ? (
+          {it.why && (
+            <p className={clsx("mt-1.5 font-serif leading-snug text-ink2", lead ? "text-[18px]" : "text-[15.5px]",
+                               !open && !lead && "line-clamp-2")}>
+              {it.why}
+            </p>
+          )}
+          <p className="meta mt-1.5">{it.source} · {it.date_label}</p>
+          {lead && !open && (
             <>
-              <button type="button" className={clsx("btn", marks.has("saved") && "btn-on")} onClick={() => toggle("saved")} aria-pressed={marks.has("saved")}>
-                <Bookmark size={14} fill={marks.has("saved") ? "currentColor" : "none"} />{marks.has("saved") ? "Saved" : "Save"}
-              </button>
-              <button type="button" className={clsx("btn", marks.has("useful") && "btn-on")} onClick={() => toggle("useful")} aria-pressed={marks.has("useful")}>
-                <ThumbsUp size={14} />{marks.has("useful") ? "Marked useful" : "Useful"}
-              </button>
-              <button type="button" className="btn" onClick={() => toggle("not_useful")} title="Hide this item and stop offering it">
-                <ThumbsDown size={14} />Not useful
-              </button>
+              {it.excerpt && (
+                <p className="mt-4 font-serif text-[17px] leading-relaxed text-ink first-letter:float-left first-letter:mr-2 first-letter:font-serif first-letter:text-[52px] first-letter:font-semibold first-letter:leading-[0.85]">
+                  <Translated original={it.excerpt} en={it.excerpt_en} />
+                </p>
+              )}
+              <p className="mt-3 font-sans text-[15px] text-ink2">
+                <span className="font-semibold text-ink">Next step:</span> {it.next_action || "Open the source and check the details."}
+              </p>
             </>
-          ) : (
-            <span className="meta">Choose this company under “Acting as” to save or rate items.</span>
+          )}
+        </div>
+        {it.relevance != null && <Ring value={it.relevance} size={lead ? 64 : 52} />}
+      </div>
+
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open}
+              className="mt-2 inline-flex items-center gap-1 font-sans text-[13.5px] font-semibold text-brand hover:underline">
+        {open ? "Less" : "Read more"} <ChevronDown size={14} className={clsx("transition-transform", open && "rotate-180")} />
+      </button>
+
+      {open && (
+        <div className="mt-3 space-y-3 border-l-2 border-line pl-4">
+          {it.excerpt && (
+            <blockquote className="quote !my-0"><Translated original={it.excerpt} en={it.excerpt_en} /></blockquote>
+          )}
+          {(it.terms ?? []).map(([k, v], i) => (
+            <p key={k} className="font-sans text-[14px] leading-relaxed text-ink2">
+              <span className="font-semibold text-ink">{k}:</span> <Translated original={v} en={it.terms_en?.[i]} />
+            </p>
+          ))}
+          {(it.matched ?? []).length > 0 && (
+            <p className="font-sans text-[14px] text-ink2"><span className="font-semibold text-ink">Matches your profile on:</span> {it.matched.join(", ")}</p>
+          )}
+          <p className="font-sans text-[14px] text-ink2">
+            <span className="font-semibold text-ink">Source:</span> <SourceLink url={it.url}>source record</SourceLink>
+            {it.apply_url && <> · <SourceLink url={it.apply_url}>application page</SourceLink></>}
+            <span className="text-muted"> · retrieved {day(it.retrieved_at)}</span>
+          </p>
+          {!compact && (
+            <p className="font-sans text-[14px] text-ink2">
+              <span className="font-semibold text-ink">Next step:</span> {it.next_action || "Open the source and check the details."}
+            </p>
+          )}
+          {it.uncertainty && <p className="font-sans text-[14px] text-muted"><span className="font-semibold">Uncertain:</span> {it.uncertainty}</p>}
+          {(it.adjustments ?? []).map((a) => <p key={a} className="meta">Ranking note: {a}</p>)}
+          {canMark !== undefined && !compact && (
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {canMark ? (
+                <>
+                  <button type="button" className={clsx("btn", marks.has("saved") && "btn-on")} onClick={() => toggle("saved")} aria-pressed={marks.has("saved")}>
+                    <Bookmark size={14} fill={marks.has("saved") ? "currentColor" : "none"} />{marks.has("saved") ? "Saved" : "Save"}
+                  </button>
+                  <button type="button" className={clsx("btn", marks.has("useful") && "btn-on")} onClick={() => toggle("useful")} aria-pressed={marks.has("useful")}>
+                    <ThumbsUp size={14} />{marks.has("useful") ? "Marked useful" : "Useful"}
+                  </button>
+                  <button type="button" className="btn" onClick={() => toggle("not_useful")} title="Hide this item and stop offering it">
+                    <ThumbsDown size={14} />Not useful
+                  </button>
+                </>
+              ) : (
+                <span className="meta">Choose this company under "Reading as" to save or rate items.</span>
+              )}
+            </div>
           )}
         </div>
       )}

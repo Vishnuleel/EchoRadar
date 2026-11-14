@@ -85,6 +85,10 @@ Copy `.env.example` to `.env`. Notable settings:
   website claims. Every proposed claim must cite a source and quote it exactly, or it is rejected; failures fall back
   to the rule-based extractor and say so. Checked live once on 2026-11-14 (`python scripts/check_gemini.py`); see
   `docs/known_limitations.md` for the result. Off by default.
+- `NEXUS_LLM_ROUTING=gemini` + `GEMINI_API_KEY`: optional sorting of Ask NEXUS questions that the rule-based
+  question router cannot place. The model only picks a question type, member names and a period from fixed lists;
+  it never writes the answer, which is still built from stored records. Only anonymous visitors' questions are sent,
+  safety checks always run first on rules alone, and a failure falls back to the rules. Off by default.
 - `NEXUS_AUTH_MODE=token` + `NEXUS_AUTH_TOKENS` — server-side company tokens instead of the demo selector.
 - `NEXUS_DATABASE_URL` — SQLite by default; any SQLAlchemy URL works.
 
@@ -136,18 +140,20 @@ Details: `docs/architecture.md`, `docs/innovation_methodology.md`.
 Engine: Python, SQLAlchemy + SQLite, Pydantic, NetworkX, sentence-transformers (`paraphrase-multilingual-MiniLM-L12-v2`),
 transformers + sentencepiece (`Helsinki-NLP/opus-mt-sv-en`, local Swedish to English machine translation), scikit-learn,
 NumPy, pandas, requests, BeautifulSoup, reportlab, pytest. API: FastAPI, uvicorn. Interface: React, Vite, Tailwind CSS,
-TanStack Query, React Router, react-force-graph, lucide icons, Inter and Space Grotesk fonts. Fallback interface:
+TanStack Query, React Router, react-force-graph, lucide icons, Newsreader and Source Sans 3 fonts. Fallback interface:
 Streamlit, Plotly.
 
 Written for this project: everything under `nexus/`, `api/`, `web/src/`, `pages/`, `scripts/`, `tests/`, including the
 capability taxonomy, relation table and application-concept library (`nexus/core/taxonomy.py`). Reused: the libraries
 and models above. External services: OpenAlex API, Vinnova open data API, public pages of bluesciencepark.se, mtcos.se
-and five member websites; optionally the Gemini API (not exercised live). The audited seed in `data/sources/` was
+and member websites (five read during ingest; any member can be re-read live from its profile page); optionally the
+Gemini API (extraction checked live once; question sorting tested only with recorded responses). The audited seed in `data/sources/` was
 supplied separately and is used as a second source only.
 
 ## Limitations (short)
 
-- The assistant is rule-based retrieval, not a language model. Website extraction is rule-based by default; the
+- The assistant is rule-based: a boundary check, then a question router (park, member, comparison, count, period,
+  how to apply, help), then retrieval from stored records. No language model writes answers. Website extraction is rule-based by default; the
   optional Gemini path has only been tested with recorded responses.
 - Only 5 of 56 profiles include the company's own website; 11 members have no confirmed capability.
 - English text for Swedish sources is machine-translated and labelled; the original stays the evidence.

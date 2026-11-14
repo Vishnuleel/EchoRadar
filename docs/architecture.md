@@ -3,7 +3,9 @@
 ## Agents and how they work together
 
 A plain sequential orchestrator (`nexus/pipeline.py`) runs the agents. Each step writes a trace entry (agent,
-duration, counts, warnings) that the Home page shows. No agent calls a language model.
+duration, counts, warnings) that the interface shows. By default no agent calls a language model; two optional,
+off-by-default paths use Gemini (website extraction behind quote validation, and sorting of Ask NEXUS questions
+the rules cannot place), and both fall back to the rules.
 
 | Agent | Module | Input | Output |
 |---|---|---|---|
@@ -16,6 +18,9 @@ duration, counts, warnings) that the Home page shows. No agent calls a language 
 | Verification | `agents/verification_agent.py` | Scored candidates | Pass / pass with warnings / reject; checks evidence, freshness, structure, closed calls |
 | Brief Generator | `core/blueprint_generator.py` | One verified hypothesis | 13-section blueprint, Markdown and PDF |
 | Boundary guard and privacy | `security/` | User requests, retrieved text, data access | Scope decision, quarantined text, ownership checks |
+| Question router and answer builder | `core/question_router.py`, `core/answer_builder.py` | An in-scope (or unclear) question | The kind of question (park, help, member, comparison, count, opportunities with a period, partners, how to apply), the members it names and the period; an answer assembled from stored records and fixed sentences |
+| Profile check | `agents/profile_check.py` | One member, on demand from its profile page | The profiling agents re-run in the open (directory page, website, boundary filter, extraction), compared with the stored profile: new, unchanged and no longer found. Saves nothing |
+| Monitoring scheduler | `nexus/monitor.py` | Due monitor tasks (directory, Vinnova, events, news, test environments, OpenAlex per capability) | Fresh records, change events (new, updated, no longer observed), a lease lock so only one run works at a time |
 
 ## Data flow
 
@@ -25,7 +30,7 @@ On the shipped data a recompute takes about one second once embeddings are cache
 
 ## Storage
 
-SQLite through SQLAlchemy (`database/models.py`, schema version 2 with a small migration mechanism in
+SQLite through SQLAlchemy (`database/models.py`, schema version 6 with a small migration mechanism in
 `database/database.py`). Entities: Company, Capability, CompanyCapability (claim), Evidence, ResearchPublication,
 FundingOpportunity, Testbed, Event, NewsUpdate, Opportunity (radar item), CollaborationHypothesis,
 Recommendation, CompanyProfileRevision, UserFeedback, SavedItem, PrivateInteraction, RetrievalLog,
@@ -41,14 +46,22 @@ Private rows always carry the owning company and are read only through `security
 - Re-profiling replaces the public claims of a company but keeps user refinements and the claims a user removed.
 - News that names a member is attached to that member and ranked high on its radar.
 - Sources older than 120 days are marked stale: they lower the evidence score and raise a verification warning.
-- Not implemented: a scheduler and a change report ("what changed in this profile since last run").
+- `python -m nexus.monitor --once` (or `--loop N`) re-checks every source on its own interval (24 hours by
+  default) and records what changed as change events; failures back off and are logged.
+- On any member's profile page, "Read the sources live" re-runs the profiling agents and shows what is new,
+  unchanged or no longer found compared with the stored profile. It does not save: rebuilding the stored
+  profile is still a deliberate step (`scripts/ingest.py`), so a bad page cannot silently change a profile.
 
 ## Service boundaries
 
 1. `boundary_guard.classify_request` — rule-based categories: in scope, needs clarification, out of scope,
    escalation to staff, prompt injection, privacy violation. Every turn is classified on its own text; a previous
    turn can only help interpret a short follow-up.
-2. The assistant builds answers only from stored records, so there is no model to re-instruct.
+2. The question router decides what kind of question it is; the answer is built only from stored records and fixed
+   sentences, so there is no model to re-instruct. The optional model sorting runs only after the boundary check,
+   only for anonymous visitors, and may only choose from fixed lists.
+6. The interaction limits are measured, not asserted: 60 labelled questions run through the real pipeline on the
+   Evaluation page (`data/eval/boundary_cases.json`).
 3. `boundary_guard.filter_untrusted` — sentences from web pages that look like instructions are quarantined
    before extraction and logged.
 4. `privacy.assert_owner` — private data requires the acting company to be the owner.
@@ -56,5 +69,5 @@ Private rows always carry the owning company and are read only through `security
 
 ## Migration path
 
-The matching engine (`core/`) has no Streamlit or database imports, so it can sit behind a FastAPI service
-unchanged. See `docs/feasibility.md`.
+The engine (`nexus/`) already sits behind a FastAPI layer (`api/`) with a React interface (`web/`); the Streamlit
+pages remain as a fallback. See `docs/feasibility.md` for PostgreSQL, pgvector and authenticated deployment.

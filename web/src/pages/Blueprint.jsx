@@ -11,7 +11,7 @@ function Section({ n, title, badge, children, className }) {
   return (
     <section className={className}>
       <h2 className="mb-3 flex items-center gap-2.5 text-lg font-semibold">
-        <span className="grid h-7 min-w-7 place-items-center rounded-lg bg-brand/15 px-1.5 font-display text-[13px] text-brand">{n}</span>
+        <span className="font-serif text-[22px] font-semibold text-sea">{n}</span>
         {title}{badge && <Badge kind={badge} />}
       </h2>
       {children}
@@ -62,7 +62,6 @@ function Brief({ bp, note, params }) {
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Card className="relative overflow-hidden">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-hyp/10 to-transparent" />
           <div className="relative">
             <div className="flex items-center gap-2"><Badge kind="HYPOTHESIS" /><span className="meta">1. Proposed innovation</span></div>
             <h2 className="mt-2 text-[26px] font-semibold leading-tight">{bp.title}</h2>
@@ -95,7 +94,7 @@ function Brief({ bp, note, params }) {
         <Section n="3-4" title="Capability areas and companies">
           <div className="space-y-2.5">
             {bp.capability_areas.map((a, i) => (
-              <div key={i} className="card flex items-start gap-3 p-3.5">
+              <div key={i} className="flex items-start gap-3 border-b border-line py-3">
                 <Badge kind={a.basis === "SOURCED" ? "FACT" : a.basis === "USER" ? "USER" : "neutral"} className="mt-0.5">
                   {a.basis === "SOURCED" ? "FACT" : a.basis === "USER" ? "USER" : "unknown"}
                 </Badge>
@@ -126,7 +125,7 @@ function Brief({ bp, note, params }) {
         <Section n="5" title="Why they complement each other">
           <div className="space-y-2.5">
             {bp.complementarity.slice(0, 5).map((c, i) => (
-              <div key={i} className="card p-3.5">
+              <div key={i} className="border-b border-line py-3">
                 <div className="flex flex-wrap items-center gap-2"><Badge kind="HYPOTHESIS" /><span className="meta">relationship strength {c.strength.toFixed(2)} · {c.kind.replace(/_/g, " ")}</span></div>
                 <p className="mt-1.5 text-sm leading-relaxed text-ink">{c.text}</p>
                 {c.evidence.map((e, j) => (
@@ -145,7 +144,7 @@ function Brief({ bp, note, params }) {
         <Section n="6" title="Relevant research">
           <div className="space-y-2.5">
             {bp.research.map((r) => (
-              <div key={r.url} className="card p-3.5">
+              <div key={r.url} className="border-b border-line py-3">
                 <div className="flex flex-wrap items-center gap-2"><Badge>OpenAlex</Badge><span className="meta">{r.date} · relevance {r.relevance.toFixed(0)}</span></div>
                 <p className="mt-1.5 text-[13px] leading-snug text-ink">{r.title.slice(0, 140)}</p>
                 <p className="meta mt-1">{r.authors}</p>
@@ -162,7 +161,7 @@ function Brief({ bp, note, params }) {
         <Section n="7" title="Potential funding">
           <div className="space-y-2.5">
             {bp.funding.map((f) => (
-              <div key={f.url} className="card p-3.5">
+              <div key={f.url} className="border-b border-line py-3">
                 <div className="flex flex-wrap items-center gap-2"><Badge kind={["open", "upcoming"].includes(f.status) ? f.status : "neutral"}>{f.status}</Badge><span className="meta">deadline {f.deadline} · relevance {f.relevance.toFixed(0)}</span></div>
                 <p className="mt-1.5 text-[13px] leading-snug text-ink"><Translated original={f.title} en={f.title_en} max={140} /></p>
                 {f.eligibility && <p className="mt-1 text-[12.5px] leading-relaxed text-ink2"><b className="text-ink">Who can apply (Vinnova):</b> {f.eligibility.slice(0, 260)}</p>}
@@ -175,7 +174,7 @@ function Brief({ bp, note, params }) {
         <Section n="8" title="Test possibilities">
           <div className="space-y-2.5">
             {bp.testbeds.map((t) => (
-              <div key={t.url + t.name} className="card p-3.5">
+              <div key={t.url + t.name} className="border-b border-line py-3">
                 <Badge>{t.kind}</Badge>
                 <p className="mt-1.5 text-[13px] leading-snug text-ink"><Translated original={t.name} en={t.name_en} max={120} /></p>
                 <blockquote className="quote">“{t.description.slice(0, 240)}”</blockquote>
@@ -199,7 +198,7 @@ function Brief({ bp, note, params }) {
             <ol className="space-y-2">
               {bp.next_steps.map((x, i) => (
                 <li key={i} className="flex gap-3 text-sm leading-relaxed text-ink2">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-cyan/15 font-display text-xs font-semibold text-cyan">{i + 1}</span>{x}
+                  <span className="w-5 shrink-0 font-serif text-[18px] font-semibold text-sea">{i + 1}.</span>{x}
                 </li>
               ))}
             </ol>

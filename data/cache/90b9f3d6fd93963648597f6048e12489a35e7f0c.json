@@ -1,0 +1,1 @@
+{"url": "https://www.softhouse.se/robots.txt", "final_url": "https://www.softhouse.se/robots.txt", "http_status": 200, "retrieved_at": "2026-11-14T10:20:19.559778", "text": "# START YOAST BLOCK\n# ---------------------------\nUser-agent: *\nDisallow:\n\nSitemap: https://www.softhouse.se/sitemap_index.xml\n# ---------------------------\n# END YOAST BLOCK"}

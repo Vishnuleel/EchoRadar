@@ -30,6 +30,7 @@ export const api = {
   ask: (text, previous) => request("/assistant", { method: "POST", body: JSON.stringify({ text, previous_in_scope: previous }) }),
   overview: () => request("/overview"),
   dna: (companyId) => request(`/companies/${companyId}/dna`),
+  recheck: (companyId, fresh) => request(`/companies/${companyId}/recheck${qs({ fresh })}`, { method: "POST" }),
   refine: (companyId, body) => request(`/companies/${companyId}/refine`, { method: "POST", body: JSON.stringify(body) }),
   graph: (focus, edgeTypes) => request(`/graph${qs({ focus, edge_types: edgeTypes.join(",") })}`),
   radar: (companyId) => request(`/radar${qs({ company_id: companyId })}`),

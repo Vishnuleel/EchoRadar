@@ -115,14 +115,55 @@ function Canvas({ data, selected, picked, onSelect, styles }) {
   );
 }
 
-export default function Graph() {
+
+// Newsprint palette (the server's colours were chosen for the old dark theme). Shape and line style still carry the meaning.
+const NODE_COLOURS = { company: "#152B4E", application: "#A4482D", capability: "#267365", funding: "#966616",
+                       testbed: "#A03442", research: "#5C5496" };
+const EDGE_COLOURS = { HAS_CAPABILITY: "#267365", SIMILAR_TO: "#8A8F98", COMPLEMENTS: "#152B4E", RELEVANT_TO: "#966616",
+                       SUPPORTED_BY: "#5C5496", POTENTIAL_COLLABORATION: "#A4482D" };
+
+/** On the desk the graph page shows a still figure; the live, draggable graph runs only when the page is open. */
+function GraphPreview() {
+  const nodes = [[150, 120, "Njord X"], [420, 90, "EmbeddedArt"], [650, 170, "Knowit"], [280, 300, "Lassen"], [560, 330, "Nexer"],
+                 [860, 120, "C Marine"], [800, 330, "Baltic Offshore"]];
+  const edges = [[0, 1, 0], [1, 2, 1], [0, 3, 0], [1, 3, 1], [2, 4, 1], [5, 0, 0], [6, 3, 1], [4, 6, 0]];
+  return (
+    <>
+      <PageHeader eyebrow="Knowledge graph" title="Innovation Connection Graph"
+                  subtitle="Solid lines are backed by a source or calculated from text. Dashed lines are generated hypotheses." />
+      <figure>
+        <svg viewBox="0 0 1000 420" className="w-full border-y border-line">
+          {edges.map(([a, b, dashed], i) => (
+            <line key={i} x1={nodes[a][0]} y1={nodes[a][1]} x2={nodes[b][0]} y2={nodes[b][1]} stroke={dashed ? "#A4482D" : "#267365"}
+                  strokeWidth="2" strokeDasharray={dashed ? "8 6" : undefined} />
+          ))}
+          {nodes.map(([x, y, label]) => (
+            <g key={label}>
+              <circle cx={x} cy={y} r="13" fill="#152B4E" />
+              <text x={x} y={y + 36} textAnchor="middle" fontFamily="Newsreader, Georgia, serif" fontSize="22" fill="#101F37">{label}</text>
+            </g>
+          ))}
+        </svg>
+        <figcaption className="meta mt-2 italic">Illustration. Open the page to explore the live graph built from the stored records.</figcaption>
+      </figure>
+    </>
+  );
+}
+
+export default function Graph({ preview }) {
+  return preview ? <GraphPreview /> : <GraphFull />;
+}
+
+function GraphFull() {
   const { companies, companyId, meta } = useSession();
-  const allTypes = Object.keys(meta.edge_styles);
+  const nodeStyles = useMemo(() => Object.fromEntries(Object.entries(meta.node_styles).map(([k, v]) => [k, { ...v, color: NODE_COLOURS[k] ?? v.color }])), [meta]);
+  const edgeStyles = useMemo(() => Object.fromEntries(Object.entries(meta.edge_styles).map(([k, v]) => [k, { ...v, color: EDGE_COLOURS[k] ?? v.color }])), [meta]);
+  const allTypes = Object.keys(edgeStyles);
   const [focus, setFocus] = useState(companyId);
   const [types, setTypes] = useState(allTypes);
   const [selected, setSelected] = useState(null);
   const query = useQuery({ queryKey: ["graph", focus, [...types].sort().join(",")], queryFn: () => api.graph(focus, types), placeholderData: (prev) => prev });
-  const styles = useMemo(() => ({ node: meta.node_styles, edge: meta.edge_styles }), [meta]);
+  const styles = useMemo(() => ({ node: nodeStyles, edge: edgeStyles }), [meta]);
   const toggle = (t) => setTypes((ts) => (ts.includes(t) ? ts.filter((x) => x !== t) : [...ts, t]));
 
   const data = query.data;
@@ -147,8 +188,8 @@ export default function Graph() {
           <span className="label">Relationship types</span>
           <div className="flex flex-wrap gap-1.5">
             {allTypes.map((t) => (
-              <Chip key={t} active={types.includes(t)} onClick={() => toggle(t)} color={meta.edge_styles[t].color}>
-                {t.replace(/_/g, " ").toLowerCase()} <span className="text-muted">({meta.edge_styles[t].status})</span>
+              <Chip key={t} active={types.includes(t)} onClick={() => toggle(t)} color={edgeStyles[t].color}>
+                {t.replace(/_/g, " ").toLowerCase()} <span className="text-muted">({edgeStyles[t].status})</span>
               </Chip>
             ))}
           </div>
@@ -162,7 +203,7 @@ export default function Graph() {
               <Canvas data={d} selected={current?.id} picked={nodeMap.has(selected) ? selected : null} onSelect={setSelected} styles={styles} />
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-line px-4 py-2.5">
                 <span className="meta tabular-nums">{d.nodes.length} nodes · {d.links.length} relationships</span>
-                {Object.entries(meta.node_styles).map(([k, v]) => (
+                {Object.entries(nodeStyles).map(([k, v]) => (
                   <span key={k} className="flex items-center gap-1.5 text-[11.5px] text-ink2">
                     <span className="h-2.5 w-2.5 rounded-full" style={{ background: v.color }} />{k === "application" ? "potential application" : k} <span className="text-muted">({SHAPE_NOTE[k]})</span>
                   </span>
@@ -180,7 +221,7 @@ export default function Graph() {
                     </select>
                   </label>
                   <div className="mt-3.5 flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: meta.node_styles[current.type]?.color }} />
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: nodeStyles[current.type]?.color }} />
                     <span className="eyebrow !text-muted">{current.type}</span>
                   </div>
                   <h3 className="mt-1 text-base font-semibold leading-snug">{current.label}</h3>
@@ -198,7 +239,7 @@ export default function Graph() {
                   {relations.map((r, i) => (
                     <li key={i} className="rounded-xl border border-line bg-bg/40 p-3">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="h-0.5 w-5 rounded" style={{ background: meta.edge_styles[r.type]?.color }} />
+                        <span className="h-0.5 w-5 rounded" style={{ background: edgeStyles[r.type]?.color }} />
                         <span className="text-[11px] font-semibold uppercase tracking-wide text-ink2">{r.type.replace(/_/g, " ")}</span>
                         <Badge kind={r.status === "evidence" ? "FACT" : r.status === "hypothesis" ? "HYPOTHESIS" : r.status === "user" ? "USER" : "neutral"}>{r.status}</Badge>
                       </div>

@@ -15,6 +15,15 @@
   company name, and Baltic Offshore "Telecom networks" / "Offshore wind" came from a 1989 history sentence. Both were
   fixed and are regression tests. The remaining quotes were read and support their claims; one is a judgement call
   (Baltic Offshore "Hydroacoustics & sonar" rests on owning a multibeam echo sounder, not a stated service).
+- Random accuracy sample (2026-11-14, Evaluation page): 40 of the 106 stored capability facts checked against their
+  quotes by the team with AI assistance: 36 supported, 4 partly, none wrong. The partly supported ones show the
+  limits of word matching: two public agencies "responsible for" maritime surveillance are listed as having that
+  capability (they use such systems, they do not supply them), and one fact rests only on an industry label.
+- The live profile check on a page that was never ingested (softhouse.se) produced two wrong matches: the survey firm
+  "Radar Group" read as radar, and "your investments" read as financing. Both terms were tightened; other such
+  words certainly remain, which is why the check shows every quote and saves nothing.
+- The live profile check reads at most five pages, skips language and country copies of a site, and does not save:
+  rebuilding the stored profile is a separate step (`scripts/ingest.py`).
 - Exact quote checking proves that an excerpt exists in its source. It does not prove that the excerpt means what
   the claim says; that still needs a person.
 - The audited seed supplied with the project differs from the live official pages on 15 websites, 5 descriptions
@@ -53,9 +62,16 @@
 
 **Assistant and boundaries**
 
-- The assistant is rule-based retrieval, not a conversational language model.
-- Boundary rules are pattern-based and tested against `tests/test_boundaries.py`; a determined user can probably
-  phrase an off-topic request that passes as in scope. Answers are still built only from stored records.
+- The assistant is rule-based: a boundary check, a question router (park, member, comparison, count, period,
+  how to apply, help) and retrieval from stored records. It is not a conversational language model and cannot
+  hold a long conversation; a short follow-up ("and events?") reuses the previous subject only.
+- Boundary and routing rules are pattern-based. The 60-question check on the Evaluation page passes 60 of 60, but
+  the same team wrote the rules and the questions; a determined user can probably phrase an off-topic request that
+  passes as in scope. Answers are still built only from stored records.
+- What NEXUS does not store about Blue Science Park itself (address, opening hours, staff) it says it does not
+  store. The contact email shown was copied from the contact page by hand and is not re-checked automatically.
+- Optional model-assisted sorting of unplaced questions (Gemini, off by default) has been tested only with recorded
+  responses, never against the live API.
 - The untrusted-content filter drops sentences with known instruction patterns; it does not detect every attempt.
 
 **Privacy and identity**

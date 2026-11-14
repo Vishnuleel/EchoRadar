@@ -132,3 +132,61 @@ def ranking_differentiation(s: Session, top_k: int = 5) -> dict:
             "mean_jaccard_overlap_top_k": round(float(np.mean(overlaps)), 3) if overlaps else None,
             "identical_list_pairs": sum(1 for o in overlaps if o == 1.0), "pairs_compared": len(overlaps),
             "distinct_top1": len(set(tops.values())), "top_k": top_k}
+
+
+# ---- interaction limits ------------------------------------------------------------------------
+BOUNDARY_PATH = DATA_DIR / "eval" / "boundary_cases.json"
+BLOCKED = ("prompt_injection", "privacy_violation")
+
+
+def boundary_check(s: Session, embedder, path=BOUNDARY_PATH) -> dict:
+    """Run the labelled questions through the real Ask NEXUS pipeline (anonymous visitor, so nothing is
+    stored, and without model-assisted sorting) and compare the outcome with the label.
+
+    A case passes when the boundary outcome matches; when a question type is labelled, the router
+    must also have chosen it. A refused request must also return no records at all."""
+    from nexus import pipeline
+
+    data = json.loads(path.read_text(encoding="utf-8"))
+    rows, groups = [], {}
+    for case in data["cases"]:
+        res = pipeline.answer_request(s, case["text"], None, embedder, previous_in_scope=case.get("previous"),
+                                      use_model=False)
+        got = res["decision"].category
+        got_type = (res["route"] or {}).get("type")
+        returned = len(res["items"]) + len(res["companies"]) + len(res["cards"]) + len(res["hypotheses"])
+        if case["expect"] == "blocked":
+            ok = got in BLOCKED
+        else:
+            ok = got == case["expect"] and (not case.get("type") or got_type == case["type"])
+        if got in BLOCKED and returned:
+            ok = False  # a refusal that still shows records is a failure, whatever the label says
+        g = groups.setdefault(case["group"], {"n": 0, "passed": 0})
+        g["n"] += 1
+        g["passed"] += ok
+        rows.append({"group": case["group"], "text": case["text"], "previous": case.get("previous"),
+                     "expect": case["expect"] + (f" / {case['type']}" if case.get("type") else ""),
+                     "got": got + (f" / {got_type}" if got_type else ""), "passed": bool(ok), "records_returned": returned})
+    return {"n": len(rows), "passed": sum(r["passed"] for r in rows), "groups": groups, "rows": rows,
+            "labelled_by": data.get("labelled_by"), "caveat": data.get("caveat")}
+
+
+# ---- profile accuracy ---------------------------------------------------------------------------
+AUDIT_PATH = DATA_DIR / "eval" / "profile_audit.json"
+
+
+def profile_audit(s: Session, path=AUDIT_PATH) -> dict | None:
+    """The manual accuracy review of a random sample of capability facts, with a check that each
+    reviewed fact is still stored (a rebuilt profile can drop or change it)."""
+    if not path.exists():
+        return None
+    data = json.loads(path.read_text(encoding="utf-8"))
+    stored = {(c.company.name, c.capability.key, (c.evidence.evidence_text or "")[:300])
+              for c in repo.all_claims(s) if c.classification == "FACT" and c.capability and c.evidence}
+    for case in data["cases"]:
+        case["still_stored"] = (case["company"], case["capability"], case["quote"]) in stored
+    labels = [c["label"] for c in data["cases"]]
+    data["summary"] = {"n": len(labels), "supported": labels.count("supported"), "partly": labels.count("partly"),
+                       "not_supported": labels.count("not_supported"),
+                       "still_stored": sum(c["still_stored"] for c in data["cases"])}
+    return data

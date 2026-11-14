@@ -164,6 +164,85 @@ function Tests({ r }) {
   );
 }
 
+/** The challenge brief's "quality and boundary check": profile accuracy and interaction limits, measured. */
+function Quality({ b, a, marks }) {
+  const [onlyFails, setOnlyFails] = useState(false);
+  const rows = onlyFails ? b.rows.filter((r) => !r.passed) : b.rows;
+  const s = a?.summary;
+  return (
+    <div className="space-y-8">
+      <section className="space-y-3">
+        <SectionTitle hint="Each question is sent through the real Ask NEXUS pipeline as an anonymous visitor (nothing is stored), every time this page is built.">
+          Interaction limits: {b.passed} of {b.n} questions handled as labelled
+        </SectionTitle>
+        <Notice><b className="text-ink">Read with care.</b> {b.caveat}<br />Labelled by: {b.labelled_by}</Notice>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-1 font-sans text-[14px] sm:grid-cols-3">
+          {Object.entries(b.groups).map(([g, v]) => (
+            <div key={g} className="flex justify-between border-b border-line py-1">
+              <span className="text-ink2">{g}</span>
+              <span className={v.passed === v.n ? "tabular-nums text-ink" : "font-semibold tabular-nums text-hyp"}>{v.passed} / {v.n}</span>
+            </div>
+          ))}
+        </div>
+        <label className="flex items-center gap-2 font-sans text-[13px] text-ink2">
+          <input type="checkbox" checked={onlyFails} onChange={(e) => setOnlyFails(e.target.checked)} className="accent-[rgb(var(--brand))]" />
+          Show only questions that were not handled as labelled
+        </label>
+        <div className="table-wrap max-h-[420px]">
+          <table className="table">
+            <thead><tr><th>Group</th><th>Question</th><th>Expected</th><th>Result</th><th className="text-right">Records shown</th></tr></thead>
+            <tbody>{rows.map((r) => (
+              <tr key={r.group + r.text}>
+                <td className="whitespace-nowrap">{r.group}</td>
+                <td className="text-ink">{r.previous && <span className="text-muted">after "{r.previous}": </span>}{r.text}</td>
+                <td className="whitespace-nowrap">{r.expect.replace(/_/g, " ")}</td>
+                <td className="whitespace-nowrap"><span className="flex items-center gap-1.5">{r.passed ? <CheckCircle2 size={14} className="text-fact" /> : <XCircle size={14} className="text-pink" />}{r.got.replace(/_/g, " ")}</span></td>
+                <td className="text-right tabular-nums">{r.records_returned}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+        <p className="meta">A refused request must show no records at all; a refusal that still shows records counts as a failure.</p>
+      </section>
+
+      {a && (
+        <section className="space-y-3">
+          <SectionTitle hint={a.drawn}>Profile accuracy: {s.supported} of {s.n} sampled capability facts fully supported by their quote</SectionTitle>
+          <Notice><b className="text-ink">Who checked:</b> {a.labelled_by}</Notice>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <Stat value={s.supported} label="Supported" sub="the quote states it" />
+            <Stat value={s.partly} label="Partly supported" sub="too broad, or a user not a provider" />
+            <Stat value={s.not_supported} label="Not supported" />
+            <Stat value={`${s.n} of ${a.population}`} label="Sample size" sub={`${s.still_stored} still stored as reviewed`} />
+          </div>
+          <div className="table-wrap max-h-[380px]">
+            <table className="table">
+              <thead><tr><th>Company</th><th>Capability</th><th>Quote</th><th>Verdict</th></tr></thead>
+              <tbody>{a.cases.map((c) => (
+                <tr key={c.n}>
+                  <td className="whitespace-nowrap text-ink">{c.company}</td>
+                  <td className="whitespace-nowrap">{c.capability.replace(/_/g, " ")}</td>
+                  <td className="min-w-[280px]">"{c.quote.slice(0, 160)}{c.quote.length > 160 ? "..." : ""}" <a className="link" href={c.url} target="_blank" rel="noopener noreferrer">source</a></td>
+                  <td className="min-w-[160px]"><span className={c.label === "supported" ? "text-fact" : "font-semibold text-hyp"}>{c.label.replace(/_/g, " ")}</span>{c.note && <div className="meta">{c.note}</div>}</td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+          {a.also_found?.map((x) => <p key={x} className="meta">Also found outside the sample: {x}</p>)}
+        </section>
+      )}
+
+      <section className="space-y-2">
+        <SectionTitle>Recommendation relevance from users</SectionTitle>
+        <p className="font-sans text-[14px] text-ink2">
+          Radar marks given in the app (anonymous totals): {["useful", "not_useful", "saved"].map((k) => `${marks[k] ?? 0} ${k.replace("_", " ")}`).join(", ")}.
+          {!Object.keys(marks).length && " No member has rated a finding yet; none is invented."}
+        </p>
+      </section>
+    </div>
+  );
+}
+
 const METHOD = `**S = 0.35 C + 0.25 O + 0.20 R + 0.20 E** (each 0-100; weights are initial hypotheses, not tuned on outcomes)
 
 - **C - Capability complementarity.** Explicit relations between *different* capabilities (77 hand-written capability relations and 18 generic value-chain relations), gated by a shared application area and scaled by evidence confidence. The same capability on both sides counts as similarity, not complementarity.
@@ -174,7 +253,7 @@ const METHOD = `**S = 0.35 C + 0.25 O + 0.20 R + 0.20 E** (each 0-100; weights a
 A component without data counts as 0 and lowers the displayed *data coverage*; it is never filled in.`;
 
 export default function Evaluation() {
-  const [tab, setTab] = useState("baseline");
+  const [tab, setTab] = useState("quality");
   const query = useQuery({ queryKey: ["evaluation"], queryFn: api.evaluation });
   return (
     <>
@@ -191,9 +270,11 @@ export default function Evaluation() {
                 <Stat value={fb.n ? fb.mean : "n/a"} label="Mean human relevance rating" sub={`${fb.n} ratings collected in the app`} icon={Star} tone="inf" />
               </div>
               {!d.embedding.semantic && <Notice tone="sim" className="mb-4">Embedding FALLBACK active ({d.embedding.backend}): {d.embedding.fallback_reason}</Notice>}
-              <Tabs value={tab} onChange={setTab} tabs={[{ id: "baseline", label: "Baseline comparison" }, { id: "coverage", label: "Coverage and freshness" },
+              <Tabs value={tab} onChange={setTab} tabs={[{ id: "quality", label: "Quality and boundary check", count: d.boundaries?.n },
+                                                         { id: "baseline", label: "Baseline comparison" }, { id: "coverage", label: "Coverage and freshness" },
                                                          { id: "tests", label: "Automated tests", count: d.tests?.total }, { id: "method", label: "Method and limitations" }]} />
               <div className="animate-rise" key={tab}>
+                {tab === "quality" && <Quality b={d.boundaries} a={d.profile_audit} marks={d.radar_marks ?? {}} />}
                 {tab === "baseline" && <Baseline cmp={d.comparison} />}
                 {tab === "coverage" && <Coverage d={d} />}
                 {tab === "tests" && <Tests r={d.tests} />}

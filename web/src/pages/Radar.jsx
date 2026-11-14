@@ -14,10 +14,7 @@ const DEFAULT_MIN = 25;
 function NoRadar({ name, owner }) {
   return (
     <div className="card relative overflow-hidden p-6 sm:p-8">
-      <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full border border-cyan/15" />
-      <div className="pointer-events-none absolute -right-6 -top-6 h-36 w-36 rounded-full border border-cyan/15" />
       <div className="relative max-w-2xl">
-        <span className="grid h-11 w-11 place-items-center rounded-xl bg-cyan/10 text-cyan"><RadarIcon size={20} /></span>
         <h2 className="mt-4 text-xl font-semibold">No radar yet for {name}</h2>
         <p className="mt-2 text-[14px] leading-relaxed text-ink2">
           The radar ranks funding, test environments, events and research against a company's confirmed capabilities.
@@ -25,15 +22,15 @@ function NoRadar({ name, owner }) {
           ranked rather than guessed.
         </p>
         <ol className="mt-5 space-y-2.5 text-[13.5px] text-ink2">
-          <li className="flex gap-3"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand/15 text-xs font-semibold text-brand">1</span>
+          <li className="flex gap-3"><span className="font-serif text-[18px] font-semibold text-sea">1.</span>
             {owner ? "Add one capability or interest to your profile; the radar is calculated straight away."
                    : `Sign in as ${name} under “Acting as” and add one capability or interest; the radar is calculated straight away.`}</li>
-          <li className="flex gap-3"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand/15 text-xs font-semibold text-brand">2</span>
+          <li className="flex gap-3"><span className="font-serif text-[18px] font-semibold text-sea">2.</span>
             Or ask the assistant directly, for example “funding for digital services”.</li>
         </ol>
         <div className="mt-6 flex flex-wrap gap-2">
           <Link to="/dna" className="btn btn-primary !px-4 !py-2"><Fingerprint size={15} />{owner ? "Refine the profile" : "Open the profile"}<ArrowRight size={14} /></Link>
-          <Link to="/" className="btn !px-4 !py-2"><MessageSquare size={15} />Ask the assistant</Link>
+          <Link to="/ask" className="btn !px-4 !py-2"><MessageSquare size={15} />Ask NEXUS</Link>
         </div>
       </div>
     </div>
@@ -43,7 +40,6 @@ function NoRadar({ name, owner }) {
 function EmptyFilter({ icon: Icon, title, text, action, onAction }) {
   return (
     <div className="card flex flex-col items-center px-6 py-10 text-center">
-      <span className="grid h-11 w-11 place-items-center rounded-xl bg-surface2 text-ink2"><Icon size={19} /></span>
       <h2 className="mt-3 text-base font-semibold">{title}</h2>
       <p className="mt-1 max-w-md text-[13.5px] leading-relaxed text-ink2">{text}</p>
       <button type="button" className="btn mt-4" onClick={onAction}>{action}</button>

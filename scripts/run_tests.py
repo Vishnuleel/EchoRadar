@@ -22,7 +22,7 @@ for tc in suite.iter("testcase"):
     outcome = "failed" if tc.find("failure") is not None or tc.find("error") is not None else \
         "skipped" if tc.find("skipped") is not None else "passed"
     cases.append({"file": tc.get("classname", "").split(".")[-1], "name": tc.get("name"), "outcome": outcome,
-                  "live": "live" in tc.get("name", ""), "seconds": float(tc.get("time", 0))})
+                  "live": tc.get("name", "").startswith("test_live_"), "seconds": float(tc.get("time", 0))})
 summary = {"run_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "live_included": live,
            "total": len(cases), "passed": sum(c["outcome"] == "passed" for c in cases),
            "failed": sum(c["outcome"] == "failed" for c in cases),
