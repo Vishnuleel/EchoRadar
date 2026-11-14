@@ -1,4 +1,4 @@
-"""Knowledge graph (NetworkX) built from stored records, with a Plotly renderer.
+"""Knowledge graph (NetworkX) built from stored records for the React interface.
 
 Edge status tells the user how much to trust a relationship:
   evidence   - backed by a public source (HAS_CAPABILITY)
@@ -8,8 +8,6 @@ Edge status tells the user how much to trust a relationship:
 from __future__ import annotations
 
 import networkx as nx
-import numpy as np
-import plotly.graph_objects as go
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -129,49 +127,3 @@ def build_graph(s: Session, profiles=None, similarity=None, focus_company: int |
                                    explanation=f"Profile text similarity {sim:.2f} (similar, not necessarily complementary)",
                                    weight=sim)
     return g
-
-
-def figure(g: nx.Graph, height: int = 700) -> go.Figure:
-    fig = go.Figure()
-    if g.number_of_nodes() == 0:
-        return fig
-    pos = nx.spring_layout(g, seed=7, k=2.6 / np.sqrt(max(1, g.number_of_nodes())), iterations=200, weight=None)
-    for etype, (color, dash, status) in EDGE_STYLE.items():
-        xs, ys, mx, my, texts = [], [], [], [], []
-        for u, v, d in g.edges(data=True):
-            if d["type"] != etype:
-                continue
-            xs += [pos[u][0], pos[v][0], None]
-            ys += [pos[u][1], pos[v][1], None]
-            mx.append((pos[u][0] + pos[v][0]) / 2)
-            my.append((pos[u][1] + pos[v][1]) / 2)
-            texts.append(f"<b>{etype}</b> ({d['status']})<br>{g.nodes[u]['label']} - {g.nodes[v]['label']}<br>{d['explanation'][:180]}")
-        if xs:
-            fig.add_trace(go.Scatter(x=xs, y=ys, mode="lines", hoverinfo="skip", legendgroup=etype,
-                                     line=dict(color=color, width=2 if status == "hypothesis" else 1.2, dash=dash),
-                                     name=f"{etype} ({status})", opacity=0.75))
-            fig.add_trace(go.Scatter(x=mx, y=my, mode="markers", marker=dict(size=7, color=color, opacity=0.01),
-                                     hovertext=texts, hoverinfo="text", showlegend=False, legendgroup=etype))
-    for ntype, (color, size) in NODE_STYLE.items():
-        nodes = [n for n, d in g.nodes(data=True) if d["type"] == ntype]
-        if not nodes:
-            continue
-        show_label = ntype in ("company", "application") or (ntype == "capability" and g.number_of_nodes() <= 45)
-        fig.add_trace(go.Scatter(
-            x=[pos[n][0] for n in nodes], y=[pos[n][1] for n in nodes],
-            mode="markers+text" if show_label else "markers", name=ntype.capitalize(),
-            text=[g.nodes[n]["label"][:30] + ("..." if len(g.nodes[n]["label"]) > 30 else "") for n in nodes] if show_label else None, textposition="top center",
-            textfont=dict(size=11 if ntype != "capability" else 9, color="#dce6f5"),
-            customdata=nodes,
-            hovertext=[f"<b>{g.nodes[n]['label']}</b><br>{ntype}<br>{(g.nodes[n].get('detail') or '')[:220]}" for n in nodes],
-            hoverinfo="text",
-            marker=dict(size=[size + (8 if g.nodes[n].get("focus") else 0) for n in nodes], color=color,
-                        line=dict(width=2, color="#0d1526"),
-                        symbol={"application": "diamond", "funding": "square", "testbed": "triangle-up",
-                                "research": "hexagon"}.get(ntype, "circle"))))
-    fig.update_layout(height=height, margin=dict(l=0, r=0, t=10, b=0), paper_bgcolor="rgba(0,0,0,0)",
-                      plot_bgcolor="rgba(0,0,0,0)", font=dict(color="#c3cee0"), hovermode="closest",
-                      xaxis=dict(visible=False), yaxis=dict(visible=False),
-                      legend=dict(orientation="h", y=-0.02, font=dict(size=11)),
-                      hoverlabel=dict(bgcolor="#101a2e", font_size=12, font_color="#e8eef9"))
-    return fig

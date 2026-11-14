@@ -1,8 +1,5 @@
-"""Tests 17, 23, 24: blueprint generation, export, and the full discovery journey incl. UI smoke tests."""
-import os
+"""Blueprint generation, export, graph construction, and the full discovery journey."""
 from datetime import timedelta
-
-import pytest
 
 from nexus import pipeline
 from nexus.agents import company_agent, monitoring_agent
@@ -180,7 +177,6 @@ def test_knowledge_graph_construction(seeded, embedder):
     assert all(d["status"] == "hypothesis" for _, _, d in g.edges(data=True) if d["type"] in ("COMPLEMENTS", "POTENTIAL_COLLABORATION"))
     only = ge.build_graph(seeded, profiles, None, focus, ["HAS_CAPABILITY"])
     assert {d["type"] for _, _, d in only.edges(data=True)} == {"HAS_CAPABILITY"}
-    assert len(ge.figure(g).data) >= 2
 
 
 def test_pipeline_ingest_with_mocked_sources(session, embedder):
@@ -203,14 +199,3 @@ def test_pipeline_ingest_with_mocked_sources(session, embedder):
     assert hyp.kind == "pair" and hyp.score_breakdown["research"] is None and "research" in hyp.score_breakdown["missing"]
     assert hyp.score_breakdown["coverage"] == 0.75 and hyp.funding_ids
     assert session.query(Opportunity).filter_by(kind="funding").count() == 2
-
-
-@pytest.mark.parametrize("page", ["pages/0_Home.py", "pages/1_Innovation_Overview.py", "pages/2_Company_DNA.py",
-                                  "pages/3_Innovation_Graph.py", "pages/4_Opportunity_Radar.py",
-                                  "pages/5_Innovation_Blueprint.py", "pages/6_Evaluation.py", "pages/7_Staff_View.py"])
-def test_ui_pages_render_without_exceptions(seeded, page):
-    from streamlit.testing.v1 import AppTest
-
-    at = AppTest.from_file(os.path.join(os.path.dirname(__file__), "..", page), default_timeout=90).run()
-    assert not at.exception, [e.value for e in at.exception]
-    assert len(at.markdown) > 0

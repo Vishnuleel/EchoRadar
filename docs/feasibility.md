@@ -69,8 +69,7 @@ bluesciencepark.se, mtcos.se, member websites and (once) huggingface.co for the 
 
 - **PostgreSQL:** set `NEXUS_DATABASE_URL`; models use portable SQLAlchemy types. Move `EmbeddingCache.vector`
   to a pgvector column to search items in the database instead of in memory.
-- **FastAPI / React:** done during the hackathon: `api/` exposes the engine, `web/` is the React interface. The
-  Streamlit pages remain as a fallback.
+- **FastAPI / React:** done during the hackathon: `api/` exposes the engine, `web/` is the React interface.
 - **Neo4j:** not justified at this size; the graph is rebuilt from SQL in milliseconds.
 - **Background jobs:** `python -m nexus.monitor --once` (or `--loop N`) runs due checks with a lease lock;
   `scripts/ingest.py` is idempotent and cache-aware, so either can run from cron or Windows Task Scheduler as is.

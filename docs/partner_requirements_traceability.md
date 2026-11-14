@@ -58,7 +58,7 @@ Status: **Done** = implemented and exercised, **Partial** = implemented with a s
 
 | Deliverable | Where |
 |---|---|
-| Working demo | `python -m api` then http://localhost:8000 (fallback: `streamlit run app.py`); `docs/demo_script.md` |
+| Working demo | `python -m api` then http://localhost:8000; `docs/demo_script.md` |
 | Solution explanation | `README.md`, `docs/architecture.md`, `docs/innovation_methodology.md` |
 | Quality and boundary check | Evaluation page, first tab: interaction limits (60 questions), profile accuracy (40 sampled facts checked against their quotes: 36 supported, 4 partly, 0 wrong), source traceability (all 292 facts with URL and excerpt), recommendation relevance (baseline comparison, with its caveat); `docs/technical_validation.md` |
 | Handover package | Code, setup instructions, `docs/known_limitations.md`, `docs/feasibility.md` |

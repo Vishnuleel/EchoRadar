@@ -1,4 +1,4 @@
-"""All API endpoints. Each one mirrors a Streamlit page and reuses the same engine functions."""
+"""API endpoints for the React interface, reusing the shared engine functions."""
 from __future__ import annotations
 
 import copy

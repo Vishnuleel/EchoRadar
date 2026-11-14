@@ -110,7 +110,7 @@ saves the edition for the company in view.
 |---|---|
 | No internet | The app runs from `data/nexus.db`. In the profile check use **Use stored copies**. Start with `NEXUS_OFFLINE=1` to forbid any network call |
 | Language model not downloaded | Start with `NEXUS_EMBEDDINGS=hash`; the sidebar says "Fallback embeddings in use" and matching is weaker |
-| The React app will not start | `streamlit run app.py` starts the older fallback interface on port 8501 |
+| The React app will not start | Run `npm --prefix web run build`, then restart `python -m api` |
 | Nothing starts | Show `assets/screenshots/` in order |
 | A live read is slow | Wait up to 30 seconds, or use **Use stored copies**; a live read of the same member is allowed once every ten minutes |
 

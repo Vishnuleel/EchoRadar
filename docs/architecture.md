@@ -76,5 +76,5 @@ Private rows always carry the owning company and are read only through `security
 
 ## Migration path
 
-The engine (`nexus/`) already sits behind a FastAPI layer (`api/`) with a React interface (`web/`); the Streamlit
-pages remain as a fallback. See `docs/feasibility.md` for PostgreSQL, pgvector and authenticated deployment.
+The engine (`nexus/`) sits behind a FastAPI layer (`api/`) with a React interface (`web/`).
+See `docs/feasibility.md` for PostgreSQL, pgvector and authenticated deployment.

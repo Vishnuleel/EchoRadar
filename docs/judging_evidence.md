@@ -35,8 +35,9 @@ survive re-reading, a random audit, and a re-read that never saves silently.
 
 - Shown live: the profiling agents re-reading Njord X's directory page and website (about 15 s, nothing saved);
   ranking that responds to a changed priority; Ask EchoRadar answering, declining and refusing.
-- Tested: 172 automated tests pass, 3 of them live against OpenAlex, Vinnova and the member directory
-  (`data/test_results.json`, Evaluation page). 60 of 60 labelled boundary questions run through the real pipeline.
+- Automated test results are recorded in `data/test_results.json` and shown on the Evaluation page.
+  Live checks against OpenAlex, Vinnova and the member directory run separately with `--live`.
+  60 of 60 labelled boundary questions run through the real pipeline.
   40 random profile facts audited: 36 supported, 4 partly, 0 wrong.
 - Structure: agents, engine, API and interface are separate (`docs/architecture.md`); the answers are built from
   stored records, so there is no language model to re-instruct.
