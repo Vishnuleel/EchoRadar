@@ -43,12 +43,18 @@ No account, API key or cloud service is needed.
 ```powershell
 py -m venv .venv                                  # an own environment avoids clashes with globally installed torch tools
 .venv\Scripts\python.exe -m pip install -r requirements.txt
-npm --prefix web install
-npm --prefix web run build                        # once, and after frontend changes
+cd web
+npm ci                                            # installs exactly the versions in package-lock.json
+npm run build                                     # once, and after frontend changes
+cd ..
 .venv\Scripts\python.exe -m api                   # http://localhost:8000 serves the API and the app
 ```
 
 macOS / Linux: the same with `python3 -m venv .venv` and `.venv/bin/python`.
+
+Windows: keep the project in a short folder path (for example `C:\Users\you\nexus`). PyTorch contains deeply
+nested files, and inside a long path pip fails with "No such file or directory" unless Windows long-path support
+is enabled.
 
 The package ships with `data/nexus.db` (retrieved from the live sources on 2026-11-13 and 14) and `data/cache/` (the raw
 responses), so the demo works offline; the sidebar says the data is a stored snapshot and when sources were last
